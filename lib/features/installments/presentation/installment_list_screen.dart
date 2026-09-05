@@ -573,12 +573,24 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
               ),
               actions: [
                 CupertinoDialogAction(
-                  isDestructiveAction: true,
+                  textStyle: const TextStyle(
+                    inherit: false,
+                    fontFamily: '.SF Pro Text',
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryPink,
+                  ),
                   onPressed: () => Navigator.pop(dialogCtx),
                   child: const Text('Batal'),
                 ),
                 CupertinoDialogAction(
-                  isDefaultAction: true,
+                  textStyle: const TextStyle(
+                    inherit: false,
+                    fontFamily: '.SF Pro Text',
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryPink,
+                  ),
                   onPressed: () async {
                     final amount = double.tryParse(amountController.text.trim()) ?? 0.0;
                     if (amount <= 0) return;

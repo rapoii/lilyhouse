@@ -107,11 +107,24 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
         ),
         actions: [
           CupertinoDialogAction(
+            textStyle: const TextStyle(
+              inherit: false,
+              fontFamily: '.SF Pro Text',
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryPink,
+            ),
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Batal'),
           ),
           CupertinoDialogAction(
-            isDefaultAction: true,
+            textStyle: const TextStyle(
+              inherit: false,
+              fontFamily: '.SF Pro Text',
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryPink,
+            ),
             onPressed: () {
               final text = accController.text.trim();
               if (text.isNotEmpty) {
@@ -119,7 +132,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
               }
               Navigator.pop(ctx);
             },
-            child: const Text('Tambah', style: TextStyle(color: AppColors.primaryPink, fontWeight: FontWeight.bold)),
+            child: const Text('Tambah'),
           ),
         ],
       ),
@@ -133,43 +146,50 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       builder: (ctx) => Container(
         height: 250,
         color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: const BoxDecoration(
-                border: Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Batal'),
-                  ),
-                  const Text('Pilih Ukuran', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => Navigator.pop(ctx),
-                    child: const Text('Selesai', style: TextStyle(fontWeight: FontWeight.bold, color: AppColors.primaryPink)),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: CupertinoPicker(
-                itemExtent: 36,
-                scrollController: FixedExtentScrollController(
-                  initialItem: sizes.indexOf(_selectedSize).clamp(0, sizes.length - 1),
+        child: DefaultTextStyle(
+          style: const TextStyle(
+            decoration: TextDecoration.none,
+            fontFamily: '.SF Pro Text',
+            color: AppColors.textDark,
+          ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: const BoxDecoration(
+                  border: Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
                 ),
-                onSelectedItemChanged: (idx) {
-                  setState(() => _selectedSize = sizes[idx]);
-                },
-                children: sizes.map((s) => Center(child: Text(s, style: const TextStyle(fontSize: 18)))).toList(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Batal', style: AppTypography.actionButton),
+                    ),
+                    const Text('Pilih Ukuran', style: AppTypography.navTitle),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Selesai', style: AppTypography.actionButton),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+              Expanded(
+                child: CupertinoPicker(
+                  itemExtent: 36,
+                  scrollController: FixedExtentScrollController(
+                    initialItem: sizes.indexOf(_selectedSize).clamp(0, sizes.length - 1),
+                  ),
+                  onSelectedItemChanged: (idx) {
+                    setState(() => _selectedSize = sizes[idx]);
+                  },
+                  children: sizes.map((s) => Center(child: Text(s, style: const TextStyle(fontSize: 18, color: AppColors.textDark)))).toList(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -237,9 +257,15 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
         ),
         actions: [
           CupertinoDialogAction(
-            isDefaultAction: true,
+            textStyle: const TextStyle(
+              inherit: false,
+              fontFamily: '.SF Pro Text',
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primaryPink,
+            ),
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Oke', style: TextStyle(color: AppColors.primaryPink)),
+            child: const Text('Oke'),
           ),
         ],
       ),
