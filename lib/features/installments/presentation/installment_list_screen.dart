@@ -396,9 +396,13 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
             child: _isLoading
                 ? const Center(child: CupertinoActivityIndicator(radius: 14))
                 : _installments.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                    ? Padding(
+                        // Offset content up to optically center between tabs
+                        // and bottom nav (compensates floating bottom nav bias).
+                        padding: const EdgeInsets.only(bottom: 25.0),
+                        child: Center(
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
                               width: 72,
@@ -424,6 +428,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                               ),
                             ),
                           ],
+                        ),
                         ),
                       )
                     : RefreshIndicator(
