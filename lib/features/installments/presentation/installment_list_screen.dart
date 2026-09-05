@@ -398,7 +398,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                 : _installments.isEmpty
                     ? Center(
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
                               width: 72,
@@ -416,45 +416,11 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                             const SizedBox(height: 16),
                             const Text(
                               'Belum ada daftar cicilan',
+                              textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textDark,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            const Text(
-                              'Catat pengeluaran atau cicilan pembelian kostum baru',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textMuted,
-                              ),
-                            ),
-                            const SizedBox(height: 20),
-                            CupertinoButton(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                              onPressed: _showAddInstallmentDialog,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                                decoration: BoxDecoration(
-                                  color: const Color(0xFFFFF1F4),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(CupertinoIcons.add, size: 16, color: AppColors.primaryPink),
-                                    SizedBox(width: 6),
-                                    Text(
-                                      'Catat Cicilan Baru',
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: AppColors.primaryPink,
-                                      ),
-                                    ),
-                                  ],
-                                ),
                               ),
                             ),
                           ],
