@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/apple_sliding_segmented_control.dart';
+import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../data/installment_repository.dart';
 import '../domain/installment.dart';
@@ -26,6 +27,12 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
   List<Installment> _installments = [];
   bool _isLoading = true;
   String _selectedFilter = 'all'; // all, ongoing, paidOff
+
+  static const _months = [
+    '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
+  ];
+
+  String _monthName(int month) => (month >= 1 && month <= 12) ? _months[month] : '$month';
 
   @override
   void initState() {
@@ -62,18 +69,13 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
     showCupertinoModalPopup<void>(
       context: context,
       builder: (ctx) {
-        final screenHeight = MediaQuery.of(ctx).size.height;
         final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return Container(
-              height: screenHeight * 0.85,
-              decoration: const BoxDecoration(
-                color: Color(0xFFF2F2F7),
-                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: DefaultTextStyle(
+            return DraggableSheetContainer(
+              backgroundColor: const Color(0xFFF2F2F7),
+              onDismissed: () => Navigator.of(ctx).pop(),
+              builder: (context) => DefaultTextStyle(
                 style: const TextStyle(
                   decoration: TextDecoration.none,
                   fontFamily: '.SF Pro Text',
@@ -87,9 +89,14 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                     leading: CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Batal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+                      child: const Text('Batal', style: AppTypography.actionButton),
                     ),
-                    middle: const Text('Cicilan Baru', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                    middle: const SizedBox(
+                      width: double.infinity,
+                      child: Center(
+                        child: Text('Cicilan Baru', style: AppTypography.navTitle),
+                      ),
+                    ),
                     trailing: CupertinoButton(
                       padding: EdgeInsets.zero,
                       onPressed: () async {
@@ -127,7 +134,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                         Navigator.of(ctx).pop();
                         _loadInstallments();
                       },
-                      child: const Text('Simpan', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+                      child: const Text('Simpan', style: AppTypography.actionButton),
                     ),
                   ),
                   child: SafeArea(
@@ -136,18 +143,6 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                       padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 24),
                       physics: const BouncingScrollPhysics(),
                       children: [
-                        // iOS Modal Sheet Drag Handle
-                        Center(
-                          child: Container(
-                            width: 36,
-                            height: 5,
-                            margin: const EdgeInsets.only(bottom: 12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFD1D1D6),
-                              borderRadius: BorderRadius.circular(2.5),
-                            ),
-                          ),
-                        ),
                         CupertinoFormSection.insetGrouped(
                           backgroundColor: AppColors.background,
                           header: const Text('INFORMASI BARANG'),
@@ -186,10 +181,27 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                               placeholder: 'DP awal (Rp)',
                               keyboardType: TextInputType.number,
                             ),
-                            // Match CupertinoTextFormFieldRow exactly (same padding, same prefix slot)
-                            // so SquircleIcon aligns pixel-perfect with Total/DP rows above.
-                            GestureDetector(
-                              behavior: HitTestBehavior.opaque,
+                            // Jatuh tempo row: Apple HIG style
+                            CupertinoListTile(
+                              leading: const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFFFF3B30)),
+                              title: Text(
+                                selectedDueDate == null
+                                    ? 'Pilih jatuh tempo (opsional)'
+                                    : '${selectedDueDate!.day} ${_monthName(selectedDueDate!.month)} ${selectedDueDate!.year}',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: selectedDueDate == null
+                                      ? const Color(0xFFC7C7CC)
+                                      : AppColors.textDark,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              trailing: AnimatedRotation(
+                                turns: isDatePickerExpanded ? 0.25 : 0.0,
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeInOutCubic,
+                                child: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                              ),
                               onTap: () {
                                 setSheetState(() {
                                   isDatePickerExpanded = !isDatePickerExpanded;
@@ -198,83 +210,81 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                   }
                                 });
                               },
-                              child: IgnorePointer(
-                                child: CupertinoTextFormFieldRow(
-                                  key: const Key('installment_due_date_row'),
-                                  prefix: const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFFFF3B30)),
-                                  placeholder: 'Pilih jatuh tempo (opsional)',
-                                  controller: TextEditingController(
-                                    text: selectedDueDate == null
-                                        ? ''
-                                        : '${selectedDueDate!.day}/${selectedDueDate!.month}/${selectedDueDate!.year}',
-                                  ),
-                                  readOnly: true,
-                                ),
-                              ),
                             ),
-                            if (isDatePickerExpanded)
-                              Container(
-                                color: CupertinoColors.white,
-                                padding: const EdgeInsets.only(top: 8, bottom: 12),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    SizedBox(
-                                      height: 180,
-                                      child: CupertinoDatePicker(
-                                        mode: CupertinoDatePickerMode.date,
-                                        initialDateTime: selectedDueDate ?? DateTime.now().add(const Duration(days: 30)),
-                                        minimumDate: DateTime(2020),
-                                        maximumDate: DateTime(2035),
-                                        onDateTimeChanged: (d) {
-                                          setSheetState(() => selectedDueDate = d);
-                                        },
+                            AnimatedSize(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOutCubic,
+                              alignment: Alignment.topCenter,
+                              child: isDatePickerExpanded
+                                  ? Container(
+                                      decoration: const BoxDecoration(
+                                        color: CupertinoColors.white,
+                                        border: Border(
+                                          top: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
+                                        ),
                                       ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                                      child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      padding: const EdgeInsets.only(top: 8, bottom: 12),
+                                      child: Column(
+                                        mainAxisSize: MainAxisSize.min,
                                         children: [
-                                          CupertinoButton(
-                                            padding: EdgeInsets.zero,
-                                            minimumSize: Size.zero,
-                                            onPressed: () {
-                                              setSheetState(() {
-                                                selectedDueDate = null;
-                                                isDatePickerExpanded = false;
-                                              });
-                                            },
-                                            child: const Text(
-                                              'Hapus Tanggal',
-                                              style: TextStyle(
-                                                color: AppColors.primaryPink,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w500,
-                                              ),
+                                          SizedBox(
+                                            height: 180,
+                                            child: CupertinoDatePicker(
+                                              mode: CupertinoDatePickerMode.date,
+                                              initialDateTime: selectedDueDate ?? DateTime.now().add(const Duration(days: 30)),
+                                              minimumDate: DateTime(2020),
+                                              maximumDate: DateTime(2035),
+                                              onDateTimeChanged: (d) {
+                                                setSheetState(() => selectedDueDate = d);
+                                              },
                                             ),
                                           ),
-                                          CupertinoButton(
-                                            padding: EdgeInsets.zero,
-                                            minimumSize: Size.zero,
-                                            onPressed: () {
-                                              setSheetState(() => isDatePickerExpanded = false);
-                                            },
-                                            child: const Text(
-                                              'Selesai',
-                                              style: TextStyle(
-                                                color: AppColors.primaryPink,
-                                                fontSize: 14,
-                                                fontWeight: FontWeight.w600,
-                                              ),
+                                          Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                CupertinoButton(
+                                                  padding: EdgeInsets.zero,
+                                                  minimumSize: Size.zero,
+                                                  onPressed: () {
+                                                    setSheetState(() {
+                                                      selectedDueDate = null;
+                                                      isDatePickerExpanded = false;
+                                                    });
+                                                  },
+                                                  child: const Text(
+                                                    'Hapus Tanggal',
+                                                    style: TextStyle(
+                                                      color: AppColors.primaryPink,
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w500,
+                                                    ),
+                                                  ),
+                                                ),
+                                                CupertinoButton(
+                                                  padding: EdgeInsets.zero,
+                                                  minimumSize: Size.zero,
+                                                  onPressed: () {
+                                                    setSheetState(() => isDatePickerExpanded = false);
+                                                  },
+                                                  child: const Text(
+                                                    'Selesai',
+                                                    style: TextStyle(
+                                                      color: AppColors.primaryPink,
+                                                      fontSize: 14,
+                                                      fontWeight: FontWeight.w600,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
                                             ),
                                           ),
                                         ],
                                       ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                                    )
+                                  : const SizedBox.shrink(),
+                            ),
                           ],
                         ),
                       ],
