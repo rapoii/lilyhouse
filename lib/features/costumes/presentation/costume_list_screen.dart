@@ -218,42 +218,44 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                     child: CupertinoActivityIndicator(radius: 14),
                   )
                 : _costumes.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 72,
-                              height: 72,
-                              decoration: const BoxDecoration(
-                                color: Color(0xFFE5E5EA), // iOS systemGray5
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                CupertinoIcons.sparkles,
-                                size: 36,
-                                color: Color(0xFF8E8E93), // iOS secondaryLabel
-                              ),
+                    ? Column(
+                        // Flex-based optical centering: content at 1/3 from
+                        // top of available area (Apple HIG empty-state
+                        // position). Same device-agnostic pattern as Cicilan
+                        // for visual consistency across empty states.
+                        children: [
+                          const Spacer(flex: 1),
+                          Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 72,
+                                  height: 72,
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFE5E5EA), // iOS systemGray5
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    CupertinoIcons.sparkles,
+                                    size: 36,
+                                    color: Color(0xFF8E8E93), // iOS secondaryLabel
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Belum ada kostum',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textDark,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Belum ada kostum',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textDark,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            const Text(
-                              'Sesuaikan kata kunci pencarian atau filter status',
-                              style: TextStyle(
-                                fontSize: 13,
-                                color: AppColors.textMuted,
-                              ),
-                            ),
-                          ],
-                        ),
+                          ),
+                          const Spacer(flex: 2),
+                        ],
                       )
                     : ListView.separated(
                         padding: const EdgeInsets.fromLTRB(16, 16, 16, 112),
