@@ -397,9 +397,13 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                 ? const Center(child: CupertinoActivityIndicator(radius: 14))
                 : _installments.isEmpty
                     ? Padding(
-                        // Offset content up to optically center between tabs
-                        // and bottom nav (compensates floating bottom nav bias).
-                        padding: const EdgeInsets.only(bottom: 25.0),
+                        // extendBody:true spans the body behind the floating
+                        // nav, so Center's midpoint includes the dead zone
+                        // behind the nav. Compensate by exactly HALF the nav
+                        // reserve (system inset + 76dp) — scales to any phone.
+                        padding: EdgeInsets.only(
+                          bottom: (MediaQuery.of(context).padding.bottom + 76.0) / 2 - 8.0,
+                        ),
                         child: Center(
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
