@@ -4,6 +4,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/draggable_sheet_container.dart';
+import '../../../core/widgets/squircle_icon.dart';
 import '../../costumes/data/costume_repository.dart';
 import '../../costumes/domain/costume.dart';
 import '../../rentals/data/rental_repository.dart';
@@ -11,18 +13,11 @@ import '../../rentals/domain/customer.dart';
 import '../../rentals/domain/rental.dart';
 import '../domain/booking_conflict_engine.dart';
 
-/// Modal untuk input booking manual (di luar Smart Paste form).
-///
-/// Fields:
-/// - Nama Penyewa
-/// - No HP
-/// - Kostum (dropdown picker dari katalog)
-/// - Tanggal Mulai (DatePicker)
-/// - Tanggal Selesai (DatePicker, default = mulai + 3 hari)
-/// - Keperluan (opsional, default 'homecos')
-/// - Total Harga (opsional, default 0)
-///
-/// Otomatis insert Customer + Rental ke repository, dan cek konflik.
+/// Modal for adding a booking manually (entry chosen from the "Tambah" sheet
+/// in the Kalender tab). Style mirrors the "Tambah Kostum" and "Cicilan Baru"
+/// sheets: DraggableSheetContainer + CupertinoPageScaffold +
+/// CupertinoNavigationBar, body composed of CupertinoFormSection.insetGrouped
+/// sections — iOS Settings-style form.
 class ManualBookingModal extends StatefulWidget {
   final IRentalRepository rentalRepository;
   final ICostumeRepository costumeRepository;
@@ -53,8 +48,6 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   String _purpose = 'homecos';
   bool _isLoadingCostumes = true;
   bool _isSaving = false;
-  String? _nameError;
-  String? _phoneError;
   String? _costumeError;
   String? _dateError;
 
@@ -92,52 +85,9 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   }
 
   Future<void> _pickStartDate() async {
-    final picked = await showCupertinoModalPopup<DateTime>(
-      context: context,
-      builder: (ctx) => Container(
-        height: 280,
-        color: Colors.white,
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Batal', style: AppTypography.actionButton),
-                  ),
-                  const Text('Pilih Tanggal Mulai', style: AppTypography.navTitle),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => Navigator.of(ctx).pop(_startDate),
-                    child: const Text('Selesai', style: AppTypography.actionButton),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _startDate,
-                minimumYear: 2020,
-                maximumYear: 2035,
-                onDateTimeChanged: (dt) {
-                  // Update temp value for completion
-                  _startDate = dt;
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+    final picked = await _showDatePickerSheet(
+      title: 'Pilih Tanggal Mulai',
+      initial: _startDate,
     );
     if (picked != null && mounted) {
       setState(() {
@@ -145,210 +95,244 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         if (_endDate.isBefore(_startDate)) {
           _endDate = _startDate.add(const Duration(days: 3));
         }
+        _dateError = null;
       });
     }
   }
 
   Future<void> _pickEndDate() async {
-    final picked = await showCupertinoModalPopup<DateTime>(
-      context: context,
-      builder: (ctx) => Container(
-        height: 280,
-        color: Colors.white,
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Batal', style: AppTypography.actionButton),
-                  ),
-                  const Text('Pilih Tanggal Selesai', style: AppTypography.navTitle),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => Navigator.of(ctx).pop(_endDate),
-                    child: const Text('Selesai', style: AppTypography.actionButton),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: _endDate,
-                minimumYear: 2020,
-                maximumYear: 2035,
-                minimumDate: _startDate,
-                onDateTimeChanged: (dt) {
-                  _endDate = dt;
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+    final picked = await _showDatePickerSheet(
+      title: 'Pilih Tanggal Selesai',
+      initial: _endDate,
+      minimumDate: _startDate,
     );
     if (picked != null && mounted) {
       setState(() {
         _endDate = picked;
+        _dateError = null;
       });
     }
   }
 
-  Future<void> _pickCostume() async {
-    if (_costumes.isEmpty) return;
-    final selected = await showCupertinoModalPopup<Costume>(
+  Future<DateTime?> _showDatePickerSheet({
+    required String title,
+    required DateTime initial,
+    DateTime? minimumDate,
+  }) async {
+    DateTime temp = initial;
+    return showCupertinoModalPopup<DateTime>(
       context: context,
       builder: (ctx) => Container(
         height: 280,
-        color: Colors.white,
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
+        color: CupertinoColors.white,
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              // Navigation bar
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: const BoxDecoration(
+                  border: Border(
+                    bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.of(ctx).pop(),
+                      child: const Text('Batal', style: AppTypography.actionButton),
+                    ),
+                    Text(title, style: AppTypography.navTitle),
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.of(ctx).pop(temp),
+                      child: const Text('Selesai', style: AppTypography.actionButton),
+                    ),
+                  ],
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Batal', style: AppTypography.actionButton),
-                  ),
-                  const Text('Pilih Kostum', style: AppTypography.navTitle),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => Navigator.of(ctx).pop(_selectedCostume),
-                    child: const Text('Selesai', style: AppTypography.actionButton),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: CupertinoPicker(
-                itemExtent: 36,
-                scrollController: FixedExtentScrollController(
-                  initialItem: _selectedCostume != null
-                      ? _costumes.indexWhere((c) => c.id == _selectedCostume!.id)
-                      : 0,
+              Expanded(
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: initial,
+                  minimumYear: 2020,
+                  maximumYear: 2035,
+                  minimumDate: minimumDate,
+                  onDateTimeChanged: (dt) => temp = dt,
                 ),
-                onSelectedItemChanged: (idx) {
-                  _selectedCostume = _costumes[idx];
-                },
-                children: _costumes
-                    .map((c) => Center(
-                          child: Text(
-                            '${c.name} (${c.size})',
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ))
-                    .toList(),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Future<void> _pickCostume() async {
+    if (_costumes.isEmpty) return;
+    int initialIdx = _selectedCostume != null
+        ? _costumes.indexWhere((c) => c.id == _selectedCostume!.id)
+        : 0;
+    if (initialIdx < 0) initialIdx = 0;
+    final selected = await showCupertinoModalPopup<Costume>(
+      context: context,
+      builder: (ctx) {
+        int current = initialIdx;
+        return Container(
+          height: 280,
+          color: CupertinoColors.white,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('Batal', style: AppTypography.actionButton),
+                      ),
+                      const Text('Pilih Kostum', style: AppTypography.navTitle),
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () => Navigator.of(ctx).pop(_costumes[current]),
+                        child: const Text('Selesai', style: AppTypography.actionButton),
+                      ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  child: CupertinoPicker(
+                    itemExtent: 36,
+                    scrollController: FixedExtentScrollController(initialItem: initialIdx),
+                    onSelectedItemChanged: (idx) => current = idx,
+                    children: _costumes
+                        .map((c) => Center(
+                              child: Text(
+                                '${c.name} (${c.size})',
+                                style: const TextStyle(fontSize: 15),
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
     if (selected != null && mounted) {
       setState(() {
         _selectedCostume = selected;
+        _costumeError = null;
       });
     }
   }
 
   Future<void> _pickPurpose() async {
-    final options = ['homecos', 'event', 'photoshoot', 'lainnya'];
-    final labels = {
+    const List<String> options = ['homecos', 'event', 'photoshoot', 'lainnya'];
+    const Map<String, String> labels = {
       'homecos': 'Homecos (Pakai Sendiri)',
       'event': 'Event Cosplay',
       'photoshoot': 'Photoshoot',
       'lainnya': 'Lainnya',
     };
+    int initialIdx = options.indexOf(_purpose);
+    if (initialIdx < 0) initialIdx = 0;
     final selected = await showCupertinoModalPopup<String>(
       context: context,
-      builder: (ctx) => Container(
-        height: 280,
-        color: Colors.white,
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-              decoration: const BoxDecoration(
-                border: Border(
-                  bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
-                ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => Navigator.of(ctx).pop(),
-                    child: const Text('Batal', style: AppTypography.actionButton),
+      builder: (ctx) {
+        int current = initialIdx;
+        return Container(
+          height: 280,
+          color: CupertinoColors.white,
+          child: SafeArea(
+            top: false,
+            child: Column(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
+                    ),
                   ),
-                  const Text('Keperluan', style: AppTypography.navTitle),
-                  CupertinoButton(
-                    padding: EdgeInsets.zero,
-                    onPressed: () => Navigator.of(ctx).pop(_purpose),
-                    child: const Text('Selesai', style: AppTypography.actionButton),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () => Navigator.of(ctx).pop(),
+                        child: const Text('Batal', style: AppTypography.actionButton),
+                      ),
+                      const Text('Keperluan', style: AppTypography.navTitle),
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () => Navigator.of(ctx).pop(options[current]),
+                        child: const Text('Selesai', style: AppTypography.actionButton),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: CupertinoPicker(
-                itemExtent: 36,
-                scrollController: FixedExtentScrollController(
-                  initialItem: options.indexOf(_purpose),
                 ),
-                onSelectedItemChanged: (idx) {
-                  _purpose = options[idx];
-                },
-                children: options
-                    .map((p) => Center(
-                          child: Text(
-                            labels[p]!,
-                            style: const TextStyle(fontSize: 15),
-                          ),
-                        ))
-                    .toList(),
-              ),
+                Expanded(
+                  child: CupertinoPicker(
+                    itemExtent: 36,
+                    scrollController: FixedExtentScrollController(initialItem: initialIdx),
+                    onSelectedItemChanged: (idx) => current = idx,
+                    children: options
+                        .map((v) => Center(
+                              child: Text(labels[v] ?? v, style: const TextStyle(fontSize: 15)),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
     if (selected != null && mounted) {
-      setState(() {
-        _purpose = selected;
-      });
+      setState(() => _purpose = selected);
+    }
+  }
+
+  String get _purposeLabel {
+    switch (_purpose) {
+      case 'event':
+        return 'Event Cosplay';
+      case 'photoshoot':
+        return 'Photoshoot';
+      case 'lainnya':
+        return 'Lainnya';
+      case 'homecos':
+      default:
+        return 'Homecos (Pakai Sendiri)';
     }
   }
 
   bool _validate() {
+    final okName = _nameController.text.trim().isNotEmpty;
+    final okPhone = _phoneController.text.trim().isNotEmpty;
+    final okCostume = _selectedCostume != null;
+    final okDate = !_endDate.isBefore(_startDate);
     setState(() {
-      _nameError = _nameController.text.trim().isEmpty ? 'Nama wajib diisi' : null;
-      _phoneError = _phoneController.text.trim().isEmpty ? 'No HP wajib diisi' : null;
-      _costumeError = _selectedCostume == null ? 'Pilih kostum dulu' : null;
-      _dateError = _endDate.isBefore(_startDate) ? 'Tanggal selesai harus setelah mulai' : null;
+      _costumeError = okCostume ? null : 'Pilih kostum dulu';
+      _dateError = okDate ? null : 'Tanggal selesai harus setelah mulai';
     });
-    return _nameError == null &&
-        _phoneError == null &&
-        _costumeError == null &&
-        _dateError == null;
+    return okName && okPhone && okCostume && okDate;
   }
 
   Future<void> _save() async {
@@ -356,7 +340,6 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     setState(() => _isSaving = true);
 
     try {
-      // Cek konflik
       final candidate = Rental(
         id: 'temp_candidate',
         costumeId: _selectedCostume!.id,
@@ -379,7 +362,6 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         }
       }
 
-      // Insert customer
       final custId = 'cust_${DateTime.now().millisecondsSinceEpoch}';
       final customer = Customer(
         id: custId,
@@ -389,7 +371,6 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       );
       await widget.rentalRepository.insertCustomer(customer);
 
-      // Insert rental
       final rentalId = 'rent_${DateTime.now().millisecondsSinceEpoch}';
       final rental = Rental(
         id: rentalId,
@@ -446,7 +427,6 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   }
 
   void _showSuccessSnack() {
-    // Outer scaffold's snack
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Booking ${_selectedCostume!.name} tersimpan'),
@@ -468,353 +448,208 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final dateFormat = DateFormat('EEEE, d MMMM yyyy', 'id_ID');
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.92,
-      ),
-      margin: EdgeInsets.only(bottom: bottomInset),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              margin: const EdgeInsets.only(top: 12),
-              width: 36,
-              height: 5,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD1D1D6),
-                borderRadius: BorderRadius.circular(2.5),
-              ),
-            ),
-          ),
-          // Header
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 14, 20, 8),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text('Booking Manual', style: AppTypography.headline),
-                      SizedBox(height: 2),
-                      Text(
-                        'Isi data booking kostum untuk pelanggan',
-                        style: AppTypography.subhead,
-                      ),
-                    ],
-                  ),
-                ),
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-                  child: const Text('Batal', style: AppTypography.actionButton),
-                ),
-              ],
-            ),
-          ),
-          // Form
-          Flexible(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Section 1: Data Penyewa
-                  _buildSectionHeader('DATA PENYEWA'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    label: 'Nama Penyewa',
-                    icon: CupertinoIcons.person_fill,
-                    iconColor: AppColors.primaryPink,
-                    controller: _nameController,
-                    placeholder: 'cth: Andi Setiawan',
-                    errorText: _nameError,
-                  ),
-                  const SizedBox(height: 10),
-                  _buildTextField(
-                    label: 'No HP / WhatsApp',
-                    icon: CupertinoIcons.phone_fill,
-                    iconColor: const Color(0xFF5856D6),
-                    controller: _phoneController,
-                    placeholder: 'cth: 081234567890',
-                    keyboardType: TextInputType.phone,
-                    errorText: _phoneError,
-                  ),
-
-                  const SizedBox(height: 18),
-                  // Section 2: Kostum & Tanggal
-                  _buildSectionHeader('KOSTUM & JADWAL'),
-                  const SizedBox(height: 8),
-                  _buildPickerRow(
-                    label: 'Kostum',
-                    icon: CupertinoIcons.bag_fill,
-                    iconColor: const Color(0xFFFF85A1),
-                    value: _isLoadingCostumes
-                        ? 'Memuat...'
-                        : (_selectedCostume != null
-                            ? '${_selectedCostume!.name} (${_selectedCostume!.size})'
-                            : 'Pilih kostum'),
-                    valueColor: _selectedCostume != null
-                        ? AppColors.textDark
-                        : const Color(0xFF8E8E93),
-                    onTap: _isLoadingCostumes ? null : _pickCostume,
-                    errorText: _costumeError,
-                  ),
-                  const SizedBox(height: 10),
-                  _buildPickerRow(
-                    label: 'Tanggal Mulai',
-                    icon: CupertinoIcons.calendar,
-                    iconColor: const Color(0xFFFF9500),
-                    value: dateFormat.format(_startDate),
-                    valueColor: AppColors.textDark,
-                    onTap: _pickStartDate,
-                  ),
-                  const SizedBox(height: 10),
-                  _buildPickerRow(
-                    label: 'Tanggal Selesai',
-                    icon: CupertinoIcons.calendar_badge_minus,
-                    iconColor: const Color(0xFFFF3B30),
-                    value: dateFormat.format(_endDate),
-                    valueColor: AppColors.textDark,
-                    onTap: _pickEndDate,
-                    errorText: _dateError,
-                  ),
-                  const SizedBox(height: 10),
-                  _buildPickerRow(
-                    label: 'Keperluan',
-                    icon: CupertinoIcons.tag_fill,
-                    iconColor: const Color(0xFF5856D6),
-                    value: _purpose == 'homecos'
-                        ? 'Homecos (Pakai Sendiri)'
-                        : _purpose == 'event'
-                            ? 'Event Cosplay'
-                            : _purpose == 'photoshoot'
-                                ? 'Photoshoot'
-                                : 'Lainnya',
-                    valueColor: AppColors.textDark,
-                    onTap: _pickPurpose,
-                  ),
-
-                  const SizedBox(height: 18),
-                  // Section 3: Pembayaran
-                  _buildSectionHeader('PEMBAYARAN'),
-                  const SizedBox(height: 8),
-                  _buildTextField(
-                    label: 'Total Harga (opsional)',
-                    icon: CupertinoIcons.money_dollar_circle_fill,
-                    iconColor: const Color(0xFF34C759),
-                    controller: _totalPriceController,
-                    placeholder: 'cth: 150000',
-                    keyboardType: TextInputType.number,
-                    prefix: 'Rp ',
-                  ),
-
-                  const SizedBox(height: 24),
-                  // Save button
-                  CupertinoButton(
-                    onPressed: _isSaving ? null : _save,
-                    color: AppColors.primaryPink,
-                    padding: const EdgeInsets.symmetric(vertical: 14),
-                    borderRadius: BorderRadius.circular(12),
-                    child: _isSaving
-                        ? const CupertinoActivityIndicator(color: Colors.white)
-                        : const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(CupertinoIcons.checkmark_circle_fill, color: Colors.white, size: 18),
-                              SizedBox(width: 6),
-                              Text(
-                                'Simpan Booking',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 15,
-                                ),
-                              ),
-                            ],
-                          ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(String label) {
-    return Text(
-      label,
-      style: const TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: Color(0xFF6C6C70),
-        letterSpacing: 0.5,
-      ),
-    );
-  }
-
-  Widget _buildTextField({
-    required String label,
-    required IconData icon,
-    required Color iconColor,
-    required TextEditingController controller,
-    required String placeholder,
-    TextInputType? keyboardType,
-    String? errorText,
-    String? prefix,
-  }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: errorText != null ? AppColors.dangerRose : const Color(0xFFE5E5EA),
-          width: 0.5,
+    return DraggableSheetContainer(
+      backgroundColor: AppColors.background,
+      onDismissed: () => Navigator.of(context).pop(),
+      builder: (sheetCtx) => DefaultTextStyle(
+        style: const TextStyle(
+          decoration: TextDecoration.none,
+          fontFamily: '.SF Pro Text',
+          color: AppColors.textDark,
         ),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 29,
-            height: 29,
-            decoration: BoxDecoration(
-              color: iconColor,
-              borderRadius: BorderRadius.circular(7),
+        child: CupertinoPageScaffold(
+          backgroundColor: AppColors.background,
+          navigationBar: CupertinoNavigationBar(
+            backgroundColor: AppColors.background,
+            border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
+            leading: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: _isSaving ? null : () => Navigator.of(sheetCtx).pop(),
+              child: const Text('Batal', style: AppTypography.actionButton),
             ),
-            child: Icon(icon, color: Colors.white, size: 16),
+            middle: const SizedBox(
+              width: double.infinity,
+              child: Center(
+                child: Text('Booking Manual', style: AppTypography.navTitle),
+              ),
+            ),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: _isSaving ? null : _save,
+              child: _isSaving
+                  ? const CupertinoActivityIndicator(radius: 10)
+                  : const Text('Simpan', style: AppTypography.actionButton),
+            ),
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: SafeArea(
+            top: false,
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 24),
+              physics: const BouncingScrollPhysics(),
               children: [
-                Text(
-                  label,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Color(0xFF8E8E93),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                CupertinoTextField(
-                  controller: controller,
-                  placeholder: placeholder,
-                  keyboardType: keyboardType,
-                  decoration: const BoxDecoration(),
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                  placeholderStyle: const TextStyle(
-                    fontSize: 15,
-                    color: Color(0xFF8E8E93),
-                  ),
-                  prefix: prefix != null
-                      ? Padding(
-                          padding: const EdgeInsets.only(right: 4),
-                          child: Text(
-                            prefix,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              color: Color(0xFF8E8E93),
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        )
-                      : null,
-                ),
-                if (errorText != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: Text(
-                      errorText,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: AppColors.dangerRose,
-                        fontWeight: FontWeight.w500,
+                // ====== Section 1: DATA PENYEWA ======
+                CupertinoFormSection.insetGrouped(
+                  backgroundColor: AppColors.background,
+                  header: const Text('DATA PENYEWA'),
+                  children: [
+                    CupertinoTextFormFieldRow(
+                      key: const Key('manual_name_input'),
+                      controller: _nameController,
+                      prefix: const SquircleIcon(
+                        icon: CupertinoIcons.person_fill,
+                        color: AppColors.primaryPink,
                       ),
+                      placeholder: 'Nama Penyewa',
+                      textInputAction: TextInputAction.next,
                     ),
-                  ),
+                    CupertinoTextFormFieldRow(
+                      key: const Key('manual_phone_input'),
+                      controller: _phoneController,
+                      prefix: const SquircleIcon(
+                        icon: CupertinoIcons.phone_fill,
+                        color: Color(0xFF5856D6),
+                      ),
+                      placeholder: 'No HP / WhatsApp',
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.next,
+                    ),
+                  ],
+                ),
+
+                // ====== Section 2: KOSTUM & JADWAL ======
+                CupertinoFormSection.insetGrouped(
+                  backgroundColor: AppColors.background,
+                  header: const Text('KOSTUM & JADWAL'),
+                  children: [
+                    // Kostum — picker row
+                    _PickerFormRow(
+                      key: const Key('manual_costume_row'),
+                      leadingIcon: CupertinoIcons.bag_fill,
+                      leadingColor: const Color(0xFFFF85A1),
+                      value: _isLoadingCostumes
+                          ? 'Memuat...'
+                          : (_selectedCostume != null
+                              ? '${_selectedCostume!.name} (${_selectedCostume!.size})'
+                              : 'Pilih kostum'),
+                      valueColor: _selectedCostume != null
+                          ? AppColors.textDark
+                          : const Color(0xFF8E8E93),
+                      onTap: _isLoadingCostumes ? null : _pickCostume,
+                      errorText: _costumeError,
+                    ),
+                    // Tanggal Mulai
+                    _PickerFormRow(
+                      key: const Key('manual_start_date_row'),
+                      leadingIcon: CupertinoIcons.calendar,
+                      leadingColor: const Color(0xFFFF9500),
+                      value: dateFormat.format(_startDate),
+                      valueColor: AppColors.textDark,
+                      onTap: _pickStartDate,
+                    ),
+                    // Tanggal Selesai
+                    _PickerFormRow(
+                      key: const Key('manual_end_date_row'),
+                      leadingIcon: CupertinoIcons.calendar_badge_minus,
+                      leadingColor: const Color(0xFFFF3B30),
+                      value: dateFormat.format(_endDate),
+                      valueColor: AppColors.textDark,
+                      onTap: _pickEndDate,
+                      errorText: _dateError,
+                    ),
+                    // Keperluan
+                    _PickerFormRow(
+                      key: const Key('manual_purpose_row'),
+                      leadingIcon: CupertinoIcons.tag_fill,
+                      leadingColor: const Color(0xFF5856D6),
+                      value: _purposeLabel,
+                      valueColor: AppColors.textDark,
+                      onTap: _pickPurpose,
+                    ),
+                  ],
+                ),
+
+                // ====== Section 3: PEMBAYARAN ======
+                CupertinoFormSection.insetGrouped(
+                  backgroundColor: AppColors.background,
+                  header: const Text('PEMBAYARAN'),
+                  children: [
+                    CupertinoTextFormFieldRow(
+                      key: const Key('manual_price_input'),
+                      controller: _totalPriceController,
+                      prefix: const SquircleIcon(
+                        icon: CupertinoIcons.money_dollar_circle_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      placeholder: 'Total harga (opsional)',
+                      keyboardType: TextInputType.number,
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildPickerRow({
-    required String label,
-    required IconData icon,
-    required Color iconColor,
-    required String value,
-    required Color valueColor,
-    required VoidCallback? onTap,
-    String? errorText,
-  }) {
+/// iOS form-row style picker (mirrors the inline Jatuh tempo row in the
+/// Cicilan sheet). Tap target is the full row, leading SquircleIcon +
+/// placeholder value, trailing chevron. Custom Container used here (not
+/// CupertinoListTile) so the leading area exactly matches sibling
+/// CupertinoTextFormFieldRow icons.
+class _PickerFormRow extends StatelessWidget {
+  final IconData leadingIcon;
+  final Color leadingColor;
+  final String value;
+  final Color valueColor;
+  final VoidCallback? onTap;
+  final String? errorText;
+
+  const _PickerFormRow({
+    super.key,
+    required this.leadingIcon,
+    required this.leadingColor,
+    required this.value,
+    required this.valueColor,
+    required this.onTap,
+    this.errorText,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
       behavior: HitTestBehavior.opaque,
+      onTap: onTap,
       child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: errorText != null ? AppColors.dangerRose : const Color(0xFFE5E5EA),
-            width: 0.5,
-          ),
-        ),
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 14.0, 14.0),
+        color: CupertinoColors.white,
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Container(
-              width: 29,
-              height: 29,
-              decoration: BoxDecoration(
-                color: iconColor,
-                borderRadius: BorderRadius.circular(7),
-              ),
-              child: Icon(icon, color: Colors.white, size: 16),
-            ),
-            const SizedBox(width: 10),
+            SquircleIcon(icon: leadingIcon, color: leadingColor),
+            const SizedBox(width: 7.0),
             Expanded(
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF8E8E93),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
                     value,
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 16,
                       color: valueColor,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                   if (errorText != null)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
-                        errorText,
+                        errorText!,
                         style: const TextStyle(
                           fontSize: 11,
                           color: AppColors.dangerRose,
@@ -827,7 +662,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
             ),
             const Icon(
               CupertinoIcons.chevron_right,
-              size: 16,
+              size: 14,
               color: Color(0xFFC7C7CC),
             ),
           ],
