@@ -396,44 +396,48 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
             child: _isLoading
                 ? const Center(child: CupertinoActivityIndicator(radius: 14))
                 : _installments.isEmpty
-                    ? Padding(
-                        // extendBody:true spans the body behind the floating
-                        // nav, so Center's midpoint includes the dead zone
-                        // behind the nav. Compensate by exactly HALF the nav
-                        // reserve (system inset + 76dp) — scales to any phone.
-                        padding: EdgeInsets.only(
-                          bottom: (MediaQuery.of(context).padding.bottom + 76.0) / 2 - 8.0,
-                        ),
-                        child: Center(
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Container(
-                              width: 72,
-                              height: 72,
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFE5E5EA), // iOS systemGray5
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                CupertinoIcons.creditcard,
-                                size: 36,
-                                color: Color(0xFF8E8E93), // iOS secondaryLabel
-                              ),
+                    ? Column(
+                        // Flex-based optical centering: 1 part above content,
+                        // 1 part the content, 2 parts below = content sits at
+                        // 25% from the top of the available area (Apple HIG
+                        // empty-state position). Scales to any screen — no
+                        // magic pixels, no MediaQuery dance. The bottom Spacer
+                        // is naturally larger to leave breathing room above
+                        // the floating nav.
+                        children: [
+                          const Spacer(flex: 1),
+                          Center(
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Container(
+                                  width: 72,
+                                  height: 72,
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFE5E5EA),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: const Icon(
+                                    CupertinoIcons.creditcard,
+                                    size: 36,
+                                    color: Color(0xFF8E8E93),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                const Text(
+                                  'Belum ada daftar cicilan',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColors.textDark,
+                                  ),
+                                ),
+                              ],
                             ),
-                            const SizedBox(height: 16),
-                            const Text(
-                              'Belum ada daftar cicilan',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textDark,
-                              ),
-                            ),
-                          ],
-                        ),
-                        ),
+                          ),
+                          const Spacer(flex: 2),
+                        ],
                       )
                     : RefreshIndicator(
                         color: AppColors.primaryPink,
