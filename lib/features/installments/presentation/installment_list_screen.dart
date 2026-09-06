@@ -405,7 +405,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                         // is naturally larger to leave breathing room above
                         // the floating nav.
                         children: [
-                          const Spacer(flex: 1),
+                          const Spacer(flex: 5),
                           Center(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -413,14 +413,14 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                 Container(
                                   width: 72,
                                   height: 72,
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFE5E5EA),
+                                  decoration: const BoxDecoration(
+                                    color: Color(0xFFE5E5EA), // iOS systemGray5
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
                                     CupertinoIcons.creditcard,
                                     size: 36,
-                                    color: Color(0xFF8E8E93),
+                                    color: Color(0xFF8E8E93), // iOS secondaryLabel
                                   ),
                                 ),
                                 const SizedBox(height: 16),
@@ -436,7 +436,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                               ],
                             ),
                           ),
-                          const Spacer(flex: 2),
+                          const Spacer(flex: 8),
                         ],
                       )
                     : RefreshIndicator(

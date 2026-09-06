@@ -224,7 +224,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                         // position). Same device-agnostic pattern as Cicilan
                         // for visual consistency across empty states.
                         children: [
-                          const Spacer(flex: 1),
+                          const Spacer(flex: 5),
                           Center(
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -254,7 +254,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                               ],
                             ),
                           ),
-                          const Spacer(flex: 2),
+                          const Spacer(flex: 8),
                         ],
                       )
                     : ListView.separated(
