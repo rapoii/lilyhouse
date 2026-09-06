@@ -345,28 +345,23 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                     // used by CupertinoTextFormFieldRow siblings so the
                     // title text starts at the same x-coordinate.
                     CupertinoListTile(
+                      padding: const EdgeInsetsDirectional.fromSTEB(26.0, 0, 14.0, 0),
                       leadingSize: 29.0,
-                      leadingToTitle: 13.0,
+                      leadingToTitle: 0.0,
                       leading: const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
-                      title: Transform.translate(
-                        offset: const Offset(-16.0, 0),
-                        child: Text(
-                          _selectedSize,
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: AppColors.textDark,
-                            fontWeight: FontWeight.w400,
-                          ),
+                      title: Text(
+                        _selectedSize,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: AppColors.textDark,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
-                      subtitle: Transform.translate(
-                        offset: const Offset(-16.0, 0),
-                        child: const Text(
-                          'Pilih ukuran',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF8E8E93),
-                          ),
+                      subtitle: const Text(
+                        'Pilih ukuran',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8E8E93),
                         ),
                       ),
                       trailing: AnimatedRotation(
