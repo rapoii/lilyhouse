@@ -626,8 +626,11 @@ class _PickerFormRow extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
+        // No opaque color — the parent CupertinoFormSection.insetGrouped
+        // already paints the rounded card background. Adding a flat
+        // white fill here would paint over the section's bottom rounded
+        // corners, making the picker row appear to break out of the card.
         padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 14.0, 14.0),
-        color: CupertinoColors.white,
         child: Row(
           children: [
             SquircleIcon(icon: leadingIcon, color: leadingColor),

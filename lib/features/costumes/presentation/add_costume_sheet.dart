@@ -348,12 +348,17 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                     // CupertinoListTile so we have full control over
                     // the leading area to match the sibling
                     // CupertinoTextFormFieldRow icons exactly.
+                    // No opaque `color` here — let the parent
+                    // CupertinoListSection.insetGrouped's rounded
+                    // card background show through. Otherwise this
+                    // row would paint a flat white rectangle over
+                    // the section's bottom rounded corners, making
+                    // them appear square.
                     GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: _showSizePicker,
                       child: Container(
                         padding: const EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 14.0, 12.0),
-                        color: CupertinoColors.white,
                         child: Row(
                           children: [
                             const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
@@ -402,8 +407,11 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                       alignment: Alignment.topCenter,
                       child: _isSizePickerExpanded
                           ? Container(
+                              // No opaque color — the CupertinoPicker below
+                              // renders its own background, and a flat white
+                              // box here would clip the section's rounded
+                              // bottom corners to a square.
                               decoration: const BoxDecoration(
-                                color: CupertinoColors.white,
                                 border: Border(
                                   top: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
                                 ),

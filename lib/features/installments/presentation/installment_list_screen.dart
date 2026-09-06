@@ -210,8 +210,17 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                 });
                               },
                               child: Container(
+                                // No `color` here — let the parent
+                                // CupertinoFormSection.insetGrouped's
+                                // rounded card background show through.
+                                // Adding an opaque `color: CupertinoColors.white`
+                                // would paint over the card's bottom rounded
+                                // corners with a flat white rectangle, making
+                                // the PEMBAYARAN card look square at the bottom
+                                // (which it is, but only because this row used
+                                // to be a CupertinoListTile that respected the
+                                // card's clip chain).
                                 padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 14.0, 14.0),
-                                color: CupertinoColors.white,
                                 child: Row(
                                   children: [
                                     const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFFFF3B30)),
@@ -246,8 +255,11 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                               alignment: Alignment.topCenter,
                               child: isDatePickerExpanded
                                   ? Container(
+                                      // No opaque color — the CupertinoDatePicker
+                                      // renders its own white background per-row,
+                                      // and a flat white box here would clip the
+                                      // card's rounded bottom to a square.
                                       decoration: const BoxDecoration(
-                                        color: CupertinoColors.white,
                                         border: Border(
                                           top: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
                                         ),
