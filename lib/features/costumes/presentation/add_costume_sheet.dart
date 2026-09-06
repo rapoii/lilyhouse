@@ -345,7 +345,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                     // used by CupertinoTextFormFieldRow siblings so the
                     // title text starts at the same x-coordinate.
                     CupertinoListTile(
-                      padding: const EdgeInsetsDirectional.fromSTEB(20.0, 0, 14.0, 0),
+                      padding: const EdgeInsetsDirectional.fromSTEB(26.0, 0, 14.0, 0),
                       leadingSize: 29.0,
                       leadingToTitle: 0.0,
                       leading: const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
