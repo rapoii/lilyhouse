@@ -33,6 +33,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
   final CostumeStatus _selectedStatus = CostumeStatus.available;
   String? _selectedImagePath;
   final List<String> _accessories = [];
+  bool _isSizePickerExpanded = false;
   bool _isSaving = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -128,59 +129,9 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
   }
 
   void _showSizePicker() {
-    final sizes = ['S', 'M', 'L', 'XL', 'All Size', 'Custom'];
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (ctx) => Container(
-        height: 250,
-        color: CupertinoColors.systemBackground.resolveFrom(context),
-        child: DefaultTextStyle(
-          style: const TextStyle(
-            decoration: TextDecoration.none,
-            fontFamily: '.SF Pro Text',
-            color: AppColors.textDark,
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: const BoxDecoration(
-                  border: Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Batal', style: AppTypography.actionButton),
-                    ),
-                    const Text('Pilih Ukuran', style: AppTypography.navTitle),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.pop(ctx),
-                      child: const Text('Selesai', style: AppTypography.actionButton),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: CupertinoPicker(
-                  itemExtent: 36,
-                  scrollController: FixedExtentScrollController(
-                    initialItem: sizes.indexOf(_selectedSize).clamp(0, sizes.length - 1),
-                  ),
-                  onSelectedItemChanged: (idx) {
-                    setState(() => _selectedSize = sizes[idx]);
-                  },
-                  children: sizes.map((s) => Center(child: Text(s, style: const TextStyle(fontSize: 18, color: AppColors.textDark)))).toList(),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+    setState(() {
+      _isSizePickerExpanded = !_isSizePickerExpanded;
+    });
   }
 
   Future<void> _save() async {
@@ -386,18 +337,108 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                         decoration: null,
                       ),
                     ),
+                    // Ukuran row: Apple HIG collapsible picker (same pattern
+                    // as Jatuh tempo on Cicilan sheet). Tapping the row
+                    // toggles the inline CupertinoPicker — no separate
+                    // modal popup, consistent with the rest of the form.
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
-                      title: const Text('Ukuran', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(_selectedSize, style: const TextStyle(fontSize: 15, color: Color(0xFF8E8E93), fontWeight: FontWeight.w500)),
-                          const SizedBox(width: 4),
-                          const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
-                        ],
+                      title: Text(
+                        _selectedSize,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: AppColors.textDark,
+                          fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Pilih ukuran',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8E8E93),
+                        ),
+                      ),
+                      trailing: AnimatedRotation(
+                        turns: _isSizePickerExpanded ? 0.25 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOutCubic,
+                        child: const Icon(
+                          CupertinoIcons.chevron_right,
+                          size: 14,
+                          color: Color(0xFFC7C7CC),
+                        ),
                       ),
                       onTap: _showSizePicker,
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: _isSizePickerExpanded
+                          ? Container(
+                              decoration: const BoxDecoration(
+                                color: CupertinoColors.white,
+                                border: Border(
+                                  top: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
+                                ),
+                              ),
+                              padding: const EdgeInsets.only(top: 8, bottom: 12),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(
+                                    height: 180,
+                                    child: CupertinoPicker(
+                                      itemExtent: 36,
+                                      scrollController: FixedExtentScrollController(
+                                        initialItem: ['S', 'M', 'L', 'XL', 'All Size', 'Custom']
+                                            .indexOf(_selectedSize)
+                                            .clamp(0, 5),
+                                      ),
+                                      onSelectedItemChanged: (idx) {
+                                        const sizes = ['S', 'M', 'L', 'XL', 'All Size', 'Custom'];
+                                        setState(() => _selectedSize = sizes[idx]);
+                                      },
+                                      children: const ['S', 'M', 'L', 'XL', 'All Size', 'Custom']
+                                          .map((s) => Center(
+                                                child: Text(
+                                                  s,
+                                                  style: const TextStyle(
+                                                    fontSize: 18,
+                                                    color: AppColors.textDark,
+                                                  ),
+                                                ),
+                                              ))
+                                          .toList(),
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        CupertinoButton(
+                                          padding: EdgeInsets.zero,
+                                          minimumSize: Size.zero,
+                                          onPressed: () {
+                                            setState(() => _isSizePickerExpanded = false);
+                                          },
+                                          child: const Text(
+                                            'Selesai',
+                                            style: TextStyle(
+                                              color: AppColors.primaryPink,
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.money_dollar_circle_fill, color: Color(0xFF34C759)),
