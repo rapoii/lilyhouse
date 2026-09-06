@@ -168,8 +168,8 @@ void main() {
       await tester.pump();
 
       expect(find.text('Kalender Rental'), findsOneWidget);
-      expect(find.byKey(const Key('smart_paste_button')), findsOneWidget);
-      expect(find.text('Smart Paste'), findsOneWidget);
+      expect(find.byKey(const Key('add_booking_button')), findsOneWidget);
+      expect(find.text('Tambah'), findsOneWidget);
     });
 
     testWidgets('displays rentals for selected date in daily slot card', (tester) async {
@@ -231,8 +231,18 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      // Tap Smart Paste button
-      await tester.tap(find.byKey(const Key('smart_paste_button')));
+      // Tap "Tambah" button to open entry chooser
+      await tester.tap(find.byKey(const Key('add_booking_button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Verify chooser sheet appears with both options
+      expect(find.text('Tambah Pesanan'), findsOneWidget);
+      expect(find.byKey(const Key('entry_smart_paste')), findsOneWidget);
+      expect(find.byKey(const Key('entry_manual')), findsOneWidget);
+
+      // Tap "Smart Paste" card to open parser dialog
+      await tester.tap(find.byKey(const Key('entry_smart_paste')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -270,8 +280,11 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      // Tap Smart Paste button
-      await tester.tap(find.byKey(const Key('smart_paste_button')));
+      // Tap "Tambah" then "Smart Paste" to open parser
+      await tester.tap(find.byKey(const Key('add_booking_button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.byKey(const Key('entry_smart_paste')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 

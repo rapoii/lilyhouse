@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../costumes/data/costume_repository.dart';
 import '../../rentals/data/form_parser.dart';
 import '../../rentals/data/rental_repository.dart';
@@ -12,6 +13,7 @@ import '../../rentals/domain/customer.dart';
 import '../../rentals/domain/parsed_rental_data.dart';
 import '../../rentals/domain/rental.dart';
 import '../domain/booking_conflict_engine.dart';
+import 'entry_method_card.dart';
 import 'manual_booking_modal.dart';
 
 class CalendarScreen extends StatefulWidget {
@@ -78,6 +80,102 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }).toList();
   }
 
+  void _openBookingEntrySheet() {
+    // Entry chooser — pilih mau Smart Paste atau Input Manual.
+    // Style: DraggableSheetContainer (sama dengan modal Tambah Katalog & Cicilan).
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) {
+        return DraggableSheetContainer(
+          backgroundColor: const Color(0xFFF2F2F7),
+          onDismissed: () => Navigator.of(ctx).pop(),
+          builder: (sheetCtx) => DefaultTextStyle(
+            style: const TextStyle(
+              decoration: TextDecoration.none,
+              fontFamily: '.SF Pro Text',
+              color: AppColors.textDark,
+            ),
+            child: CupertinoPageScaffold(
+              backgroundColor: const Color(0xFFF2F2F7),
+              navigationBar: CupertinoNavigationBar(
+                backgroundColor: const Color(0xFFF2F2F7),
+                border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
+                leading: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => Navigator.of(ctx).pop(),
+                  child: const Text('Batal', style: AppTypography.actionButton),
+                ),
+                middle: const SizedBox(
+                  width: double.infinity,
+                  child: Center(
+                    child: Text('Tambah Pesanan', style: AppTypography.navTitle),
+                  ),
+                ),
+              ),
+              child: SafeArea(
+                top: false,
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+                  physics: const BouncingScrollPhysics(),
+                  children: [
+                    // Header description
+                    const Padding(
+                      padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
+                      child: Text(
+                        'Pilih cara untuk menambahkan pesanan baru.',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: AppColors.textMuted,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+
+                    // ====== METODE 1: SMART PASTE ======
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: EntryMethodCard(
+                        key: const Key('entry_smart_paste'),
+                        leadingIcon: CupertinoIcons.sparkles,
+                        leadingBg: const Color(0xFFFFF1F4),
+                        leadingFg: const Color(0xFFFF85A1),
+                        title: 'Smart Paste',
+                        subtitle: 'Paste teks chat / form booking, sistem akan parsing otomatis.',
+                        onTap: () {
+                          Navigator.of(ctx).pop();
+                          _openSmartPasteDialog();
+                        },
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // ====== METODE 2: MANUAL ======
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: EntryMethodCard(
+                        key: const Key('entry_manual'),
+                        leadingIcon: CupertinoIcons.square_pencil,
+                        leadingBg: const Color(0xFFEAF1FF),
+                        leadingFg: const Color(0xFF5856D6),
+                        title: 'Input Manual',
+                        subtitle: 'Ketik data pesanan satu per satu lewat form.',
+                        onTap: () {
+                          Navigator.of(ctx).pop();
+                          _openManualBookingDialog();
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   void _openSmartPasteDialog() {
     showModalBottomSheet(
       context: context,
@@ -123,48 +221,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
         centerTitle: false,
         actions: [
-          // Manual Booking button (Indonesia-friendly: input manual)
-          Padding(
-            padding: const EdgeInsets.only(right: 4.0),
-            child: CupertinoButton(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              key: const Key('manual_booking_button'),
-              onPressed: _openManualBookingDialog,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF1F4), // very light pink fill (Apple tertiary fill)
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      CupertinoIcons.add_circled,
-                      size: 15,
-                      color: AppColors.primaryPink,
-                    ),
-                    SizedBox(width: 5),
-                    Text(
-                      'Tambah Manual',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryPink,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-          // Smart Paste button
+          // Single Tambah button — opens entry method chooser (Smart Paste / Manual)
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: CupertinoButton(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              key: const Key('smart_paste_button'),
-              onPressed: _openSmartPasteDialog,
+              key: const Key('add_booking_button'),
+              onPressed: _openBookingEntrySheet,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
@@ -175,13 +238,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Icon(
-                      CupertinoIcons.sparkles,
+                      CupertinoIcons.add,
                       size: 15,
                       color: AppColors.primaryPink,
                     ),
                     SizedBox(width: 5),
                     Text(
-                      'Smart Paste',
+                      'Tambah',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
