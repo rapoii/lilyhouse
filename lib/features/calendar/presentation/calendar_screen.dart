@@ -100,17 +100,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
               navigationBar: CupertinoNavigationBar(
                 backgroundColor: const Color(0xFFF2F2F7),
                 border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
-                leading: CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  onPressed: () => Navigator.of(ctx).pop(),
-                  child: const Text('Batal', style: AppTypography.actionButton),
-                ),
-                middle: const SizedBox(
-                  width: double.infinity,
-                  child: Center(
-                    child: Text('Tambah Pesanan', style: AppTypography.navTitle),
-                  ),
-                ),
+                // No leading "Batal" — the drag handle is enough affordance
+                // for dismissing the chooser. We pass an empty `leading` AND
+                // `automaticallyImplyLeading: false` because modal popup
+                // routes can still show a default back-chevron otherwise.
+                // Tapping outside the sheet (on the scrim) still dismisses it.
+                leading: const SizedBox.shrink(),
+                automaticallyImplyLeading: false,
+                middle: const Text('Tambah Pesanan', style: AppTypography.navTitle),
               ),
               child: SafeArea(
                 top: false,
@@ -118,19 +115,6 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
                   physics: const BouncingScrollPhysics(),
                   children: [
-                    // Header description
-                    const Padding(
-                      padding: EdgeInsets.fromLTRB(20, 8, 20, 12),
-                      child: Text(
-                        'Pilih cara untuk menambahkan pesanan baru.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textMuted,
-                          height: 1.4,
-                        ),
-                      ),
-                    ),
-
                     // ====== METODE 1: SMART PASTE ======
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
