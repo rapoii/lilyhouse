@@ -190,8 +190,8 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                             // pushes this row's text ~3-4px to the right of
                             // the other rows in the section.
                             CupertinoListTile(
-                              padding: const EdgeInsetsDirectional.fromSTEB(62.0, 0, 14.0, 0),
                               leadingSize: 29.0,
+                              leadingToTitle: 13.0,
                               leading: const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFFFF3B30)),
                               title: Text(
                                 selectedDueDate == null
