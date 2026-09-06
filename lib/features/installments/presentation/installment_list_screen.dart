@@ -193,16 +193,19 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                               leadingSize: 29.0,
                               leadingToTitle: 13.0,
                               leading: const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFFFF3B30)),
-                              title: Text(
-                                selectedDueDate == null
-                                    ? 'Pilih jatuh tempo (opsional)'
-                                    : '${selectedDueDate!.day} ${_monthName(selectedDueDate!.month)} ${selectedDueDate!.year}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: selectedDueDate == null
-                                      ? const Color(0xFFC7C7CC)
-                                      : AppColors.textDark,
-                                  fontWeight: FontWeight.w400,
+                              title: Transform.translate(
+                                offset: const Offset(-16.0, 0),
+                                child: Text(
+                                  selectedDueDate == null
+                                      ? 'Pilih jatuh tempo (opsional)'
+                                      : '${selectedDueDate!.day} ${_monthName(selectedDueDate!.month)} ${selectedDueDate!.year}',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: selectedDueDate == null
+                                        ? const Color(0xFFC7C7CC)
+                                        : AppColors.textDark,
+                                    fontWeight: FontWeight.w400,
+                                  ),
                                 ),
                               ),
                               trailing: AnimatedRotation(
