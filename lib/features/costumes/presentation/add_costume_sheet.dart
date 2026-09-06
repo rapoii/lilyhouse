@@ -344,37 +344,57 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                     // Use leadingSize: 29 to match the SquircleIcon size
                     // used by CupertinoTextFormFieldRow siblings so the
                     // title text starts at the same x-coordinate.
-                    CupertinoListTile(
-                      padding: const EdgeInsetsDirectional.fromSTEB(23.0, 0, 14.0, 0),
-                      leadingSize: 29.0,
-                      leadingToTitle: 0.0,
-                      leading: const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
-                      title: Text(
-                        _selectedSize,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          color: AppColors.textDark,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      subtitle: const Text(
-                        'Pilih ukuran',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Color(0xFF8E8E93),
-                        ),
-                      ),
-                      trailing: AnimatedRotation(
-                        turns: _isSizePickerExpanded ? 0.25 : 0.0,
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOutCubic,
-                        child: const Icon(
-                          CupertinoIcons.chevron_right,
-                          size: 14,
-                          color: Color(0xFFC7C7CC),
-                        ),
-                      ),
+                    // Ukuran row: custom Container instead of
+                    // CupertinoListTile so we have full control over
+                    // the leading area to match the sibling
+                    // CupertinoTextFormFieldRow icons exactly.
+                    GestureDetector(
+                      behavior: HitTestBehavior.opaque,
                       onTap: _showSizePicker,
+                      child: Container(
+                        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 14.0, 12.0),
+                        color: CupertinoColors.white,
+                        child: Row(
+                          children: [
+                            const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
+                            const SizedBox(width: 7.0),
+                            Expanded(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    _selectedSize,
+                                    style: const TextStyle(
+                                      fontSize: 16,
+                                      color: AppColors.textDark,
+                                      fontWeight: FontWeight.w400,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  const Text(
+                                    'Pilih ukuran',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Color(0xFF8E8E93),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            AnimatedRotation(
+                              turns: _isSizePickerExpanded ? 0.25 : 0.0,
+                              duration: const Duration(milliseconds: 250),
+                              curve: Curves.easeInOutCubic,
+                              child: const Icon(
+                                CupertinoIcons.chevron_right,
+                                size: 14,
+                                color: Color(0xFFC7C7CC),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     AnimatedSize(
                       duration: const Duration(milliseconds: 300),

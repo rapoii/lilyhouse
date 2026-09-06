@@ -189,29 +189,18 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                             // uses leadingSize 28 + leadingToTitle 16, which
                             // pushes this row's text ~3-4px to the right of
                             // the other rows in the section.
-                            CupertinoListTile(
-                              padding: const EdgeInsetsDirectional.fromSTEB(23.0, 0, 14.0, 0),
-                              leadingSize: 29.0,
-                              leadingToTitle: 0.0,
-                              leading: const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFFFF3B30)),
-                              title: Text(
-                                selectedDueDate == null
-                                    ? 'Pilih jatuh tempo (opsional)'
-                                    : '${selectedDueDate!.day} ${_monthName(selectedDueDate!.month)} ${selectedDueDate!.year}',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: selectedDueDate == null
-                                      ? const Color(0xFFC7C7CC)
-                                      : AppColors.textDark,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                              trailing: AnimatedRotation(
-                                turns: isDatePickerExpanded ? 0.25 : 0.0,
-                                duration: const Duration(milliseconds: 250),
-                                curve: Curves.easeInOutCubic,
-                                child: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
-                              ),
+                            // Jatuh tempo row: custom Container instead of
+                            // CupertinoListTile so we have full control over
+                            // the leading area to match the sibling
+                            // CupertinoTextFormFieldRow icons exactly.
+                            // Textfield row: padding-start=20, prefix=SquircleIcon
+                            // 29x29, then textfield internal padding 7 -> text
+                            // starts at 20+29+7 = 56 logical from section start.
+                            // Here we replicate: padding 20, SquircleIcon 29,
+                            // SizedBox 7, then text. Total = 56 logical = 168
+                            // physical pixels at 3x density.
+                            GestureDetector(
+                              behavior: HitTestBehavior.opaque,
                               onTap: () {
                                 setSheetState(() {
                                   isDatePickerExpanded = !isDatePickerExpanded;
@@ -220,6 +209,36 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                   }
                                 });
                               },
+                              child: Container(
+                                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 14.0, 14.0),
+                                color: CupertinoColors.white,
+                                child: Row(
+                                  children: [
+                                    const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFFFF3B30)),
+                                    const SizedBox(width: 7.0),
+                                    Expanded(
+                                      child: Text(
+                                        selectedDueDate == null
+                                            ? 'Pilih jatuh tempo (opsional)'
+                                            : '${selectedDueDate!.day} ${_monthName(selectedDueDate!.month)} ${selectedDueDate!.year}',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: selectedDueDate == null
+                                              ? const Color(0xFFC7C7CC)
+                                              : AppColors.textDark,
+                                          fontWeight: FontWeight.w400,
+                                        ),
+                                      ),
+                                    ),
+                                    AnimatedRotation(
+                                      turns: isDatePickerExpanded ? 0.25 : 0.0,
+                                      duration: const Duration(milliseconds: 250),
+                                      curve: Curves.easeInOutCubic,
+                                      child: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ),
                             AnimatedSize(
                               duration: const Duration(milliseconds: 300),
