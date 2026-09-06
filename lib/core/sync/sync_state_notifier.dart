@@ -69,7 +69,7 @@ class SyncStateNotifier extends StateNotifier<SyncState> {
       return const SyncResult(
         isSuccess: false,
         syncedCount: 0,
-        errorMessage: 'Sync already in progress',
+        errorMessage: 'Sinkronisasi sedang berjalan',
       );
     }
 

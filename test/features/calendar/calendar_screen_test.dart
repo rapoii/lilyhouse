@@ -203,8 +203,8 @@ void main() {
       // On Sept 6, 2026, rental_001 is active
       expect(find.text('Citlali'), findsWidgets);
       expect(find.text('Jihan Fatin'), findsOneWidget);
-      expect(find.text('Booked'), findsWidgets);
-      expect(find.text('DP Paid'), findsWidgets);
+      expect(find.text('Dibooking'), findsWidgets);
+      expect(find.text('DP Terbayar'), findsWidgets);
     });
 
     testWidgets('opening Smart Paste dialog allows input and shows conflict warning', (tester) async {

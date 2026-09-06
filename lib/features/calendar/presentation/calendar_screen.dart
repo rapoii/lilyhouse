@@ -5,12 +5,14 @@ import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../costumes/data/costume_repository.dart';
 import '../../rentals/data/form_parser.dart';
 import '../../rentals/data/rental_repository.dart';
 import '../../rentals/domain/customer.dart';
 import '../../rentals/domain/parsed_rental_data.dart';
 import '../../rentals/domain/rental.dart';
 import '../domain/booking_conflict_engine.dart';
+import 'manual_booking_modal.dart';
 
 class CalendarScreen extends StatefulWidget {
   final IRentalRepository? rentalRepository;
@@ -90,6 +92,22 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
+  void _openManualBookingDialog() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => ManualBookingModal(
+        rentalRepository: _repository,
+        costumeRepository: CostumeRepository(),
+        initialDate: _selectedDay,
+        onBookingAdded: () {
+          _loadData();
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final selectedDayRentals = _getRentalsForDay(_selectedDay);
@@ -105,6 +123,42 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ),
         centerTitle: false,
         actions: [
+          // Manual Booking button (Indonesia-friendly: input manual)
+          Padding(
+            padding: const EdgeInsets.only(right: 4.0),
+            child: CupertinoButton(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              key: const Key('manual_booking_button'),
+              onPressed: _openManualBookingDialog,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFF1F4), // very light pink fill (Apple tertiary fill)
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      CupertinoIcons.add_circled,
+                      size: 15,
+                      color: AppColors.primaryPink,
+                    ),
+                    SizedBox(width: 5),
+                    Text(
+                      'Tambah Manual',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryPink,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          // Smart Paste button
           Padding(
             padding: const EdgeInsets.only(right: 8.0),
             child: CupertinoButton(
@@ -510,22 +564,22 @@ class _RentalSlotCard extends StatelessWidget {
       case RentalPaymentStatus.paid:
         bg = AppColors.successMint.withValues(alpha: 0.15);
         fg = const Color(0xFF289868);
-        label = 'Paid';
+        label = 'Lunas';
         break;
       case RentalPaymentStatus.dpPaid:
         bg = AppColors.warningOrange.withValues(alpha: 0.15);
         fg = const Color(0xFFD67710);
-        label = 'DP Paid';
+        label = 'DP Terbayar';
         break;
       case RentalPaymentStatus.unpaid:
         bg = AppColors.dangerRose.withValues(alpha: 0.12);
         fg = AppColors.dangerRose;
-        label = 'Unpaid';
+        label = 'Belum Bayar';
         break;
       case RentalPaymentStatus.refunded:
         bg = AppColors.textMuted.withValues(alpha: 0.15);
         fg = AppColors.textDark;
-        label = 'Refunded';
+        label = 'Dikembalikan';
         break;
     }
 
@@ -555,37 +609,37 @@ class _RentalSlotCard extends StatelessWidget {
       case RentalItemStatus.booked:
         bg = AppColors.softPinkBg;
         fg = AppColors.primaryPink;
-        label = 'Booked';
+        label = 'Dibooking';
         break;
       case RentalItemStatus.rented:
         bg = AppColors.successMint.withValues(alpha: 0.15);
         fg = const Color(0xFF289868);
-        label = 'Rented';
+        label = 'Disewa';
         break;
       case RentalItemStatus.shipped:
         bg = AppColors.pastelPink.withValues(alpha: 0.2);
         fg = AppColors.primaryPink;
-        label = 'Shipped';
+        label = 'Dikirim';
         break;
       case RentalItemStatus.returned:
         bg = Colors.grey.shade200;
         fg = Colors.black54;
-        label = 'Returned';
+        label = 'Dikembalikan';
         break;
       case RentalItemStatus.laundry:
         bg = AppColors.pastelPink.withValues(alpha: 0.15);
         fg = const Color(0xFFC44D7B);
-        label = 'Laundry';
+        label = 'Dicuci';
         break;
       case RentalItemStatus.completed:
         bg = AppColors.successMint.withValues(alpha: 0.2);
         fg = const Color(0xFF1B7A4E);
-        label = 'Completed';
+        label = 'Selesai';
         break;
       case RentalItemStatus.cancelled:
         bg = AppColors.dangerRose.withValues(alpha: 0.12);
         fg = AppColors.dangerRose;
-        label = 'Cancelled';
+        label = 'Dibatalkan';
         break;
     }
 

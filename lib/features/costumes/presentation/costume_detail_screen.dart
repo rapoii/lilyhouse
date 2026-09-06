@@ -52,15 +52,15 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
   (Color bg, Color text, String label) _getStatusBadgeData(CostumeStatus status) {
     switch (status) {
       case CostumeStatus.available:
-        return (const Color(0xFFE3F9EC), const Color(0xFF1E824C), 'Available');
+        return (const Color(0xFFE3F9EC), const Color(0xFF1E824C), 'Tersedia');
       case CostumeStatus.booked:
-        return (const Color(0xFFFFF4E5), const Color(0xFFD97706), 'Booked');
+        return (const Color(0xFFFFF4E5), const Color(0xFFD97706), 'Dibooking');
       case CostumeStatus.rented:
-        return (const Color(0xFFFFEBF0), AppColors.primaryPink, 'Rented');
+        return (const Color(0xFFFFEBF0), AppColors.primaryPink, 'Disewa');
       case CostumeStatus.laundry:
-        return (const Color(0xFFE8F1FF), const Color(0xFF2563EB), 'Laundry');
+        return (const Color(0xFFE8F1FF), const Color(0xFF2563EB), 'Dicuci');
       case CostumeStatus.maintenance:
-        return (const Color(0xFFFDE8E8), AppColors.dangerRose, 'Maintenance');
+        return (const Color(0xFFFDE8E8), AppColors.dangerRose, 'Perawatan');
     }
   }
 
@@ -188,10 +188,10 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildPillAttribute('Size', widget.costume.size),
+                      _buildPillAttribute('Ukuran', widget.costume.size),
                       _buildPillAttribute(
-                        'Rental Rate',
-                        '${_formatCurrency(widget.costume.rentPrice3Days)} / 3d',
+                        'Tarif Sewa',
+                        '${_formatCurrency(widget.costume.rentPrice3Days)} / 3 hari',
                         highlight: true,
                       ),
                     ],
@@ -199,7 +199,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                   if (widget.costume.notes != null && widget.costume.notes!.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     const Text(
-                      'Notes',
+                      'Catatan',
                       style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.bold,
@@ -219,7 +219,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
 
             // Accessories Section
             const Text(
-              'Included Accessories & Props',
+              'Aksesori & Properti Termasuk',
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.bold,
@@ -240,7 +240,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                   border: Border.all(color: AppColors.borderSubtle),
                 ),
                 child: const Text(
-                  'No specific accessories recorded for this costume.',
+                  'Belum ada aksesori yang dicatat untuk kostum ini.',
                   style: TextStyle(color: AppColors.textMuted, fontSize: 13),
                 ),
               )

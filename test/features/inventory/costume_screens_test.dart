@@ -180,6 +180,6 @@ void main() {
     expect(find.text('Makima Suit'), findsWidgets);
     expect(find.text('Chainsaw Man'), findsWidgets);
     expect(find.text('Tie & Badge'), findsOneWidget);
-    expect(find.text('Rented'), findsWidgets);
+    expect(find.text('Disewa'), findsWidgets);
   });
 }

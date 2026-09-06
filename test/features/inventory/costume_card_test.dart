@@ -43,7 +43,7 @@ void main() {
     expect(find.textContaining('135.000'), findsOneWidget);
 
     // Verify Status Pill
-    expect(find.text('Available'), findsOneWidget);
+    expect(find.text('Tersedia'), findsOneWidget);
 
     // Verify Tap interaction
     await tester.tap(find.byType(CostumeCard));
@@ -72,6 +72,6 @@ void main() {
       ),
     );
 
-    expect(find.text('Rented'), findsOneWidget);
+    expect(find.text('Disewa'), findsOneWidget);
   });
 }

@@ -46,7 +46,7 @@ class SyncService {
         return const SyncResult(
           isSuccess: false,
           syncedCount: 0,
-          errorMessage: 'Sync endpoint URL is not configured.',
+          errorMessage: 'URL endpoint sinkronisasi belum diatur.',
         );
       }
 
@@ -77,7 +77,7 @@ class SyncService {
         return SyncResult(
           isSuccess: false,
           syncedCount: 0,
-          errorMessage: 'Server responded with HTTP ${response.statusCode}: ${response.body}',
+          errorMessage: 'Server merespons dengan HTTP ${response.statusCode}: ${response.body}',
         );
       }
 
@@ -100,9 +100,9 @@ class SyncService {
       String? errorMessage;
       if (!isSuccess) {
         if (errors.isNotEmpty) {
-          errorMessage = errors.map((e) => e['error']?.toString() ?? 'Unknown item error').join('; ');
+          errorMessage = errors.map((e) => e['error']?.toString() ?? 'Kesalahan item tidak diketahui').join('; ');
         } else {
-          errorMessage = responseData['message']?.toString() ?? 'Sync ended with status: $status';
+          errorMessage = responseData['message']?.toString() ?? 'Sinkronisasi berakhir dengan status: $status';
         }
       }
 
@@ -130,7 +130,7 @@ class SyncService {
   }) async {
     try {
       if (endpointUrl.isEmpty) {
-        throw Exception('Sync endpoint URL is not configured.');
+        throw Exception('URL endpoint sinkronisasi belum diatur.');
       }
 
       final requestBody = jsonEncode({
@@ -149,14 +149,14 @@ class SyncService {
       );
 
       if (response.statusCode != 200) {
-        throw Exception('HTTP error ${response.statusCode}: ${response.body}');
+        throw Exception('Kesalahan HTTP ${response.statusCode}: ${response.body}');
       }
 
       final Map<String, dynamic> data = jsonDecode(response.body) as Map<String, dynamic>;
       if (data['status'] == 'success') {
         return data['url'] as String?;
       } else {
-        throw Exception(data['message'] ?? 'Upload failed');
+        throw Exception(data['message'] ?? 'Unggah gagal');
       }
     } catch (e) {
       rethrow;
