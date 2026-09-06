@@ -341,7 +341,12 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                     // as Jatuh tempo on Cicilan sheet). Tapping the row
                     // toggles the inline CupertinoPicker — no separate
                     // modal popup, consistent with the rest of the form.
+                    // Use leadingSize: 29 to match the SquircleIcon size
+                    // used by CupertinoTextFormFieldRow siblings so the
+                    // title text starts at the same x-coordinate.
                     CupertinoListTile(
+                      leadingSize: 29.0,
+                      leadingToTitle: 13.0,
                       leading: const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
                       title: Text(
                         _selectedSize,

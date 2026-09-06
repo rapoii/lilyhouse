@@ -181,8 +181,17 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                               placeholder: 'DP awal (Rp)',
                               keyboardType: TextInputType.number,
                             ),
-                            // Jatuh tempo row: Apple HIG style
+                            // Jatuh tempo row: Apple HIG style.
+                            // Use leadingSize: 29 to match the SquircleIcon
+                            // size used by CupertinoTextFormFieldRow siblings
+                            // (DP awal, Total harga) so the title text starts
+                            // at the same x-coordinate. Default CupertinoListTile
+                            // uses leadingSize 28 + leadingToTitle 16, which
+                            // pushes this row's text ~3-4px to the right of
+                            // the other rows in the section.
                             CupertinoListTile(
+                              leadingSize: 29.0,
+                              leadingToTitle: 13.0,
                               leading: const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFFFF3B30)),
                               title: Text(
                                 selectedDueDate == null
