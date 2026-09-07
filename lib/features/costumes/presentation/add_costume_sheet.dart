@@ -337,55 +337,27 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                         decoration: null,
                       ),
                     ),
-                    // Ukuran row: Apple HIG collapsible picker (same pattern
-                    // as Jatuh tempo on Cicilan sheet). Tapping the row
-                    // toggles the inline CupertinoPicker — no separate
-                    // modal popup, consistent with the rest of the form.
-                    // Use leadingSize: 29 to match the SquircleIcon size
-                    // used by CupertinoTextFormFieldRow siblings so the
-                    // title text starts at the same x-coordinate.
-                    // Ukuran row: custom Container instead of
-                    // CupertinoListTile so we have full control over
-                    // the leading area to match the sibling
-                    // CupertinoTextFormFieldRow icons exactly.
-                    // No opaque `color` here — let the parent
-                    // CupertinoListSection.insetGrouped's rounded
-                    // card background show through. Otherwise this
-                    // row would paint a flat white rectangle over
-                    // the section's bottom rounded corners, making
-                    // them appear square.
-                    GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: _showSizePicker,
-                      child: Container(
-                        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 14.0, 14.0),
-                        child: Row(
-                          children: [
-                            const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
-                            const SizedBox(width: 7.0),
-                            Expanded(
-                              child: Text(
-                                _selectedSize,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  color: AppColors.textDark,
-                                  fontWeight: FontWeight.w400,
-                                ),
-                              ),
-                            ),
-                            AnimatedRotation(
-                              turns: _isSizePickerExpanded ? 0.25 : 0.0,
-                              duration: const Duration(milliseconds: 250),
-                              curve: Curves.easeInOutCubic,
-                              child: const Icon(
-                                CupertinoIcons.chevron_right,
-                                size: 14,
-                                color: Color(0xFFC7C7CC),
-                              ),
-                            ),
-                          ],
+                    CupertinoListTile(
+                      leading: const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
+                      title: Text(
+                        _selectedSize,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: AppColors.textDark,
+                          fontWeight: FontWeight.w400,
                         ),
                       ),
+                      trailing: AnimatedRotation(
+                        turns: _isSizePickerExpanded ? 0.25 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOutCubic,
+                        child: const Icon(
+                          CupertinoIcons.chevron_right,
+                          size: 14,
+                          color: Color(0xFFC7C7CC),
+                        ),
+                      ),
+                      onTap: _showSizePicker,
                     ),
                     AnimatedSize(
                       duration: const Duration(milliseconds: 300),
