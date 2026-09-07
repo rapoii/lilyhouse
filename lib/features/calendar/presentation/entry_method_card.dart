@@ -28,6 +28,7 @@ class EntryMethodCard extends StatelessWidget {
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
+        height: 92,
         padding: const EdgeInsetsDirectional.fromSTEB(20, 16, 14, 16),
         decoration: BoxDecoration(
           color: CupertinoColors.white,
@@ -42,6 +43,7 @@ class EntryMethodCard extends StatelessWidget {
           ],
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Squircle leading icon
             Container(
@@ -57,6 +59,7 @@ class EntryMethodCard extends StatelessWidget {
             // Title + subtitle
             Expanded(
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
@@ -70,6 +73,8 @@ class EntryMethodCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     subtitle,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textMuted,
