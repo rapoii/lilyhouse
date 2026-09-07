@@ -12,6 +12,7 @@ import '../../costumes/data/costume_repository.dart';
 import '../../costumes/domain/costume.dart';
 import '../../rentals/data/rental_repository.dart';
 import '../../rentals/domain/customer.dart';
+import '../../rentals/domain/parsed_rental_data.dart';
 import '../../rentals/domain/rental.dart';
 import '../domain/booking_conflict_engine.dart';
 
@@ -24,6 +25,7 @@ class ManualBookingModal extends StatefulWidget {
   final IRentalRepository rentalRepository;
   final ICostumeRepository costumeRepository;
   final DateTime? initialDate;
+  final ParsedRentalData? initialParsedData;
   final VoidCallback onBookingAdded;
 
   const ManualBookingModal({
@@ -31,6 +33,7 @@ class ManualBookingModal extends StatefulWidget {
     required this.rentalRepository,
     required this.costumeRepository,
     this.initialDate,
+    this.initialParsedData,
     required this.onBookingAdded,
   });
 
@@ -64,7 +67,49 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   void initState() {
     super.initState();
     initializeDateFormatting('id_ID', null);
-    if (widget.initialDate != null) {
+
+    final prefill = widget.initialParsedData;
+    if (prefill != null) {
+      // Pre-fill text fields from Smart Paste parse result.
+      if (prefill.fullName != null) {
+        _nameController.text = prefill.fullName!;
+      }
+      final parsedPhone = prefill.normalizedPhone ?? prefill.phone;
+      if (parsedPhone != null) {
+        _phoneController.text = parsedPhone;
+      }
+      if (prefill.address != null) {
+        _addressController.text = prefill.address!;
+      }
+      if (prefill.parentPhone != null) {
+        _parentPhoneController.text = prefill.parentPhone!;
+      }
+      if (prefill.socialMedia != null) {
+        _socialMediaController.text = prefill.socialMedia!;
+      }
+      if (prefill.startDate != null) {
+        _startDate = prefill.startDate!;
+      }
+      if (prefill.endDate != null) {
+        _endDate = prefill.endDate!;
+      } else if (prefill.startDate != null) {
+        _endDate = _startDate.add(const Duration(days: 2));
+      }
+      if (prefill.purpose != null) {
+        final p = prefill.purpose!.toLowerCase();
+        if (p.contains('homecos') ||
+            p.contains('home') ||
+            p.contains('pakai sendiri')) {
+          _purpose = 'homecos';
+        } else if (p.contains('photo') || p.contains('ses')) {
+          _purpose = 'photoshoot';
+        } else if (p.contains('event') || p.contains('acar')) {
+          _purpose = 'event';
+        } else {
+          _purpose = 'lainnya';
+        }
+      }
+    } else if (widget.initialDate != null) {
       _startDate = DateTime(
         widget.initialDate!.year,
         widget.initialDate!.month,
@@ -92,6 +137,21 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       setState(() {
         _costumes = list;
         _isLoadingCostumes = false;
+
+        // Try to match parsed costume name to a Costume in the catalogue.
+        final wanted = widget.initialParsedData?.costumeName;
+        if (wanted != null && wanted.isNotEmpty && _selectedCostume == null) {
+          final needle = wanted.toLowerCase().trim();
+          Costume? match;
+          for (final c in _costumes) {
+            final n = c.name.toLowerCase().trim();
+            if (n == needle || n.contains(needle) || needle.contains(n)) {
+              match = c;
+              break;
+            }
+          }
+          _selectedCostume = match;
+        }
       });
     }
   }

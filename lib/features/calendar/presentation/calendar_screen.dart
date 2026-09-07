@@ -18,11 +18,13 @@ import 'manual_booking_modal.dart';
 
 class CalendarScreen extends StatefulWidget {
   final IRentalRepository? rentalRepository;
+  final ICostumeRepository? costumeRepository;
   final DateTime? initialFocusedDay;
 
   const CalendarScreen({
     super.key,
     this.rentalRepository,
+    this.costumeRepository,
     this.initialFocusedDay,
   });
 
@@ -32,6 +34,7 @@ class CalendarScreen extends StatefulWidget {
 
 class _CalendarScreenState extends State<CalendarScreen> {
   late IRentalRepository _repository;
+  late ICostumeRepository _costumeRepository;
   late DateTime _focusedDay;
   late DateTime _selectedDay;
   final CalendarFormat _calendarFormat = CalendarFormat.month;
@@ -45,6 +48,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     super.initState();
     initializeDateFormatting('id_ID', null);
     _repository = widget.rentalRepository ?? RentalRepository();
+    _costumeRepository = widget.costumeRepository ?? CostumeRepository();
     final initial = widget.initialFocusedDay ?? DateTime.now();
     _focusedDay = DateTime(initial.year, initial.month, initial.day);
     _selectedDay = _focusedDay;
@@ -167,6 +171,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => _SmartPasteModal(
         repository: _repository,
+        costumeRepository: _costumeRepository,
+        parentContext: context,
         onBookingAdded: () {
           _loadData();
         },
@@ -710,23 +716,25 @@ class _RentalSlotCard extends StatelessWidget {
 
 class _SmartPasteModal extends StatefulWidget {
   final IRentalRepository repository;
+  final ICostumeRepository costumeRepository;
+  final BuildContext parentContext;
   final VoidCallback onBookingAdded;
 
   const _SmartPasteModal({
     required this.repository,
+    required this.costumeRepository,
+    required this.parentContext,
     required this.onBookingAdded,
   });
 
   @override
   State<_SmartPasteModal> createState() => _SmartPasteModalState();
 }
-
 class _SmartPasteModalState extends State<_SmartPasteModal> {
   final TextEditingController _textController = TextEditingController();
   ParsedRentalData? _parsedData;
   bool _hasConflict = false;
   List<Rental> _conflictingRentals = [];
-  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -765,39 +773,30 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
     });
   }
 
-  Future<void> _saveBooking() async {
+  Future<void> _continueToManual() async {
     if (_parsedData == null) return;
-    setState(() => _isSaving = true);
-
-    final custId = 'cust_${DateTime.now().millisecondsSinceEpoch}';
-    final customer = Customer(
-      id: custId,
-      fullName: _parsedData!.fullName ?? 'Pelanggan Baru',
-      phone: _parsedData!.normalizedPhone ?? _parsedData!.phone ?? '-',
-      parentPhone: _parsedData!.parentPhone,
-      address: _parsedData!.address ?? '-',
-      socialMedia: _parsedData!.socialMedia,
-    );
-    await widget.repository.insertCustomer(customer);
-
-    final rentalId = 'rent_${DateTime.now().millisecondsSinceEpoch}';
-    final rental = Rental(
-      id: rentalId,
-      costumeId: _parsedData!.costumeName ?? 'Kostum',
-      customerId: custId,
-      startDate: _parsedData!.startDate ?? DateTime.now(),
-      endDate: _parsedData!.endDate ?? DateTime.now().add(const Duration(days: 3)),
-      durationDays: _parsedData!.rentalDurationDays ?? 3,
-      purpose: _parsedData!.purpose ?? 'homecos',
-      totalPrice: 150000.0,
-      itemStatus: RentalItemStatus.booked,
-      paymentStatus: RentalPaymentStatus.dpPaid,
-    );
-    await widget.repository.insertRental(rental);
-
+    final parsed = _parsedData!;
+    // Capture outer context (CalendarScreen) so Manual modal survives this
+    // Smart Paste modal being popped. Defer Manual modal open with post-frame
+    // callback so it lands on the navigator after this route is gone.
+    final outerCtx = widget.parentContext;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!outerCtx.mounted) return;
+      showModalBottomSheet<void>(
+        context: outerCtx,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (ctx) => ManualBookingModal(
+          rentalRepository: widget.repository,
+          costumeRepository: widget.costumeRepository,
+          initialParsedData: parsed,
+          onBookingAdded: () {
+            widget.onBookingAdded();
+          },
+        ),
+      );
+    });
     if (mounted) {
-      setState(() => _isSaving = false);
-      widget.onBookingAdded();
       Navigator.of(context).pop();
     }
   }
@@ -949,6 +948,9 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                         children: [
                           _buildDetailRow('Nama Penyewa', _parsedData!.fullName ?? '-'),
                           _buildDetailRow('No HP', _parsedData!.normalizedPhone ?? _parsedData!.phone ?? '-'),
+                          _buildDetailRow('Alamat', _parsedData!.address ?? '-'),
+                          _buildDetailRow('No HP Ortu / Keluarga', _parsedData!.parentPhone ?? '-'),
+                          _buildDetailRow('Akun Sosmed', _parsedData!.socialMedia ?? '-'),
                           _buildDetailRow('Kostum', _parsedData!.costumeName ?? '-'),
                           _buildDetailRow(
                             'Tanggal',
@@ -960,21 +962,48 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                         ],
                       ),
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
+                    // Reminder that 2 image fields still need manual upload.
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF3E0),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(color: const Color(0xFFFF9500).withValues(alpha: 0.4)),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(CupertinoIcons.camera_fill, size: 14, color: Color(0xFFFF9500)),
+                          SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'Foto KTP & Selfie+KTP belum bisa di-paste. Akan diinput di langkah berikutnya.',
+                              style: TextStyle(fontSize: 11, color: Color(0xFF8E5A00)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 10),
                     CupertinoButton.filled(
-                      onPressed: _isSaving ? null : _saveBooking,
+                      onPressed: _continueToManual,
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       borderRadius: BorderRadius.circular(10),
-                      child: _isSaving
-                          ? const CupertinoActivityIndicator(color: Colors.white)
-                          : Text(
-                              _hasConflict ? 'Tetap Simpan Booking' : 'Simpan Booking',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                              ),
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(CupertinoIcons.arrow_right_circle_fill, size: 16, color: Colors.white),
+                          SizedBox(width: 6),
+                          Text(
+                            'Lanjut Input Manual (Lengkapi Foto)',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
                             ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),

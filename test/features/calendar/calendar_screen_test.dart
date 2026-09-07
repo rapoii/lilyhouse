@@ -3,6 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lilyhouse/core/theme/app_theme.dart';
 import 'package:lilyhouse/features/calendar/domain/booking_conflict_engine.dart';
 import 'package:lilyhouse/features/calendar/presentation/calendar_screen.dart';
+import 'package:lilyhouse/features/costumes/data/costume_repository.dart';
+import 'package:lilyhouse/features/costumes/domain/accessory.dart';
+import 'package:lilyhouse/features/costumes/domain/costume.dart';
 import 'package:lilyhouse/features/rentals/data/rental_repository.dart';
 import 'package:lilyhouse/features/rentals/domain/customer.dart';
 import 'package:lilyhouse/features/rentals/domain/rental.dart';
@@ -144,11 +147,73 @@ class MockRentalRepository implements IRentalRepository {
   }
 }
 
+/// Minimal mock for ICostumeRepository — only the methods the manual booking
+/// modal calls. Returns empty lists so the modal opens without touching the
+/// (uninitialised) sqflite database in the test environment.
+class MockCostumeRepository implements ICostumeRepository {
+  final List<Costume> _costumes = [];
+  final List<Accessory> _accessories = [];
+
+  @override
+  Future<int> insertCostume(Costume costume) async {
+    _costumes.removeWhere((c) => c.id == costume.id);
+    _costumes.add(costume);
+    return 1;
+  }
+
+  @override
+  Future<Costume?> getCostumeById(String id) async {
+    try {
+      return _costumes.firstWhere((c) => c.id == id);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  @override
+  Future<List<Costume>> getAllCostumes() async => List<Costume>.from(_costumes);
+
+  @override
+  Future<List<Costume>> searchCostumes({
+    String? query,
+    CostumeStatus? status,
+    String? size,
+  }) async =>
+      List<Costume>.from(_costumes);
+
+  @override
+  Future<int> updateCostume(Costume costume) async => 1;
+
+  @override
+  Future<int> deleteCostume(String id) async {
+    _costumes.removeWhere((c) => c.id == id);
+    return 1;
+  }
+
+  @override
+  Future<int> addAccessory(Accessory accessory) async {
+    _accessories.add(accessory);
+    return 1;
+  }
+
+  @override
+  Future<List<Accessory>> getAccessoriesByCostumeId(String costumeId) async =>
+      List<Accessory>.from(_accessories);
+
+  @override
+  Future<int> updateAccessory(Accessory accessory) async => 1;
+
+  @override
+  Future<int> deleteAccessory(String id) async => 1;
+}
+
 void main() {
   late MockRentalRepository repository;
+  late MockCostumeRepository costumeRepository;
 
   setUp(() {
     repository = MockRentalRepository();
+    costumeRepository = MockCostumeRepository();
   });
 
   Widget createWidgetUnderTest() {
@@ -156,6 +221,7 @@ void main() {
       theme: AppTheme.lightTheme,
       home: CalendarScreen(
         rentalRepository: repository,
+        costumeRepository: costumeRepository,
         initialFocusedDay: DateTime(2026, 9, 6),
       ),
     );
@@ -310,22 +376,28 @@ void main() {
       expect(find.text('Rose Tyler'), findsOneWidget);
       expect(find.textContaining('Bebas Konflik'), findsOneWidget);
 
-      // Ensure button is visible in scrollview then tap
-      final saveBtn = find.text('Simpan Booking');
-      await tester.ensureVisible(saveBtn);
+      // Ensure button is visible in scrollview then tap.
+      // Smart Paste now always continues to Manual modal (since foto KTP
+      // and selfie cannot be parsed from text — user uploads manually).
+      final lanjutBtn = find.text('Lanjut Input Manual (Lengkapi Foto)');
+      await tester.ensureVisible(lanjutBtn);
       await tester.pumpAndSettle();
 
-      await tester.tap(saveBtn);
+      await tester.tap(lanjutBtn);
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
 
-      final allRentals = await repository.getAllRentals();
-      expect(allRentals.length, 1);
-      expect(allRentals.first.costumeId, 'Furina');
+      // Manual modal should be open with parsed data prefilled.
+      // Verify Manual modal title is visible.
+      expect(find.text('Booking Manual'), findsOneWidget);
 
-      final allCustomers = await repository.getAllCustomers();
-      expect(allCustomers.length, 1);
-      expect(allCustomers.first.fullName, 'Rose Tyler');
+      // Verify the Manual modal's text fields (Alamat, Sosmed) were
+      // prefilled into the CupertinoTextFormFieldRow widgets.
+      expect(find.text('London Street No. 4'), findsOneWidget);
+      expect(find.text('ig @rosetyler'), findsOneWidget);
+      // The 'Clara Oswald' from the previous conflict-test should NOT be here.
+      expect(find.text('Clara Oswald'), findsNothing);
     });
   });
 }
