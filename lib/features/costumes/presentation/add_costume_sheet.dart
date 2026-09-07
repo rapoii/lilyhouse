@@ -100,7 +100,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
             placeholder: 'Contoh: Wig Stylist, Tiara, dll',
             autofocus: true,
             decoration: BoxDecoration(
-              color: const Color(0xFFF2F2F7),
+              color: AppColors.background,
               borderRadius: BorderRadius.circular(8),
             ),
             padding: const EdgeInsets.all(10),
@@ -193,7 +193,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return DraggableSheetContainer(
-      backgroundColor: const Color(0xFFF2F2F7),
+      backgroundColor: AppColors.background,
       onDismissed: () => Navigator.of(context).pop(),
       builder: (context) => DefaultTextStyle(
         style: const TextStyle(
@@ -202,9 +202,9 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
           color: AppColors.textDark,
         ),
         child: CupertinoPageScaffold(
-          backgroundColor: const Color(0xFFF2F2F7),
+          backgroundColor: AppColors.background,
           navigationBar: CupertinoNavigationBar(
-            backgroundColor: const Color(0xFFF2F2F7),
+            backgroundColor: AppColors.background,
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
@@ -214,7 +214,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
             middle: const SizedBox(
               width: double.infinity,
               child: Center(
-                child: Text('Kostum Baru', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                child: Text('Kostum Baru', style: AppTypography.navTitle),
               ),
             ),
             trailing: CupertinoButton(
@@ -222,7 +222,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
               onPressed: _isSaving ? null : _save,
               child: _isSaving
                   ? const CupertinoActivityIndicator(radius: 10)
-                  : const Text('Simpan', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+                  : const Text('Simpan', style: AppTypography.actionButton),
             ),
           ),
           child: SafeArea(
@@ -288,7 +288,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                                   width: 54,
                                   height: 54,
                                   decoration: const BoxDecoration(
-                                    color: Color(0xFFF2F2F7),
+                                    color: AppColors.background,
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(CupertinoIcons.camera, color: Color(0xFF8E8E93), size: 28),
@@ -312,7 +312,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                 // Section 1: Informasi Dasar Kostum
                 CupertinoListSection.insetGrouped(
                   header: const Text('INFORMASI UTAMA'),
-                  backgroundColor: const Color(0xFFF2F2F7),
+                  backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
                     CupertinoListTile(
@@ -339,12 +339,19 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
-                      title: Text(
-                        _selectedSize,
-                        style: const TextStyle(
+                      title: const Text(
+                        'Ukuran',
+                        style: TextStyle(
                           fontSize: 15,
                           color: AppColors.textDark,
                           fontWeight: FontWeight.w400,
+                        ),
+                      ),
+                      additionalInfo: Text(
+                        _selectedSize,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: Color(0xFF8E8E93),
                         ),
                       ),
                       trailing: AnimatedRotation(
@@ -450,7 +457,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                 // Section 2: Daftar Aksesori Termasuk
                 CupertinoListSection.insetGrouped(
                   header: const Text('AKSESORI & KELENGKAPAN'),
-                  backgroundColor: const Color(0xFFF2F2F7),
+                  backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: _accessories.isEmpty
                       ? [
@@ -500,7 +507,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                 // Section 3: Catatan Khusus
                 CupertinoListSection.insetGrouped(
                   header: const Text('CATATAN TAMBAHAN'),
-                  backgroundColor: const Color(0xFFF2F2F7),
+                  backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
                     Padding(

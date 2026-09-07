@@ -70,7 +70,7 @@ class CostumeCard extends StatelessWidget {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF2F2F7),
+                    color: AppColors.background,
                     borderRadius: BorderRadius.circular(12.0),
                   ),
                   child: Center(

@@ -545,13 +545,13 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         : 'Belum pernah';
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F7), // iOS Inset Grouped background
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text(
           'Pengaturan',
           style: AppTypography.largeTitle,
         ),
-        backgroundColor: const Color(0xFFF2F2F7),
+        backgroundColor: AppColors.background,
         elevation: 0,
         centerTitle: false,
       ),

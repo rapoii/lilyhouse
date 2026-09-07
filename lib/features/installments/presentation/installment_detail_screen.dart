@@ -82,7 +82,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF2F2F7),
+                        color: AppColors.background,
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
@@ -93,7 +93,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                       placeholder: 'Catatan (misal: Cicilan ke-2)',
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF2F2F7),
+                        color: AppColors.background,
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),

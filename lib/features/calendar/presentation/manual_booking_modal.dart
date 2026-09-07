@@ -585,7 +585,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('EEEE, d MMMM yyyy', 'id_ID');
+    final dateFormat = DateFormat('d MMM y', 'id_ID');
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return DraggableSheetContainer(
@@ -628,337 +628,332 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
               physics: const BouncingScrollPhysics(),
               children: [
                 // ====== Section 1: DATA PENYEWA ======
-                CupertinoFormSection.insetGrouped(
-                  backgroundColor: AppColors.background,
+                CupertinoListSection.insetGrouped(
                   header: const Text('DATA PENYEWA'),
+                  backgroundColor: AppColors.background,
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
-                    CupertinoTextFormFieldRow(
-                      key: const Key('manual_name_input'),
-                      controller: _nameController,
-                      prefix: const SquircleIcon(
+                    CupertinoListTile(
+                      leading: const SquircleIcon(
                         icon: CupertinoIcons.person_fill,
                         color: AppColors.primaryPink,
                       ),
-                      placeholder: 'Nama asli / nama di paket',
-                      textInputAction: TextInputAction.next,
+                      title: CupertinoTextField(
+                        key: const Key('manual_name_input'),
+                        controller: _nameController,
+                        placeholder: 'Nama asli / nama di paket',
+                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: null,
+                        textInputAction: TextInputAction.next,
+                      ),
                     ),
-                    CupertinoTextFormFieldRow(
-                      key: const Key('manual_phone_input'),
-                      controller: _phoneController,
-                      prefix: const SquircleIcon(
+                    CupertinoListTile(
+                      leading: const SquircleIcon(
                         icon: CupertinoIcons.phone_fill,
                         color: Color(0xFF5856D6),
                       ),
-                      placeholder: 'No HP / WhatsApp',
-                      keyboardType: TextInputType.phone,
-                      textInputAction: TextInputAction.next,
+                      title: CupertinoTextField(
+                        key: const Key('manual_phone_input'),
+                        controller: _phoneController,
+                        placeholder: 'No HP / WhatsApp',
+                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: null,
+                        keyboardType: TextInputType.phone,
+                        textInputAction: TextInputAction.next,
+                      ),
                     ),
-                    CupertinoTextFormFieldRow(
-                      key: const Key('manual_address_input'),
-                      controller: _addressController,
-                      prefix: const SquircleIcon(
+                    CupertinoListTile(
+                      leading: const SquircleIcon(
                         icon: CupertinoIcons.location_solid,
                         color: Color(0xFFFF9500),
                       ),
-                      placeholder: 'Alamat lengkap',
-                      maxLines: 3,
-                      minLines: 1,
-                      textInputAction: TextInputAction.next,
+                      title: CupertinoTextField(
+                        key: const Key('manual_address_input'),
+                        controller: _addressController,
+                        placeholder: 'Alamat lengkap',
+                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: null,
+                        maxLines: 3,
+                        minLines: 1,
+                        textInputAction: TextInputAction.next,
+                      ),
                     ),
-                    CupertinoTextFormFieldRow(
-                      key: const Key('manual_parent_phone_input'),
-                      controller: _parentPhoneController,
-                      prefix: const SquircleIcon(
+                    CupertinoListTile(
+                      leading: const SquircleIcon(
                         icon: CupertinoIcons.person_2_fill,
                         color: Color(0xFF34C759),
                       ),
-                      placeholder: 'No HP ortu / keluarga terdekat',
-                      keyboardType: TextInputType.phone,
-                      textInputAction: TextInputAction.next,
+                      title: CupertinoTextField(
+                        key: const Key('manual_parent_phone_input'),
+                        controller: _parentPhoneController,
+                        placeholder: 'No HP ortu / keluarga terdekat',
+                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: null,
+                        keyboardType: TextInputType.phone,
+                        textInputAction: TextInputAction.next,
+                      ),
                     ),
-                    CupertinoTextFormFieldRow(
-                      key: const Key('manual_social_input'),
-                      controller: _socialMediaController,
-                      prefix: const SquircleIcon(
+                    CupertinoListTile(
+                      leading: const SquircleIcon(
                         icon: CupertinoIcons.link,
                         color: Color(0xFFFF2D55),
                       ),
-                      placeholder: 'Akun sosmed (TikTok / IG)',
-                      textInputAction: TextInputAction.done,
+                      title: CupertinoTextField(
+                        key: const Key('manual_social_input'),
+                        controller: _socialMediaController,
+                        placeholder: 'Akun sosmed (TikTok / IG)',
+                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: null,
+                        textInputAction: TextInputAction.done,
+                      ),
                     ),
                   ],
                 ),
 
                 // ====== Section 2: DOKUMEN IDENTITAS ======
-                CupertinoFormSection.insetGrouped(
-                  backgroundColor: AppColors.background,
+                CupertinoListSection.insetGrouped(
                   header: const Text('DOKUMEN IDENTITAS'),
+                  backgroundColor: AppColors.background,
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
-                    _ImagePickerRow(
+                    CupertinoListTile(
                       key: const Key('manual_ktp_photo_row'),
-                      leadingIcon: CupertinoIcons.creditcard_fill,
-                      leadingColor: const Color(0xFFFF3B30),
-                      title: 'Foto KTP / KIA',
-                      subtitle: 'Pastikan foto jelas, tidak blur',
-                      imagePath: _ktpPhotoPath,
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.creditcard_fill,
+                        color: Color(0xFFFF3B30),
+                      ),
+                      title: const Text(
+                        'Foto KTP / KIA',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        _ktpPhotoPath != null && File(_ktpPhotoPath!).existsSync()
+                            ? 'Terlampir'
+                            : 'Pilih foto',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: _ktpPhotoPath != null && File(_ktpPhotoPath!).existsSync()
+                              ? AppColors.primaryPink
+                              : const Color(0xFF8E8E93),
+                        ),
+                      ),
+                      trailing: _ktpPhotoPath != null && File(_ktpPhotoPath!).existsSync()
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: Image.file(
+                                File(_ktpPhotoPath!),
+                                width: 24,
+                                height: 24,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const Icon(
+                              CupertinoIcons.chevron_right,
+                              size: 14,
+                              color: Color(0xFFC7C7CC),
+                            ),
                       onTap: () => _showImagePickerActionSheet(true),
                     ),
-                    _ImagePickerRow(
+                    CupertinoListTile(
                       key: const Key('manual_selfie_ktp_row'),
-                      leadingIcon: CupertinoIcons.camera_viewfinder,
-                      leadingColor: const Color(0xFF5856D6),
-                      title: 'Selfie memegang KTP',
-                      subtitle: 'Wajah & KTP terlihat jelas',
-                      imagePath: _selfieKtpPath,
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.camera_viewfinder,
+                        color: Color(0xFF5856D6),
+                      ),
+                      title: const Text(
+                        'Selfie memegang KTP',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        _selfieKtpPath != null && File(_selfieKtpPath!).existsSync()
+                            ? 'Terlampir'
+                            : 'Pilih foto',
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: _selfieKtpPath != null && File(_selfieKtpPath!).existsSync()
+                              ? AppColors.primaryPink
+                              : const Color(0xFF8E8E93),
+                        ),
+                      ),
+                      trailing: _selfieKtpPath != null && File(_selfieKtpPath!).existsSync()
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(4),
+                              child: Image.file(
+                                File(_selfieKtpPath!),
+                                width: 24,
+                                height: 24,
+                                fit: BoxFit.cover,
+                              ),
+                            )
+                          : const Icon(
+                              CupertinoIcons.chevron_right,
+                              size: 14,
+                              color: Color(0xFFC7C7CC),
+                            ),
                       onTap: () => _showImagePickerActionSheet(false),
                     ),
                   ],
                 ),
 
                 // ====== Section 3: KOSTUM & JADWAL ======
-                CupertinoFormSection.insetGrouped(
-                  backgroundColor: AppColors.background,
+                CupertinoListSection.insetGrouped(
                   header: const Text('KOSTUM & JADWAL'),
+                  backgroundColor: AppColors.background,
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
-                    // Kostum — picker row
-                    _PickerFormRow(
+                    CupertinoListTile(
                       key: const Key('manual_costume_row'),
-                      leadingIcon: CupertinoIcons.bag_fill,
-                      leadingColor: const Color(0xFFFF85A1),
-                      value: _isLoadingCostumes
-                          ? 'Memuat...'
-                          : (_selectedCostume != null
-                              ? '${_selectedCostume!.name} (${_selectedCostume!.size})'
-                              : 'Pilih kostum'),
-                      valueColor: _selectedCostume != null
-                          ? AppColors.textDark
-                          : const Color(0xFF8E8E93),
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.bag_fill,
+                        color: Color(0xFFFF85A1),
+                      ),
+                      title: const Text(
+                        'Kostum',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        _isLoadingCostumes
+                            ? 'Memuat...'
+                            : (_selectedCostume != null
+                                ? '${_selectedCostume!.name} (${_selectedCostume!.size})'
+                                : 'Pilih kostum'),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: _selectedCostume != null
+                              ? AppColors.textDark
+                              : const Color(0xFF8E8E93),
+                        ),
+                      ),
+                      subtitle: _costumeError != null
+                          ? Text(
+                              _costumeError!,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.dangerRose,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            )
+                          : null,
+                      trailing: const Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 14,
+                        color: Color(0xFFC7C7CC),
+                      ),
                       onTap: _isLoadingCostumes ? null : _pickCostume,
-                      errorText: _costumeError,
                     ),
-                    // Tanggal Mulai
-                    _PickerFormRow(
+                    CupertinoListTile(
                       key: const Key('manual_start_date_row'),
-                      leadingIcon: CupertinoIcons.calendar,
-                      leadingColor: const Color(0xFFFF9500),
-                      value: dateFormat.format(_startDate),
-                      valueColor: AppColors.textDark,
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.calendar,
+                        color: Color(0xFFFF9500),
+                      ),
+                      title: const Text(
+                        'Tanggal Mulai',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        dateFormat.format(_startDate),
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      trailing: const Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 14,
+                        color: Color(0xFFC7C7CC),
+                      ),
                       onTap: _pickStartDate,
                     ),
-                    // Tanggal Selesai
-                    _PickerFormRow(
+                    CupertinoListTile(
                       key: const Key('manual_end_date_row'),
-                      leadingIcon: CupertinoIcons.calendar_badge_minus,
-                      leadingColor: const Color(0xFFFF3B30),
-                      value: dateFormat.format(_endDate),
-                      valueColor: AppColors.textDark,
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.calendar_badge_minus,
+                        color: Color(0xFFFF3B30),
+                      ),
+                      title: const Text(
+                        'Tanggal Selesai',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        dateFormat.format(_endDate),
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      subtitle: _dateError != null
+                          ? Text(
+                              _dateError!,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: AppColors.dangerRose,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            )
+                          : null,
+                      trailing: const Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 14,
+                        color: Color(0xFFC7C7CC),
+                      ),
                       onTap: _pickEndDate,
-                      errorText: _dateError,
                     ),
-                    // Keperluan
-                    _PickerFormRow(
+                    CupertinoListTile(
                       key: const Key('manual_purpose_row'),
-                      leadingIcon: CupertinoIcons.tag_fill,
-                      leadingColor: const Color(0xFF5856D6),
-                      value: _purposeLabel,
-                      valueColor: AppColors.textDark,
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.tag_fill,
+                        color: Color(0xFF5856D6),
+                      ),
+                      title: const Text(
+                        'Keperluan',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        _purposeLabel,
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      trailing: const Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 14,
+                        color: Color(0xFFC7C7CC),
+                      ),
                       onTap: _pickPurpose,
                     ),
                   ],
                 ),
 
                 // ====== Section 4: PEMBAYARAN ======
-                CupertinoFormSection.insetGrouped(
-                  backgroundColor: AppColors.background,
+                CupertinoListSection.insetGrouped(
                   header: const Text('PEMBAYARAN'),
+                  backgroundColor: AppColors.background,
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
-                    CupertinoTextFormFieldRow(
+                    CupertinoListTile(
                       key: const Key('manual_price_input'),
-                      controller: _totalPriceController,
-                      prefix: const SquircleIcon(
+                      leading: const SquircleIcon(
                         icon: CupertinoIcons.money_dollar_circle_fill,
                         color: Color(0xFF34C759),
                       ),
-                      placeholder: 'Total harga (opsional)',
-                      keyboardType: TextInputType.number,
+                      title: CupertinoTextField(
+                        controller: _totalPriceController,
+                        placeholder: 'Total harga (opsional)',
+                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: null,
+                        keyboardType: TextInputType.number,
+                      ),
                     ),
                   ],
                 ),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// iOS form-row style picker (mirrors the inline Jatuh tempo row in the
-/// Cicilan sheet). Tap target is the full row, leading SquircleIcon +
-/// placeholder value, trailing chevron. Custom Container used here (not
-/// CupertinoListTile) so the leading area exactly matches sibling
-/// CupertinoTextFormFieldRow icons.
-class _PickerFormRow extends StatelessWidget {
-  final IconData leadingIcon;
-  final Color leadingColor;
-  final String value;
-  final Color valueColor;
-  final VoidCallback? onTap;
-  final String? errorText;
-
-  const _PickerFormRow({
-    super.key,
-    required this.leadingIcon,
-    required this.leadingColor,
-    required this.value,
-    required this.valueColor,
-    required this.onTap,
-    this.errorText,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        // No opaque color — the parent CupertinoFormSection.insetGrouped
-        // already paints the rounded card background. Adding a flat
-        // white fill here would paint over the section's bottom rounded
-        // corners, making the picker row appear to break out of the card.
-        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 14.0, 14.0),
-        child: Row(
-          children: [
-            SquircleIcon(icon: leadingIcon, color: leadingColor),
-            const SizedBox(width: 7.0),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    value,
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: valueColor,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  if (errorText != null)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        errorText!,
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: AppColors.dangerRose,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            const Icon(
-              CupertinoIcons.chevron_right,
-              size: 14,
-              color: Color(0xFFC7C7CC),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// iOS form-row style for picking an image (KTP / selfie). Tap target is
-/// the full row. When empty, shows a placeholder ("Pilih foto...") plus a
-/// camera glyph on the right. When filled, shows a 36px thumbnail preview
-/// of the chosen image with a small "Ganti" hint.
-class _ImagePickerRow extends StatelessWidget {
-  final IconData leadingIcon;
-  final Color leadingColor;
-  final String title;
-  final String subtitle;
-  final String? imagePath;
-  final VoidCallback onTap;
-
-  const _ImagePickerRow({
-    super.key,
-    required this.leadingIcon,
-    required this.leadingColor,
-    required this.title,
-    required this.subtitle,
-    required this.imagePath,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final hasImage = imagePath != null && File(imagePath!).existsSync();
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: onTap,
-      child: Container(
-        // No opaque color — same iOS HIG rule as `_PickerFormRow`:
-        // let the parent section's rounded card show through.
-        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 14.0, 14.0),
-        child: Row(
-          children: [
-            SquircleIcon(icon: leadingIcon, color: leadingColor),
-            const SizedBox(width: 7.0),
-            Expanded(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: AppColors.textDark,
-                      fontWeight: FontWeight.w400,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    hasImage ? 'Tap untuk ganti foto' : subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: hasImage
-                          ? const Color(0xFF8E8E93)
-                          : const Color(0xFF8E8E93),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            if (hasImage)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.file(
-                  File(imagePath!),
-                  width: 36,
-                  height: 36,
-                  fit: BoxFit.cover,
-                ),
-              )
-            else
-              Container(
-                width: 36,
-                height: 36,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF2F2F7),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Icon(
-                  CupertinoIcons.camera,
-                  size: 18,
-                  color: Color(0xFF8E8E93),
-                ),
-              ),
-          ],
         ),
       ),
     );

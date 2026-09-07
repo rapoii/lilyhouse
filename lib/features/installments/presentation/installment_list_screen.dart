@@ -73,7 +73,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
         return StatefulBuilder(
           builder: (context, setSheetState) {
             return DraggableSheetContainer(
-              backgroundColor: const Color(0xFFF2F2F7),
+              backgroundColor: AppColors.background,
               onDismissed: () => Navigator.of(ctx).pop(),
               builder: (context) => DefaultTextStyle(
                 style: const TextStyle(
@@ -82,9 +82,9 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                   color: AppColors.textDark,
                 ),
                 child: CupertinoPageScaffold(
-                  backgroundColor: const Color(0xFFF2F2F7),
+                  backgroundColor: AppColors.background,
                   navigationBar: CupertinoNavigationBar(
-                    backgroundColor: const Color(0xFFF2F2F7),
+                    backgroundColor: AppColors.background,
                     border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
                     leading: CupertinoButton(
                       padding: EdgeInsets.zero,
@@ -143,64 +143,97 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                       padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 24),
                       physics: const BouncingScrollPhysics(),
                       children: [
-                        CupertinoFormSection.insetGrouped(
+                        CupertinoListSection.insetGrouped(
                           backgroundColor: AppColors.background,
                           header: const Text('INFORMASI BARANG'),
+                          margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                           children: [
-                            CupertinoTextFormFieldRow(
+                            CupertinoListTile(
                               key: const Key('installment_name_input'),
-                              controller: nameController,
-                              prefix: const SquircleIcon(icon: CupertinoIcons.sparkles, color: AppColors.primaryPink),
-                              placeholder: 'Nama barang / kostum',
-                              textInputAction: TextInputAction.next,
+                              leading: const SquircleIcon(icon: CupertinoIcons.sparkles, color: AppColors.primaryPink),
+                              title: CupertinoTextField(
+                                controller: nameController,
+                                placeholder: 'Nama barang / kostum',
+                                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: null,
+                                textInputAction: TextInputAction.next,
+                              ),
                             ),
-                            CupertinoTextFormFieldRow(
+                            CupertinoListTile(
                               key: const Key('installment_store_input'),
-                              controller: storeController,
-                              prefix: const SquircleIcon(icon: CupertinoIcons.bag_fill, color: Color(0xFF5856D6)),
-                              placeholder: 'Nama toko / seller',
-                              textInputAction: TextInputAction.next,
+                              leading: const SquircleIcon(icon: CupertinoIcons.bag_fill, color: Color(0xFF5856D6)),
+                              title: CupertinoTextField(
+                                controller: storeController,
+                                placeholder: 'Nama toko / seller',
+                                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: null,
+                                textInputAction: TextInputAction.next,
+                              ),
                             ),
                           ],
                         ),
-                        CupertinoFormSection.insetGrouped(
+                        CupertinoListSection.insetGrouped(
                           backgroundColor: AppColors.background,
                           header: const Text('PEMBAYARAN'),
+                          margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                           children: [
-                            CupertinoTextFormFieldRow(
+                            CupertinoListTile(
                               key: const Key('installment_cost_input'),
-                              controller: costController,
-                              prefix: const SquircleIcon(icon: CupertinoIcons.money_dollar_circle_fill, color: Color(0xFFFF9500)),
-                              placeholder: 'Total harga (Rp)',
-                              keyboardType: TextInputType.number,
+                              leading: const SquircleIcon(icon: CupertinoIcons.money_dollar_circle_fill, color: Color(0xFFFF9500)),
+                              title: CupertinoTextField(
+                                controller: costController,
+                                placeholder: 'Total harga (Rp)',
+                                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                                keyboardType: TextInputType.number,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: null,
+                              ),
                             ),
-                            CupertinoTextFormFieldRow(
+                            CupertinoListTile(
                               key: const Key('installment_dp_input'),
-                              controller: dpController,
-                              prefix: const SquircleIcon(icon: CupertinoIcons.creditcard_fill, color: Color(0xFF34C759)),
-                              placeholder: 'DP awal (Rp)',
-                              keyboardType: TextInputType.number,
+                              leading: const SquircleIcon(icon: CupertinoIcons.creditcard_fill, color: Color(0xFF34C759)),
+                              title: CupertinoTextField(
+                                controller: dpController,
+                                placeholder: 'DP awal (Rp)',
+                                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                                keyboardType: TextInputType.number,
+                                padding: const EdgeInsets.symmetric(vertical: 12),
+                                decoration: null,
+                              ),
                             ),
-                            // Jatuh tempo row: Apple HIG style.
-                            // Use leadingSize: 29 to match the SquircleIcon
-                            // size used by CupertinoTextFormFieldRow siblings
-                            // (DP awal, Total harga) so the title text starts
-                            // at the same x-coordinate. Default CupertinoListTile
-                            // uses leadingSize 28 + leadingToTitle 16, which
-                            // pushes this row's text ~3-4px to the right of
-                            // the other rows in the section.
-                            // Jatuh tempo row: custom Container instead of
-                            // CupertinoListTile so we have full control over
-                            // the leading area to match the sibling
-                            // CupertinoTextFormFieldRow icons exactly.
-                            // Textfield row: padding-start=20, prefix=SquircleIcon
-                            // 29x29, then textfield internal padding 7 -> text
-                            // starts at 20+29+7 = 56 logical from section start.
-                            // Here we replicate: padding 20, SquircleIcon 29,
-                            // SizedBox 7, then text. Total = 56 logical = 168
-                            // physical pixels at 3x density.
-                            GestureDetector(
-                              behavior: HitTestBehavior.opaque,
+                            CupertinoListTile(
+                              leading: const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFFFF3B30)),
+                              title: const Text(
+                                'Jatuh tempo',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: AppColors.textDark,
+                                  fontWeight: FontWeight.w400,
+                                ),
+                              ),
+                              additionalInfo: Text(
+                                selectedDueDate == null
+                                    ? 'Opsional'
+                                    : '${selectedDueDate!.day} ${_monthName(selectedDueDate!.month)} ${selectedDueDate!.year}',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: selectedDueDate == null
+                                      ? const Color(0xFF8E8E93)
+                                      : AppColors.textDark,
+                                ),
+                              ),
+                              trailing: AnimatedRotation(
+                                turns: isDatePickerExpanded ? 0.25 : 0.0,
+                                duration: const Duration(milliseconds: 250),
+                                curve: Curves.easeInOutCubic,
+                                child: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                              ),
                               onTap: () {
                                 setSheetState(() {
                                   isDatePickerExpanded = !isDatePickerExpanded;
@@ -209,45 +242,6 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                   }
                                 });
                               },
-                              child: Container(
-                                // No `color` here — let the parent
-                                // CupertinoFormSection.insetGrouped's
-                                // rounded card background show through.
-                                // Adding an opaque `color: CupertinoColors.white`
-                                // would paint over the card's bottom rounded
-                                // corners with a flat white rectangle, making
-                                // the PEMBAYARAN card look square at the bottom
-                                // (which it is, but only because this row used
-                                // to be a CupertinoListTile that respected the
-                                // card's clip chain).
-                                padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 14.0, 14.0),
-                                child: Row(
-                                  children: [
-                                    const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFFFF3B30)),
-                                    const SizedBox(width: 7.0),
-                                    Expanded(
-                                      child: Text(
-                                        selectedDueDate == null
-                                            ? 'Pilih jatuh tempo (opsional)'
-                                            : '${selectedDueDate!.day} ${_monthName(selectedDueDate!.month)} ${selectedDueDate!.year}',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: selectedDueDate == null
-                                              ? const Color(0xFFC7C7CC)
-                                              : AppColors.textDark,
-                                          fontWeight: FontWeight.w400,
-                                        ),
-                                      ),
-                                    ),
-                                    AnimatedRotation(
-                                      turns: isDatePickerExpanded ? 0.25 : 0.0,
-                                      duration: const Duration(milliseconds: 250),
-                                      curve: Curves.easeInOutCubic,
-                                      child: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
-                                    ),
-                                  ],
-                                ),
-                              ),
                             ),
                             AnimatedSize(
                               duration: const Duration(milliseconds: 300),
@@ -583,7 +577,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF2F2F7),
+                        color: AppColors.background,
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
@@ -594,7 +588,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                       placeholder: 'Catatan (misal: Cicilan ke-2)',
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF2F2F7),
+                        color: AppColors.background,
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
@@ -859,7 +853,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                             Container(
                               padding: const EdgeInsets.all(6),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFF2F2F7),
+                                color: AppColors.background,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.primaryPink, size: 18),

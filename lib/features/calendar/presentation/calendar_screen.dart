@@ -91,7 +91,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       context: context,
       builder: (ctx) {
         return DraggableSheetContainer(
-          backgroundColor: const Color(0xFFF2F2F7),
+          backgroundColor: AppColors.background,
           onDismissed: () => Navigator.of(ctx).pop(),
           builder: (sheetCtx) => DefaultTextStyle(
             style: const TextStyle(
@@ -100,9 +100,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
               color: AppColors.textDark,
             ),
             child: CupertinoPageScaffold(
-              backgroundColor: const Color(0xFFF2F2F7),
+              backgroundColor: AppColors.background,
               navigationBar: CupertinoNavigationBar(
-                backgroundColor: const Color(0xFFF2F2F7),
+                backgroundColor: AppColors.background,
                 border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
                 // No leading "Batal" — the drag handle is enough affordance
                 // for dismissing the chooser. We pass an empty `leading` AND
@@ -854,7 +854,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
           Container(
             height: 110,
             decoration: BoxDecoration(
-              color: const Color(0xFFF2F2F7),
+              color: AppColors.background,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: const Color(0xFFE5E5EA), width: 0.5),
             ),

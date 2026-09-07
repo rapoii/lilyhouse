@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import '../theme/app_colors.dart';
 
 /// Apple HIG-style draggable modal sheet container.
 ///
@@ -157,7 +158,7 @@ class _DraggableSheetContainerState extends State<DraggableSheetContainer>
         return Container(
           height: visualHeight,
           decoration: BoxDecoration(
-            color: widget.backgroundColor ?? const Color(0xFFF2F2F7),
+            color: widget.backgroundColor ?? AppColors.background,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
             boxShadow: [
               BoxShadow(
@@ -179,7 +180,7 @@ class _DraggableSheetContainerState extends State<DraggableSheetContainer>
                   onVerticalDragUpdate: _onVerticalDragUpdate,
                   onVerticalDragEnd: _onVerticalDragEnd,
                   child: Container(
-                    color: widget.backgroundColor ?? const Color(0xFFF2F2F7),
+                    color: widget.backgroundColor ?? AppColors.background,
                     padding: const EdgeInsets.symmetric(vertical: 6),
                     alignment: Alignment.center,
                     child: AnimatedContainer(
