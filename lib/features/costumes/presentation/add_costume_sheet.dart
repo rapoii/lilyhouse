@@ -358,33 +358,19 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                       behavior: HitTestBehavior.opaque,
                       onTap: _showSizePicker,
                       child: Container(
-                        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 12.0, 14.0, 12.0),
+                        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 14.0, 14.0),
                         child: Row(
                           children: [
                             const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
                             const SizedBox(width: 7.0),
                             Expanded(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    _selectedSize,
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      color: AppColors.textDark,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 2),
-                                  const Text(
-                                    'Pilih ukuran',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: Color(0xFF8E8E93),
-                                    ),
-                                  ),
-                                ],
+                              child: Text(
+                                _selectedSize,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  color: AppColors.textDark,
+                                  fontWeight: FontWeight.w400,
+                                ),
                               ),
                             ),
                             AnimatedRotation(
