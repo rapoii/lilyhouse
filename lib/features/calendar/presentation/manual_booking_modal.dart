@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
@@ -39,7 +41,14 @@ class ManualBookingModal extends StatefulWidget {
 class _ManualBookingModalState extends State<ManualBookingModal> {
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
+  final _addressController = TextEditingController();
+  final _parentPhoneController = TextEditingController();
+  final _socialMediaController = TextEditingController();
   final _totalPriceController = TextEditingController();
+
+  final ImagePicker _picker = ImagePicker();
+  String? _ktpPhotoPath;
+  String? _selfieKtpPath;
 
   List<Costume> _costumes = [];
   Costume? _selectedCostume;
@@ -70,6 +79,9 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _addressController.dispose();
+    _parentPhoneController.dispose();
+    _socialMediaController.dispose();
     _totalPriceController.dispose();
     super.dispose();
   }
@@ -82,6 +94,61 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         _isLoadingCostumes = false;
       });
     }
+  }
+
+  Future<void> _pickImage(ImageSource source, bool isKtp) async {
+    try {
+      final picked = await _picker.pickImage(
+        source: source,
+        imageQuality: 85,
+        maxWidth: 1600,
+        maxHeight: 1600,
+      );
+      if (picked != null && mounted) {
+        setState(() {
+          if (isKtp) {
+            _ktpPhotoPath = picked.path;
+          } else {
+            _selfieKtpPath = picked.path;
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  void _showImagePickerActionSheet(bool isKtp) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(isKtp ? 'Pilih Foto KTP / KIA' : 'Pilih Foto Selfie + KTP'),
+        message: Text(
+          isKtp
+              ? 'Ambil foto langsung atau pilih dari galeri'
+              : 'Selfie sambil pegang kartu identitas',
+        ),
+        actions: [
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _pickImage(ImageSource.camera, isKtp);
+            },
+            child: const Text('Ambil dari Kamera'),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () {
+              Navigator.pop(ctx);
+              _pickImage(ImageSource.gallery, isKtp);
+            },
+            child: const Text('Pilih dari Galeri Foto'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Batal'),
+        ),
+      ),
+    );
   }
 
   Future<void> _pickStartDate() async {
@@ -367,7 +434,17 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         id: custId,
         fullName: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
-        address: '-',
+        address: _addressController.text.trim().isEmpty
+            ? '-'
+            : _addressController.text.trim(),
+        parentPhone: _parentPhoneController.text.trim().isEmpty
+            ? null
+            : _parentPhoneController.text.trim(),
+        socialMedia: _socialMediaController.text.trim().isEmpty
+            ? null
+            : _socialMediaController.text.trim(),
+        ktpPhotoUrl: _ktpPhotoPath,
+        selfieKtpUrl: _selfieKtpPath,
       );
       await widget.rentalRepository.insertCustomer(customer);
 
@@ -502,7 +579,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         icon: CupertinoIcons.person_fill,
                         color: AppColors.primaryPink,
                       ),
-                      placeholder: 'Nama Penyewa',
+                      placeholder: 'Nama asli / nama di paket',
                       textInputAction: TextInputAction.next,
                     ),
                     CupertinoTextFormFieldRow(
@@ -516,10 +593,69 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       keyboardType: TextInputType.phone,
                       textInputAction: TextInputAction.next,
                     ),
+                    CupertinoTextFormFieldRow(
+                      key: const Key('manual_address_input'),
+                      controller: _addressController,
+                      prefix: const SquircleIcon(
+                        icon: CupertinoIcons.location_solid,
+                        color: Color(0xFFFF9500),
+                      ),
+                      placeholder: 'Alamat lengkap',
+                      maxLines: 3,
+                      minLines: 1,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    CupertinoTextFormFieldRow(
+                      key: const Key('manual_parent_phone_input'),
+                      controller: _parentPhoneController,
+                      prefix: const SquircleIcon(
+                        icon: CupertinoIcons.person_2_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      placeholder: 'No HP ortu / keluarga terdekat',
+                      keyboardType: TextInputType.phone,
+                      textInputAction: TextInputAction.next,
+                    ),
+                    CupertinoTextFormFieldRow(
+                      key: const Key('manual_social_input'),
+                      controller: _socialMediaController,
+                      prefix: const SquircleIcon(
+                        icon: CupertinoIcons.link,
+                        color: Color(0xFFFF2D55),
+                      ),
+                      placeholder: 'Akun sosmed (TikTok / IG)',
+                      textInputAction: TextInputAction.done,
+                    ),
                   ],
                 ),
 
-                // ====== Section 2: KOSTUM & JADWAL ======
+                // ====== Section 2: DOKUMEN IDENTITAS ======
+                CupertinoFormSection.insetGrouped(
+                  backgroundColor: AppColors.background,
+                  header: const Text('DOKUMEN IDENTITAS'),
+                  children: [
+                    _ImagePickerRow(
+                      key: const Key('manual_ktp_photo_row'),
+                      leadingIcon: CupertinoIcons.creditcard_fill,
+                      leadingColor: const Color(0xFFFF3B30),
+                      title: 'Foto KTP / KIA',
+                      subtitle: 'Pastikan foto jelas, tidak blur',
+                      imagePath: _ktpPhotoPath,
+                      onTap: () => _showImagePickerActionSheet(true),
+                    ),
+                    _ImagePickerRow(
+                      key: const Key('manual_selfie_ktp_row'),
+                      leadingIcon: CupertinoIcons.camera_viewfinder,
+                      leadingColor: const Color(0xFF5856D6),
+                      title: 'Selfie memegang KTP',
+                      subtitle: 'Wajah & KTP terlihat jelas',
+                      imagePath: _selfieKtpPath,
+                      onTap: () => _showImagePickerActionSheet(false),
+                    ),
+                  ],
+                ),
+
+                // ====== Section 3: KOSTUM & JADWAL ======
                 CupertinoFormSection.insetGrouped(
                   backgroundColor: AppColors.background,
                   header: const Text('KOSTUM & JADWAL'),
@@ -571,7 +707,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                   ],
                 ),
 
-                // ====== Section 3: PEMBAYARAN ======
+                // ====== Section 4: PEMBAYARAN ======
                 CupertinoFormSection.insetGrouped(
                   backgroundColor: AppColors.background,
                   header: const Text('PEMBAYARAN'),
@@ -668,6 +804,100 @@ class _PickerFormRow extends StatelessWidget {
               size: 14,
               color: Color(0xFFC7C7CC),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// iOS form-row style for picking an image (KTP / selfie). Tap target is
+/// the full row. When empty, shows a placeholder ("Pilih foto...") plus a
+/// camera glyph on the right. When filled, shows a 36px thumbnail preview
+/// of the chosen image with a small "Ganti" hint.
+class _ImagePickerRow extends StatelessWidget {
+  final IconData leadingIcon;
+  final Color leadingColor;
+  final String title;
+  final String subtitle;
+  final String? imagePath;
+  final VoidCallback onTap;
+
+  const _ImagePickerRow({
+    super.key,
+    required this.leadingIcon,
+    required this.leadingColor,
+    required this.title,
+    required this.subtitle,
+    required this.imagePath,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final hasImage = imagePath != null && File(imagePath!).existsSync();
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        // No opaque color — same iOS HIG rule as `_PickerFormRow`:
+        // let the parent section's rounded card show through.
+        padding: const EdgeInsetsDirectional.fromSTEB(20.0, 14.0, 14.0, 14.0),
+        child: Row(
+          children: [
+            SquircleIcon(icon: leadingIcon, color: leadingColor),
+            const SizedBox(width: 7.0),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: AppColors.textDark,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    hasImage ? 'Tap untuk ganti foto' : subtitle,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: hasImage
+                          ? const Color(0xFF8E8E93)
+                          : const Color(0xFF8E8E93),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 8),
+            if (hasImage)
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: Image.file(
+                  File(imagePath!),
+                  width: 36,
+                  height: 36,
+                  fit: BoxFit.cover,
+                ),
+              )
+            else
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF2F2F7),
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  CupertinoIcons.camera,
+                  size: 18,
+                  color: Color(0xFF8E8E93),
+                ),
+              ),
           ],
         ),
       ),
