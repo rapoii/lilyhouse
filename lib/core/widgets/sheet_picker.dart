@@ -85,6 +85,75 @@ Future<DateTime?> showSheetDatePicker({
   );
 }
 
+/// iOS-style sheet bar button. Uses GestureDetector to avoid Material
+/// text-theme decoration inheritance (yellow underline bug).
+class _SheetPickerBarButton extends StatefulWidget {
+  final String label;
+  final VoidCallback onPressed;
+  final bool primary;
+  const _SheetPickerBarButton({
+    required this.label,
+    required this.onPressed,
+    this.primary = false,
+  });
+
+  @override
+  State<_SheetPickerBarButton> createState() => _SheetPickerBarButtonState();
+}
+
+class _SheetPickerBarButtonState extends State<_SheetPickerBarButton>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _press = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 60),
+    reverseDuration: const Duration(milliseconds: 140),
+    lowerBound: 0.0,
+    upperBound: 1.0,
+  );
+
+  @override
+  void dispose() {
+    _press.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final color = widget.primary
+        ? CupertinoColors.systemBlue
+        : AppColors.primaryPink;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTapDown: (_) => _press.forward(),
+      onTapUp: (_) => _press.reverse(),
+      onTapCancel: () => _press.reverse(),
+      onTap: widget.onPressed,
+      child: AnimatedBuilder(
+        animation: _press,
+        builder: (ctx, child) {
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            color: CupertinoDynamicColor.maybeResolve(color, context)
+                ?.withValues(alpha: 0.10 * _press.value),
+            child: child,
+          );
+        },
+        child: Text(
+          widget.label,
+          style: TextStyle(
+            fontSize: 15,
+            fontWeight: widget.primary ? FontWeight.w600 : FontWeight.w400,
+            letterSpacing: -0.2,
+            color: CupertinoDynamicColor.maybeResolve(color, context),
+            decoration: TextDecoration.none,
+            decorationColor: const Color(0x00000000),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _SheetPickerHost extends StatelessWidget {
   final String title;
   final VoidCallback onDone;
@@ -119,20 +188,25 @@ class _SheetPickerHost extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                CupertinoButton(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                _SheetPickerBarButton(
+                  label: 'Batal',
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('Batal', style: AppTypography.actionButton),
                 ),
                 Expanded(
                   child: Center(
-                    child: Text(title, style: AppTypography.navTitle),
+                    child: Text(
+                      title,
+                      style: AppTypography.navTitle.copyWith(
+                        decoration: TextDecoration.none,
+                        decorationColor: const Color(0x00000000),
+                      ),
+                    ),
                   ),
                 ),
-                CupertinoButton(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                _SheetPickerBarButton(
+                  label: 'Selesai',
                   onPressed: onDone,
-                  child: const Text('Selesai', style: AppTypography.actionButton),
+                  primary: true,
                 ),
               ],
             ),
