@@ -282,14 +282,16 @@ class _PickerBody extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            height: 180,
-            child: CupertinoPicker(
-              itemExtent: 36,
-              scrollController:
-                  FixedExtentScrollController(initialItem: initialIndex),
-              onSelectedItemChanged: onSelected,
-              children: cachedChildren,
+          RepaintBoundary(
+            child: SizedBox(
+              height: 180,
+              child: CupertinoPicker(
+                itemExtent: 36,
+                scrollController:
+                    FixedExtentScrollController(initialItem: initialIndex),
+                onSelectedItemChanged: onSelected,
+                children: cachedChildren,
+              ),
             ),
           ),
           Padding(
@@ -516,16 +518,18 @@ class _DatePickerBody extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            height: 180,
-            child: CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.date,
-              initialDateTime: value,
-              minimumDate: minimumDate,
-              maximumDate: maximumDate,
-              minimumYear: minimumYear,
-              maximumYear: maximumYear,
-              onDateTimeChanged: onChanged,
+          RepaintBoundary(
+            child: SizedBox(
+              height: 180,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: value,
+                minimumDate: minimumDate,
+                maximumDate: maximumDate,
+                minimumYear: minimumYear,
+                maximumYear: maximumYear,
+                onDateTimeChanged: onChanged,
+              ),
             ),
           ),
           Padding(
