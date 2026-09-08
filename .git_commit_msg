@@ -1,47 +1,28 @@
-v1.0.53: Extract shared inline picker widget — performance fix for 3 modals
+v1.0.54: Eliminate parent setState on every wheel tick — picker is now truly lag-free
 
-Refactored the collapsible inline picker pattern (AnimatedRotation chevron +
-AnimatedSize + CupertinoPicker/CupertinoDatePicker + Selesai button) used
-in Booking Manual, Kostum Baru, and Cicilan Baru into a single shared
-widget so setState calls no longer rebuild the entire modal.
+Root cause of remaining lag (v1.0.53): CupertinoDatePicker.onDateTimeChanged and
+CupertinoPicker.onSelectedItemChanged fire CONTINUOUSLY while the user scrolls
+the wheel. Each tick was calling parent's setState, which rebuilt the entire
+modal ListView (all sections, all text fields, all image pickers) — thousands
+of widgets per scroll tick.
 
-What was slow: each tap or wheel-scroll on a picker called setState on the
-parent modal State. The parent rebuilds the whole ListView with all sections
-(text fields, image pickers, picker rows). With 4 pickers in Booking Manual
-and shared `setState` for every wheel micro-step on the date picker, this
-caused visible jank on slower devices.
+Fix in lib/core/widgets/inline_picker_row.dart:
+- Each wheel tick now updates an internal ValueListenable / mutable state
+  in the picker's own State, not the parent's.
+- The additionalInfo row rebuilds via ValueListenableBuilder + RepaintBoundary
+  (scoped to that single text widget — no parent rebuild).
+- Parent's setState only fires on "Selesai" tap (onConfirmed callback),
+  exactly once per close.
 
-The fix: new core widget lib/core/widgets/inline_picker_row.dart owns the
-expand/collapse State internally. The parent modal now just supplies
-`items`, `selectedKey`, and `onSelected`/`onChanged` callbacks. The
-`CupertinoPicker`/`CupertinoDatePicker` widget tree (heavy: 180px wheel,
-scroll controllers, item children) lives inside the picker's own State, so
-parent rebuilds never re-create them.
+Also: removed _onStartDateChanged / _onEndDateChanged from manual_booking_modal
+(now handled via onConfirmed lambdas in the InlineDatePickerRow site).
 
-API:
-  InlinePickerRow  — generic CupertinoPicker row (used for Ukuran, Kostum,
-                     Keperluan). items: List<InlinePickerItem>, supports
-                     subtitle, disabled state, placeholder text.
-  InlineDatePickerRow — CupertinoDatePicker row (used for Tanggal Mulai,
-                     Tanggal Selesai, Jatuh tempo). Supports Hapus Tanggal
-                     secondary button.
+Verified:
+- flutter analyze: 0 issues
+- flutter test: 89/89 passing
+- Tanggal Mulai picker: value "8 Sep 2026" updates realtime as wheel scrolled,
+  picker stayed open across rapid close/open stress (3x), Selesai commit works.
+- All 3 modals (Kostum Baru / Cicilan Baru / Booking Manual) inline pickers
+  verified visually.
 
-Verified visually on emulator for all 3 modals:
-  - Kostum Baru: Ukuran picker opens inline, S/M/L/XL/All Size/Custom shown.
-  - Cicilan Baru: Jatuh tempo picker opens inline, 3 wheels month/day/year,
-    Hapus Tanggal + Selesai buttons.
-  - Booking Manual: 4 pickers (Kostum, Tanggal Mulai, Tanggal Selesai,
-    Keperluan) all open inline, Selesai buttons.
-
-Code impact:
-  - manual_booking_modal.dart: removed 4 _isXExpanded bools, 5 helper
-    methods (_togglePicker/_onStartDateChanged/_onEndDateChanged/
-    _onCostumeChanged/_onPurposeChanged), 4 _build*Picker + _pickerContainer
-    methods (-209 lines).
-  - add_costume_sheet.dart: removed _isSizePickerExpanded state +
-    _showSizePicker method, replaced size row with InlinePickerRow.
-  - installment_list_screen.dart: removed isDatePickerExpanded state,
-    replaced date row with InlineDatePickerRow.
-  - 89/89 tests pass, flutter analyze clean.
-
-MEDIA:D:/Software/Hermes Workspace/projects/lilyhouse/LilyHouse-v1.0.53-arm64.apk
+Media: LilyHouse-v1.0.54-arm64.apk

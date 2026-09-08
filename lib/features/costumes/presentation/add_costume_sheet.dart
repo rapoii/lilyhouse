@@ -346,7 +346,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                         InlinePickerItem('Custom', 'Custom'),
                       ],
                       selectedKey: _selectedSize,
-                      onSelected: (key, _) {
+                      onConfirmed: (key, _) {
                         setState(() => _selectedSize = key);
                       },
                     ),

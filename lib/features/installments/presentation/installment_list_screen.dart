@@ -217,7 +217,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                   '${d.day} ${_monthName(d.month)} ${d.year}',
                               initialDate: selectedDueDate ??
                                   DateTime.now().add(const Duration(days: 30)),
-                              onChanged: (d) {
+                              onConfirmed: (d) {
                                 setSheetState(() => selectedDueDate = d);
                               },
                               onClear: () {

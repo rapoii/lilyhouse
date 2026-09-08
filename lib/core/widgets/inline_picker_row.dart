@@ -8,9 +8,14 @@ import 'squircle_icon.dart';
 /// (Kostum Baru, Cicilan Baru, Booking Manual). The row collapses by default
 /// showing a label + current value + chevron. Tapping the row expands an
 /// `AnimatedSize` revealing a `CupertinoPicker` (or `CupertinoDatePicker`)
-/// and a "Selesai" button. Implemented as a self-contained `StatefulWidget`
-/// so the parent's `setState` does NOT rebuild the whole modal — only this
-/// widget rebuilds when the user expands or scrolls the wheel.
+/// and a "Selesai" button.
+///
+/// **Performance contract**: wheel scroll does NOT call `setState` on the
+/// parent. The picker's `additionalInfo` row is driven by a local
+/// `ValueNotifier` mirror of the selection, so each wheel tick triggers only
+/// a `_ValueText` widget repaint (RepaintBoundary isolated) — not the entire
+/// modal rebuild. The parent receives a final `onConfirmed` callback ONLY
+/// when the user closes the picker via Selesai.
 class InlinePickerRow extends StatefulWidget {
   /// Icon shown in the squircle leading slot.
   final IconData icon;
@@ -19,8 +24,9 @@ class InlinePickerRow extends StatefulWidget {
   /// Label rendered in the row's `title` slot.
   final String label;
 
-  /// Current value rendered in the `additionalInfo` slot. When null, the
-  /// placeholder is shown in muted gray.
+  /// Initial / canonical value rendered in the `additionalInfo` slot when
+  /// the picker is closed. While the wheel is being scrolled, the row text
+  /// shows the in-progress value live without rebuilding the parent.
   final String? value;
   final String? placeholder;
 
@@ -31,9 +37,10 @@ class InlinePickerRow extends StatefulWidget {
   /// Currently selected item key. May be null for fresh state.
   final String? selectedKey;
 
-  /// Called when the user settles on a different item. Parent should update
-  /// its own state with the returned key + display label.
-  final void Function(String key, String label) onSelected;
+  /// Fired exactly once when the user closes the picker via the Selesai
+  /// button. Parent should update its own state with the returned key.
+  /// This is the ONLY callback that should trigger a parent setState.
+  final void Function(String key, String label) onConfirmed;
 
   /// Optional subtitle shown below the row (e.g. error message in red).
   final String? subtitle;
@@ -51,7 +58,7 @@ class InlinePickerRow extends StatefulWidget {
     required this.value,
     required this.items,
     required this.selectedKey,
-    required this.onSelected,
+    required this.onConfirmed,
     this.placeholder,
     this.subtitle,
     this.subtitleColor,
@@ -65,28 +72,47 @@ class InlinePickerRow extends StatefulWidget {
 class _InlinePickerRowState extends State<InlinePickerRow> {
   bool _expanded = false;
 
+  // Live mirror of the currently focused item while the wheel scrolls.
+  // This drives the additionalInfo text in real-time without rebuilding
+  // the parent modal. Reset to widget.selectedKey when the picker closes.
+  late String? _liveKey;
+  late String _liveLabel;
+
   // Cached list of picker children. Built once per `widget.items` identity.
   late List<Widget> _cachedChildren;
-  late String? _cachedSelectedKey;
+
+  // Isolated repaint target for the live additionalInfo text. Wheel ticks
+  // repaint only this small widget.
+  final ValueNotifier<String?> _liveKeyNotifier = ValueNotifier<String?>(null);
+  final ValueNotifier<String> _liveLabelNotifier =
+      ValueNotifier<String>('');
 
   @override
   void initState() {
     super.initState();
-    _rebuildCache();
+    _liveKey = widget.selectedKey;
+    _liveLabel = _labelFor(widget.selectedKey);
+    _liveKeyNotifier.value = _liveKey;
+    _liveLabelNotifier.value = _liveLabel;
+    _rebuildChildren();
   }
 
   @override
   void didUpdateWidget(covariant InlinePickerRow old) {
     super.didUpdateWidget(old);
-    // Rebuild cache only if item identity or selection changed.
-    if (!identical(old.items, widget.items) ||
-        old.selectedKey != widget.selectedKey) {
-      _rebuildCache();
+    if (!identical(old.items, widget.items)) {
+      _rebuildChildren();
+    }
+    // If parent changed selectedKey while collapsed, sync live state.
+    if (!_expanded && old.selectedKey != widget.selectedKey) {
+      _liveKey = widget.selectedKey;
+      _liveLabel = _labelFor(widget.selectedKey);
+      _liveKeyNotifier.value = _liveKey;
+      _liveLabelNotifier.value = _liveLabel;
     }
   }
 
-  void _rebuildCache() {
-    _cachedSelectedKey = widget.selectedKey;
+  void _rebuildChildren() {
     _cachedChildren = widget.items
         .map((it) => Center(
               child: Text(
@@ -97,25 +123,68 @@ class _InlinePickerRowState extends State<InlinePickerRow> {
         .toList(growable: false);
   }
 
+  String _labelFor(String? key) {
+    if (key == null) return widget.value ?? '';
+    final idx = widget.items.indexWhere((it) => it.key == key);
+    if (idx < 0) return widget.value ?? '';
+    return widget.items[idx].label;
+  }
+
   void _toggle() {
     if (widget.disabled) return;
-    setState(() => _expanded = !_expanded);
+    setState(() {
+      _expanded = !_expanded;
+      if (_expanded) {
+        // Reset live to canonical when opening.
+        _liveKey = widget.selectedKey;
+        _liveLabel = _labelFor(widget.selectedKey);
+        _liveKeyNotifier.value = _liveKey;
+        _liveLabelNotifier.value = _liveLabel;
+      } else {
+        // Closing via row tap (not Selesai) — confirm.
+        if (_liveKey != null) {
+          widget.onConfirmed(_liveKey!, _liveLabel);
+        }
+      }
+    });
   }
 
   int get _initialIndex {
-    if (widget.selectedKey == null || _cachedSelectedKey == null) return 0;
-    final i = widget.items.indexWhere((it) => it.key == _cachedSelectedKey);
+    final key = _liveKey;
+    if (key == null) return 0;
+    final i = widget.items.indexWhere((it) => it.key == key);
     return i < 0 ? 0 : i;
+  }
+
+  void _onWheelChanged(int idx) {
+    if (idx < 0 || idx >= widget.items.length) return;
+    final it = widget.items[idx];
+    _liveKey = it.key;
+    _liveLabel = it.label;
+    _liveKeyNotifier.value = it.key;
+    _liveLabelNotifier.value = it.label;
+  }
+
+  void _onClose() {
+    // Confirm current live selection to parent.
+    if (_liveKey != null) {
+      widget.onConfirmed(_liveKey!, _liveLabel);
+    } else if (widget.selectedKey != null) {
+      // Re-confirm previous selection so parent state stays consistent.
+      widget.onConfirmed(widget.selectedKey!, _labelFor(widget.selectedKey));
+    }
+    setState(() => _expanded = false);
+  }
+
+  @override
+  void dispose() {
+    _liveKeyNotifier.dispose();
+    _liveLabelNotifier.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final hasValue = widget.value != null && widget.value!.isNotEmpty;
-    final infoText = hasValue ? widget.value! : (widget.placeholder ?? '');
-    final infoColor = hasValue
-        ? AppColors.textDark
-        : const Color(0xFF8E8E93);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -128,9 +197,23 @@ class _InlinePickerRowState extends State<InlinePickerRow> {
               color: AppColors.textDark,
             ),
           ),
-          additionalInfo: Text(
-            infoText,
-            style: TextStyle(fontSize: 15, color: infoColor),
+          additionalInfo: RepaintBoundary(
+            child: ValueListenableBuilder<String?>(
+              valueListenable: _liveKeyNotifier,
+              builder: (_, key, _) {
+                final hasValue = key != null && key.isNotEmpty;
+                final text = hasValue
+                    ? _liveLabelNotifier.value
+                    : (widget.placeholder ?? widget.value ?? '');
+                final color = hasValue
+                    ? AppColors.textDark
+                    : const Color(0xFF8E8E93);
+                return Text(
+                  text,
+                  style: TextStyle(fontSize: 15, color: color),
+                );
+              },
+            ),
           ),
           subtitle: widget.subtitle != null
               ? Text(
@@ -160,11 +243,10 @@ class _InlinePickerRowState extends State<InlinePickerRow> {
           alignment: Alignment.topCenter,
           child: _expanded
               ? _PickerBody(
-                  items: widget.items,
                   cachedChildren: _cachedChildren,
                   initialIndex: _initialIndex,
-                  onSelected: widget.onSelected,
-                  onClose: _toggle,
+                  onSelected: _onWheelChanged,
+                  onClose: _onClose,
                 )
               : const SizedBox.shrink(),
         ),
@@ -174,14 +256,12 @@ class _InlinePickerRowState extends State<InlinePickerRow> {
 }
 
 class _PickerBody extends StatelessWidget {
-  final List<InlinePickerItem> items;
   final List<Widget> cachedChildren;
   final int initialIndex;
-  final void Function(String key, String label) onSelected;
+  final void Function(int) onSelected;
   final VoidCallback onClose;
 
   const _PickerBody({
-    required this.items,
     required this.cachedChildren,
     required this.initialIndex,
     required this.onSelected,
@@ -208,11 +288,7 @@ class _PickerBody extends StatelessWidget {
               itemExtent: 36,
               scrollController:
                   FixedExtentScrollController(initialItem: initialIndex),
-              onSelectedItemChanged: (idx) {
-                if (idx < 0 || idx >= items.length) return;
-                final it = items[idx];
-                onSelected(it.key, it.label);
-              },
+              onSelectedItemChanged: onSelected,
               children: cachedChildren,
             ),
           ),
@@ -247,7 +323,12 @@ class InlineDatePickerRow extends StatefulWidget {
   final DateTime? maximumDate;
   final int minimumYear;
   final int maximumYear;
-  final void Function(DateTime) onChanged;
+
+  /// Fired exactly once when the user closes the picker via the Selesai
+  /// button. Parent should update its own state with the returned DateTime.
+  /// This is the ONLY callback that should trigger a parent setState.
+  final void Function(DateTime) onConfirmed;
+
   final String? placeholder;
   final String? subtitle;
   final Color? subtitleColor;
@@ -264,7 +345,7 @@ class InlineDatePickerRow extends StatefulWidget {
     required this.value,
     required this.formatValue,
     required this.initialDate,
-    required this.onChanged,
+    required this.onConfirmed,
     this.minimumDate,
     this.maximumDate,
     this.minimumYear = 2020,
@@ -281,17 +362,57 @@ class InlineDatePickerRow extends StatefulWidget {
 
 class _InlineDatePickerRowState extends State<InlineDatePickerRow> {
   bool _expanded = false;
+  late DateTime _liveDate;
+  final ValueNotifier<DateTime> _liveDateNotifier = ValueNotifier<DateTime>(
+    DateTime.now(),
+  );
 
-  void _toggle() => setState(() => _expanded = !_expanded);
+  @override
+  void initState() {
+    super.initState();
+    _liveDate = widget.value ?? widget.initialDate;
+    _liveDateNotifier.value = _liveDate;
+  }
+
+  @override
+  void didUpdateWidget(covariant InlineDatePickerRow old) {
+    super.didUpdateWidget(old);
+    if (!_expanded && old.value != widget.value) {
+      _liveDate = widget.value ?? widget.initialDate;
+      _liveDateNotifier.value = _liveDate;
+    }
+  }
+
+  void _toggle() {
+    setState(() {
+      _expanded = !_expanded;
+      if (_expanded) {
+        _liveDate = widget.value ?? widget.initialDate;
+        _liveDateNotifier.value = _liveDate;
+      } else {
+        widget.onConfirmed(_liveDate);
+      }
+    });
+  }
+
+  void _onWheelChanged(DateTime d) {
+    _liveDate = d;
+    _liveDateNotifier.value = d;
+  }
+
+  void _onClose() {
+    widget.onConfirmed(_liveDate);
+    setState(() => _expanded = false);
+  }
+
+  @override
+  void dispose() {
+    _liveDateNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    final hasValue = widget.value != null;
-    final infoText =
-        hasValue ? widget.formatValue(widget.value!) : (widget.placeholder ?? '');
-    final infoColor =
-        hasValue ? AppColors.textDark : const Color(0xFF8E8E93);
-
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -301,9 +422,22 @@ class _InlineDatePickerRowState extends State<InlineDatePickerRow> {
             widget.label,
             style: const TextStyle(fontSize: 15, color: AppColors.textDark),
           ),
-          additionalInfo: Text(
-            infoText,
-            style: TextStyle(fontSize: 15, color: infoColor),
+          additionalInfo: RepaintBoundary(
+            child: ValueListenableBuilder<DateTime>(
+              valueListenable: _liveDateNotifier,
+              builder: (_, d, _) {
+                final text = widget.value == null && !_expanded
+                    ? (widget.placeholder ?? '')
+                    : widget.formatValue(d);
+                final color = widget.value == null && !_expanded
+                    ? const Color(0xFF8E8E93)
+                    : AppColors.textDark;
+                return Text(
+                  text,
+                  style: TextStyle(fontSize: 15, color: color),
+                );
+              },
+            ),
           ),
           subtitle: widget.subtitle != null
               ? Text(
@@ -333,13 +467,13 @@ class _InlineDatePickerRowState extends State<InlineDatePickerRow> {
           alignment: Alignment.topCenter,
           child: _expanded
               ? _DatePickerBody(
-                  value: widget.value ?? widget.initialDate,
+                  value: _liveDate,
                   minimumDate: widget.minimumDate,
                   maximumDate: widget.maximumDate,
                   minimumYear: widget.minimumYear,
                   maximumYear: widget.maximumYear,
-                  onChanged: widget.onChanged,
-                  onClose: _toggle,
+                  onChanged: _onWheelChanged,
+                  onClose: _onClose,
                   onClear: widget.onClear,
                 )
               : const SizedBox.shrink(),

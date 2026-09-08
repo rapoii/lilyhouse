@@ -233,23 +233,6 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   // but the heavy work (CupertinoPicker / CupertinoDatePicker scroll
   // controllers, picker child widgets) is owned by the InlinePickerRow
   // State, which is preserved across rebuilds.
-  void _onStartDateChanged(DateTime d) {
-    setState(() {
-      _startDate = d;
-      if (_endDate.isBefore(_startDate)) {
-        _endDate = _startDate.add(const Duration(days: 3));
-      }
-      _dateError = null;
-    });
-  }
-
-  void _onEndDateChanged(DateTime d) {
-    setState(() {
-      _endDate = d;
-      _dateError = null;
-    });
-  }
-
   bool _validate() {
     final okName = _nameController.text.trim().isNotEmpty;
     final okPhone = _phoneController.text.trim().isNotEmpty;
@@ -631,7 +614,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           .toList(growable: false),
                       selectedKey: _selectedCostume?.id,
                       disabled: _isLoadingCostumes || _costumes.isEmpty,
-                      onSelected: (key, _) {
+                      onConfirmed: (key, _) {
                         final c = _costumes.firstWhere(
                           (x) => x.id == key,
                           orElse: () => _costumes.first,
@@ -651,7 +634,15 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       formatValue: dateFormat.format,
                       initialDate: _startDate,
                       minimumDate: DateTime(2020),
-                      onChanged: _onStartDateChanged,
+                      onConfirmed: (d) {
+                        setState(() {
+                          _startDate = d;
+                          if (_endDate.isBefore(_startDate)) {
+                            _endDate = _startDate.add(const Duration(days: 3));
+                          }
+                          _dateError = null;
+                        });
+                      },
                     ),
                     InlineDatePickerRow(
                       key: const Key('manual_end_date_row'),
@@ -663,7 +654,12 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       initialDate: _endDate,
                       minimumDate: _startDate,
                       subtitle: _dateError,
-                      onChanged: _onEndDateChanged,
+                      onConfirmed: (d) {
+                        setState(() {
+                          _endDate = d;
+                          _dateError = null;
+                        });
+                      },
                     ),
                     InlinePickerRow(
                       key: const Key('manual_purpose_row'),
@@ -678,7 +674,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         InlinePickerItem('lainnya', 'Lainnya'),
                       ],
                       selectedKey: _purpose,
-                      onSelected: (key, _) {
+                      onConfirmed: (key, _) {
                         setState(() => _purpose = key);
                       },
                     ),
