@@ -69,8 +69,15 @@ class InlinePickerRow extends StatefulWidget {
   State<InlinePickerRow> createState() => _InlinePickerRowState();
 }
 
-class _InlinePickerRowState extends State<InlinePickerRow> {
+class _InlinePickerRowState extends State<InlinePickerRow>
+    with SingleTickerProviderStateMixin {
   bool _expanded = false;
+
+  // Manual AnimationController for the expand/collapse animation. Replaces
+  // AnimatedSize which re-runs the parent layout every frame and causes
+  // visible stutter on real devices when the picker body is large.
+  late final AnimationController _expandController;
+  late final Animation<double> _expandAnimation;
 
   // Live mirror of the currently focused item while the wheel scrolls.
   // This drives the additionalInfo text in real-time without rebuilding
@@ -95,6 +102,16 @@ class _InlinePickerRowState extends State<InlinePickerRow> {
     _liveKeyNotifier.value = _liveKey;
     _liveLabelNotifier.value = _liveLabel;
     _rebuildChildren();
+    _expandController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
+      value: 0.0,
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _expandController,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
   }
 
   @override
@@ -132,21 +149,25 @@ class _InlinePickerRowState extends State<InlinePickerRow> {
 
   void _toggle() {
     if (widget.disabled) return;
-    setState(() {
-      _expanded = !_expanded;
-      if (_expanded) {
-        // Reset live to canonical when opening.
-        _liveKey = widget.selectedKey;
-        _liveLabel = _labelFor(widget.selectedKey);
-        _liveKeyNotifier.value = _liveKey;
-        _liveLabelNotifier.value = _liveLabel;
-      } else {
-        // Closing via row tap (not Selesai) — confirm.
-        if (_liveKey != null) {
-          widget.onConfirmed(_liveKey!, _liveLabel);
-        }
+    if (_expanded) {
+      // Closing — confirm current selection, animate collapse.
+      if (_liveKey != null) {
+        widget.onConfirmed(_liveKey!, _liveLabel);
       }
-    });
+      _expandController.reverse().then((_) {
+        if (mounted) {
+          setState(() => _expanded = false);
+        }
+      });
+    } else {
+      // Opening — reset live state, mount picker body, animate expand.
+      _liveKey = widget.selectedKey;
+      _liveLabel = _labelFor(widget.selectedKey);
+      _liveKeyNotifier.value = _liveKey;
+      _liveLabelNotifier.value = _liveLabel;
+      setState(() => _expanded = true);
+      _expandController.forward(from: 0.0);
+    }
   }
 
   int get _initialIndex {
@@ -173,13 +194,18 @@ class _InlinePickerRowState extends State<InlinePickerRow> {
       // Re-confirm previous selection so parent state stays consistent.
       widget.onConfirmed(widget.selectedKey!, _labelFor(widget.selectedKey));
     }
-    setState(() => _expanded = false);
+    _expandController.reverse().then((_) {
+      if (mounted) {
+        setState(() => _expanded = false);
+      }
+    });
   }
 
   @override
   void dispose() {
     _liveKeyNotifier.dispose();
     _liveLabelNotifier.dispose();
+    _expandController.dispose();
     super.dispose();
   }
 
@@ -225,30 +251,41 @@ class _InlinePickerRowState extends State<InlinePickerRow> {
                   ),
                 )
               : null,
-          trailing: AnimatedRotation(
-            turns: _expanded ? 0.25 : 0.0,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOutCubic,
-            child: const Icon(
-              CupertinoIcons.chevron_right,
-              size: 14,
-              color: Color(0xFFC7C7CC),
-            ),
+          trailing: Icon(
+            CupertinoIcons.chevron_right,
+            size: 14,
+            color: const Color(0xFFC7C7CC),
           ),
           onTap: widget.disabled ? null : _toggle,
         ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child: _expanded
-              ? _PickerBody(
-                  cachedChildren: _cachedChildren,
-                  initialIndex: _initialIndex,
-                  onSelected: _onWheelChanged,
-                  onClose: _onClose,
-                )
-              : const SizedBox(width: double.infinity),
+        // Always mount the picker body so first-expand doesn't pay the
+        // CupertinoPicker first-build cost. `Offstage` keeps the tree
+        // alive but skips paint; `TickerMode(enabled: false)` pauses
+        // internal animations. `Align(heightFactor: 0→1)` interpolates
+        // the visible height over 220ms without re-running parent layout.
+        AnimatedBuilder(
+          animation: _expandController,
+          builder: (context, child) {
+            return ClipRect(
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: _expandAnimation.value,
+                child: child,
+              ),
+            );
+          },
+          child: Offstage(
+            offstage: !_expanded,
+            child: TickerMode(
+              enabled: _expanded,
+              child: _PickerBody(
+                cachedChildren: _cachedChildren,
+                initialIndex: _initialIndex,
+                onSelected: _onWheelChanged,
+                onClose: _onClose,
+              ),
+            ),
+          ),
         ),
       ],
     );
@@ -381,18 +418,32 @@ class InlineDatePickerRow extends StatefulWidget {
   State<InlineDatePickerRow> createState() => _InlineDatePickerRowState();
 }
 
-class _InlineDatePickerRowState extends State<InlineDatePickerRow> {
+class _InlineDatePickerRowState extends State<InlineDatePickerRow>
+    with SingleTickerProviderStateMixin {
   bool _expanded = false;
   late DateTime _liveDate;
   final ValueNotifier<DateTime> _liveDateNotifier = ValueNotifier<DateTime>(
     DateTime.now(),
   );
 
+  late final AnimationController _expandController;
+  late final Animation<double> _expandAnimation;
+
   @override
   void initState() {
     super.initState();
     _liveDate = widget.value ?? widget.initialDate;
     _liveDateNotifier.value = _liveDate;
+    _expandController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
+      value: 0.0,
+    );
+    _expandAnimation = CurvedAnimation(
+      parent: _expandController,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
   }
 
   @override
@@ -405,15 +456,21 @@ class _InlineDatePickerRowState extends State<InlineDatePickerRow> {
   }
 
   void _toggle() {
-    setState(() {
-      _expanded = !_expanded;
-      if (_expanded) {
-        _liveDate = widget.value ?? widget.initialDate;
-        _liveDateNotifier.value = _liveDate;
-      } else {
-        widget.onConfirmed(_liveDate);
-      }
-    });
+    if (_expanded) {
+      // Closing via row tap — confirm + animate.
+      widget.onConfirmed(_liveDate);
+      _expandController.reverse().then((_) {
+        if (mounted) {
+          setState(() => _expanded = false);
+        }
+      });
+    } else {
+      // Opening — reset live date, mount body, animate.
+      _liveDate = widget.value ?? widget.initialDate;
+      _liveDateNotifier.value = _liveDate;
+      setState(() => _expanded = true);
+      _expandController.forward(from: 0.0);
+    }
   }
 
   void _onWheelChanged(DateTime d) {
@@ -423,12 +480,17 @@ class _InlineDatePickerRowState extends State<InlineDatePickerRow> {
 
   void _onClose() {
     widget.onConfirmed(_liveDate);
-    setState(() => _expanded = false);
+    _expandController.reverse().then((_) {
+      if (mounted) {
+        setState(() => _expanded = false);
+      }
+    });
   }
 
   @override
   void dispose() {
     _liveDateNotifier.dispose();
+    _expandController.dispose();
     super.dispose();
   }
 
@@ -470,34 +532,47 @@ class _InlineDatePickerRowState extends State<InlineDatePickerRow> {
                   ),
                 )
               : null,
-          trailing: AnimatedRotation(
-            turns: _expanded ? 0.25 : 0.0,
-            duration: const Duration(milliseconds: 250),
-            curve: Curves.easeInOutCubic,
-            child: const Icon(
-              CupertinoIcons.chevron_right,
-              size: 14,
-              color: Color(0xFFC7C7CC),
-            ),
+          trailing: Icon(
+            CupertinoIcons.chevron_right,
+            size: 14,
+            color: const Color(0xFFC7C7CC),
           ),
           onTap: _toggle,
         ),
-        AnimatedSize(
-          duration: const Duration(milliseconds: 220),
-          curve: Curves.easeOutCubic,
-          alignment: Alignment.topCenter,
-          child: _expanded
-              ? _DatePickerBody(
-                  value: _liveDate,
-                  minimumDate: widget.minimumDate,
-                  maximumDate: widget.maximumDate,
-                  minimumYear: widget.minimumYear,
-                  maximumYear: widget.maximumYear,
-                  onChanged: _onWheelChanged,
-                  onClose: _onClose,
-                  onClear: widget.onClear,
-                )
-              : const SizedBox.shrink(),
+        // Always mount the picker body so first-expand doesn't pay the
+        // CupertinoDatePicker first-build cost (3 ListWheelScrollView
+        // columns + shader compile). `Offstage` skips paint while keeping
+        // the element tree alive; `TickerMode(enabled: false)` pauses
+        // internal animations. `SizeTransition` interpolates the
+        // heightFactor 0→1 over 220ms for the expand animation while
+        // keeping the picker in the tree.
+        AnimatedBuilder(
+          animation: _expandController,
+          builder: (context, child) {
+            return ClipRect(
+              child: Align(
+                alignment: Alignment.topCenter,
+                heightFactor: _expandAnimation.value,
+                child: child,
+              ),
+            );
+          },
+          child: Offstage(
+            offstage: !_expanded,
+            child: TickerMode(
+              enabled: _expanded,
+              child: _DatePickerBody(
+                value: _liveDate,
+                minimumDate: widget.minimumDate,
+                maximumDate: widget.maximumDate,
+                minimumYear: widget.minimumYear,
+                maximumYear: widget.maximumYear,
+                onChanged: _onWheelChanged,
+                onClose: _onClose,
+                onClear: widget.onClear,
+              ),
+            ),
+          ),
         ),
       ],
     );

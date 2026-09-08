@@ -1,15 +1,44 @@
-v1.0.54 build 58: Picker body stateful + faster expand animation
+v1.0.54 build 59: AnimationController-driven expand, pre-mounted picker
 
-- _PickerBody converted from StatelessWidget to StatefulWidget, with
-  FixedExtentScrollController held in State. Before, every build() of the
-  picker body (e.g. during AnimatedSize animation frames) created a new
-  controller — CupertinoPicker would briefly reset to initialItem on each
-  repaint, contributing to the visual stutter during expand.
-- AnimatedSize 300ms → 220ms, easeInOutCubic → easeOutCubic (faster
-  perceived expansion, ~27% shorter animation window).
-- Closed-state SizedBox.shrink() → SizedBox(width: double.infinity) so the
-  collapsed branch has explicit width and the animation interpolates from
-  a known base width instead of zero.
-- Build 57's `RepaintBoundary` around the modal ListView and BoxShadow
-  removal reverted (no measurable benefit on emulator, kept for
-  cleanliness).
+Real device (Dimensity 7400, Mali-G615) still felt stutter on expand
+even after v1.0.54 build 58. The root cause is two compounding issues:
+
+1. AnimatedSize re-runs the parent Column's layout every frame, forcing
+   the surrounding CupertinoListSection.insetGrouped + ClipRSuperellipse
+   to repaint on each tick. The 220ms animation = ~13 repaint passes
+   that all hit the GPU on every expand.
+
+2. First-open cost: the picker widget (CupertinoDatePicker with 3
+   ListWheelScrollView columns, or CupertinoPicker) is built from
+   scratch when the user taps. That single first build = shader compile
+   + 100+ widget instantiations = a 200-1500ms jank frame on first tap.
+
+Fixes:
+
+- Replaced AnimatedSize with manual AnimationController + CurvedAnimation
+  + AnimatedBuilder + ClipRect + Align(heightFactor: 0→1). The
+  heightFactor interpolates the visible region without forcing parent
+  layout. Animation is driven by a single ticker, no per-frame parent
+  invalidation.
+
+- Picker body is now ALWAYS mounted (Offstage + TickerMode when not
+  expanded). First-build cost is paid once when the modal opens, not
+  on every tap. The Offstage tree stays alive in the element tree
+  (cheap on memory, free on paint) and TickerMode disables internal
+  wheel animations until expanded.
+
+- Dropped AnimatedRotation on chevron. The 250ms rotation was
+  overlapping with the size animation and creating a second implicit
+  ticker that pushed more frames. Static chevron icon now.
+
+- _PickerBody (costume/size/purpose) was already converted to
+  StatefulWidget in v1.0.54 build 58; the controller for
+  FixedExtentScrollController now persists across rebuilds so the wheel
+  doesn't reset on parent re-layout.
+
+Tradeoffs:
+- ~4 picker bodies always in the tree = small memory cost (~50 widgets),
+  but layout is lazy (Offstage skips paint and measures with
+  heightFactor=0).
+- Chevron no longer rotates. The text "Kostum" + value still makes the
+  expanded state obvious; the chevron was decorative.
