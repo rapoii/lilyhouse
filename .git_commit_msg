@@ -1,18 +1,10 @@
-v1.0.55 build 61: sheet picker — fix yellow underline + iOS bar buttons
+v1.0.55 build 62: belt-and-suspenders fix for title underline
 
-Bug: Material's text theme painted a yellow underline under the title
-in the sheet picker bar (default Theme inherits Material text style
-with link-style decoration). Also Batal/Selesai were both pink, and
-Selesai wasn't bold — looks wrong vs. iOS.
-
-Fix: new `_SheetPickerBarButton` widget using GestureDetector + Text
-with explicit decoration: TextDecoration.none. Selesai is now
-CupertinoColors.systemBlue + w600 (primary action), Batal is the
-existing primaryPink (matches app accent). Light tap highlight via
-short AnimatedBuilder (60ms forward, 140ms reverse). Apple HIG style.
-
-Sheet picker no longer relies on CupertinoButton which inherits
-Material text theme. Title bar no longer has the yellow underline.
+The previous fix (decoration: TextDecoration.none in TextStyle) didn't
+fully suppress the Material text-theme decoration that paints a thin
+yellow/amber line under the title. Wrap the title in
+DefaultTextStyle.merge with explicit no-decoration style so any
+ancestor DefaultTextStyle is overridden for the title subtree.
 
 Tested: flutter analyze 0 issues, flutter test 89/89 pass. arm64 APK
-md5 024382c97188e9221feeeb8a61b90a16, libapp.so in arm64-v8a only.
+md5 9e96e10eb00a455c3be44c736e3c6973, libapp.so in arm64-v8a only.

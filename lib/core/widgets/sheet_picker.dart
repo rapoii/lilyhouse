@@ -194,11 +194,15 @@ class _SheetPickerHost extends StatelessWidget {
                 ),
                 Expanded(
                   child: Center(
-                    child: Text(
-                      title,
-                      style: AppTypography.navTitle.copyWith(
+                    child: DefaultTextStyle.merge(
+                      style: const TextStyle(
                         decoration: TextDecoration.none,
-                        decorationColor: const Color(0x00000000),
+                        decorationColor: Color(0x00000000),
+                        decorationThickness: 0,
+                      ),
+                      child: Text(
+                        title,
+                        style: AppTypography.navTitle,
                       ),
                     ),
                   ),
