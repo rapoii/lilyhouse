@@ -150,12 +150,14 @@ class _InlinePickerRowState extends State<InlinePickerRow>
   void _toggle() {
     if (widget.disabled) return;
     if (_expanded) {
-      // Closing — confirm current selection, animate collapse.
-      if (_liveKey != null) {
-        widget.onConfirmed(_liveKey!, _liveLabel);
-      }
+      // Closing — animate collapse first, then confirm to parent.
+      // Delaying onConfirmed prevents parent setState from rebuilding
+      // the entire modal during the 220ms reverse animation.
       _expandController.reverse().then((_) {
         if (mounted) {
+          if (_liveKey != null) {
+            widget.onConfirmed(_liveKey!, _liveLabel);
+          }
           setState(() => _expanded = false);
         }
       });
@@ -187,15 +189,14 @@ class _InlinePickerRowState extends State<InlinePickerRow>
   }
 
   void _onClose() {
-    // Confirm current live selection to parent.
-    if (_liveKey != null) {
-      widget.onConfirmed(_liveKey!, _liveLabel);
-    } else if (widget.selectedKey != null) {
-      // Re-confirm previous selection so parent state stays consistent.
-      widget.onConfirmed(widget.selectedKey!, _labelFor(widget.selectedKey));
-    }
+    // Animate collapse first, then confirm to parent.
     _expandController.reverse().then((_) {
       if (mounted) {
+        if (_liveKey != null) {
+          widget.onConfirmed(_liveKey!, _liveLabel);
+        } else if (widget.selectedKey != null) {
+          widget.onConfirmed(widget.selectedKey!, _labelFor(widget.selectedKey));
+        }
         setState(() => _expanded = false);
       }
     });
@@ -258,35 +259,29 @@ class _InlinePickerRowState extends State<InlinePickerRow>
           ),
           onTap: widget.disabled ? null : _toggle,
         ),
-        // Always mount the picker body so first-expand doesn't pay the
-        // CupertinoPicker first-build cost. `Offstage` keeps the tree
-        // alive but skips paint; `TickerMode(enabled: false)` pauses
-        // internal animations. `Align(heightFactor: 0→1)` interpolates
-        // the visible height over 220ms without re-running parent layout.
-        AnimatedBuilder(
-          animation: _expandController,
-          builder: (context, child) {
-            return ClipRect(
-              child: Align(
-                alignment: Alignment.topCenter,
-                heightFactor: _expandAnimation.value,
-                child: child,
-              ),
-            );
-          },
-          child: Offstage(
-            offstage: !_expanded,
-            child: TickerMode(
-              enabled: _expanded,
-              child: _PickerBody(
-                cachedChildren: _cachedChildren,
-                initialIndex: _initialIndex,
-                onSelected: _onWheelChanged,
-                onClose: _onClose,
-              ),
+        // Picker body is only in the tree while expanded. The AnimatedBuilder
+        // drives a ClipRect + Align(heightFactor) to smoothly reveal/hide.
+        // onConfirmed fires AFTER the reverse animation completes, preventing
+        // parent setState from causing rebuild during the animation.
+        if (_expanded)
+          AnimatedBuilder(
+            animation: _expandController,
+            builder: (context, child) {
+              return ClipRect(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  heightFactor: _expandAnimation.value,
+                  child: child,
+                ),
+              );
+            },
+            child: _PickerBody(
+              cachedChildren: _cachedChildren,
+              initialIndex: _initialIndex,
+              onSelected: _onWheelChanged,
+              onClose: _onClose,
             ),
           ),
-        ),
       ],
     );
   }
@@ -457,10 +452,12 @@ class _InlineDatePickerRowState extends State<InlineDatePickerRow>
 
   void _toggle() {
     if (_expanded) {
-      // Closing via row tap — confirm + animate.
-      widget.onConfirmed(_liveDate);
+      // Closing via row tap — animate collapse first, then confirm.
+      // Delaying onConfirmed prevents parent setState from rebuilding
+      // the entire modal during the 220ms reverse animation.
       _expandController.reverse().then((_) {
         if (mounted) {
+          widget.onConfirmed(_liveDate);
           setState(() => _expanded = false);
         }
       });
@@ -479,9 +476,10 @@ class _InlineDatePickerRowState extends State<InlineDatePickerRow>
   }
 
   void _onClose() {
-    widget.onConfirmed(_liveDate);
+    // Animate collapse first, then confirm to parent.
     _expandController.reverse().then((_) {
       if (mounted) {
+        widget.onConfirmed(_liveDate);
         setState(() => _expanded = false);
       }
     });
@@ -539,41 +537,33 @@ class _InlineDatePickerRowState extends State<InlineDatePickerRow>
           ),
           onTap: _toggle,
         ),
-        // Always mount the picker body so first-expand doesn't pay the
-        // CupertinoDatePicker first-build cost (3 ListWheelScrollView
-        // columns + shader compile). `Offstage` skips paint while keeping
-        // the element tree alive; `TickerMode(enabled: false)` pauses
-        // internal animations. `SizeTransition` interpolates the
-        // heightFactor 0→1 over 220ms for the expand animation while
-        // keeping the picker in the tree.
-        AnimatedBuilder(
-          animation: _expandController,
-          builder: (context, child) {
-            return ClipRect(
-              child: Align(
-                alignment: Alignment.topCenter,
-                heightFactor: _expandAnimation.value,
-                child: child,
-              ),
-            );
-          },
-          child: Offstage(
-            offstage: !_expanded,
-            child: TickerMode(
-              enabled: _expanded,
-              child: _DatePickerBody(
-                value: _liveDate,
-                minimumDate: widget.minimumDate,
-                maximumDate: widget.maximumDate,
-                minimumYear: widget.minimumYear,
-                maximumYear: widget.maximumYear,
-                onChanged: _onWheelChanged,
-                onClose: _onClose,
-                onClear: widget.onClear,
-              ),
+        // Date picker body only in tree while expanded. AnimatedBuilder
+        // drives ClipRect + Align(heightFactor) for smooth reveal/hide.
+        // onConfirmed fires AFTER reverse animation to prevent parent
+        // setState rebuild during animation.
+        if (_expanded)
+          AnimatedBuilder(
+            animation: _expandController,
+            builder: (context, child) {
+              return ClipRect(
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  heightFactor: _expandAnimation.value,
+                  child: child,
+                ),
+              );
+            },
+            child: _DatePickerBody(
+              value: _liveDate,
+              minimumDate: widget.minimumDate,
+              maximumDate: widget.maximumDate,
+              minimumYear: widget.minimumYear,
+              maximumYear: widget.maximumYear,
+              onChanged: _onWheelChanged,
+              onClose: _onClose,
+              onClear: widget.onClear,
             ),
           ),
-        ),
       ],
     );
   }
