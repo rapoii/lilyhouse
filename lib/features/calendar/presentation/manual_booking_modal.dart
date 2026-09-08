@@ -19,8 +19,10 @@ import '../domain/booking_conflict_engine.dart';
 /// Modal for adding a booking manually (entry chosen from the "Tambah" sheet
 /// in the Kalender tab). Style mirrors the "Tambah Kostum" and "Cicilan Baru"
 /// sheets: DraggableSheetContainer + CupertinoPageScaffold +
-/// CupertinoNavigationBar, body composed of CupertinoFormSection.insetGrouped
-/// sections — iOS Settings-style form.
+/// CupertinoNavigationBar, body composed of CupertinoListSection.insetGrouped
+/// sections — iOS Settings-style form. Picker rows (Kostum, Tanggal Mulai,
+/// Tanggal Selesai, Keperluan) expand inline with AnimatedRotation chevron +
+/// AnimatedSize + CupertinoPicker/CupertinoDatePicker (Apple HIG pattern).
 class ManualBookingModal extends StatefulWidget {
   final IRentalRepository rentalRepository;
   final ICostumeRepository costumeRepository;
@@ -62,6 +64,12 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   bool _isSaving = false;
   String? _costumeError;
   String? _dateError;
+
+  // Collapsible inline picker states (Apple HIG pattern).
+  bool _isStartDateExpanded = false;
+  bool _isEndDateExpanded = false;
+  bool _isCostumeExpanded = false;
+  bool _isPurposeExpanded = false;
 
   @override
   void initState() {
@@ -211,229 +219,46 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     );
   }
 
-  Future<void> _pickStartDate() async {
-    final picked = await _showDatePickerSheet(
-      title: 'Pilih Tanggal Mulai',
-      initial: _startDate,
-    );
-    if (picked != null && mounted) {
-      setState(() {
-        _startDate = picked;
-        if (_endDate.isBefore(_startDate)) {
-          _endDate = _startDate.add(const Duration(days: 3));
-        }
-        _dateError = null;
-      });
-    }
+  // Apple HIG: only one inline picker can be open at a time — auto-close
+  // siblings when toggling a new one open.
+  void _togglePicker({bool? start, bool? end, bool? costume, bool? purpose}) {
+    setState(() {
+      _isStartDateExpanded = start ?? false;
+      _isEndDateExpanded = end ?? false;
+      _isCostumeExpanded = costume ?? false;
+      _isPurposeExpanded = purpose ?? false;
+    });
   }
 
-  Future<void> _pickEndDate() async {
-    final picked = await _showDatePickerSheet(
-      title: 'Pilih Tanggal Selesai',
-      initial: _endDate,
-      minimumDate: _startDate,
-    );
-    if (picked != null && mounted) {
-      setState(() {
-        _endDate = picked;
-        _dateError = null;
-      });
-    }
+  void _onStartDateChanged(DateTime d) {
+    setState(() {
+      _startDate = d;
+      if (_endDate.isBefore(_startDate)) {
+        _endDate = _startDate.add(const Duration(days: 3));
+      }
+      _dateError = null;
+    });
   }
 
-  Future<DateTime?> _showDatePickerSheet({
-    required String title,
-    required DateTime initial,
-    DateTime? minimumDate,
-  }) async {
-    DateTime temp = initial;
-    return showCupertinoModalPopup<DateTime>(
-      context: context,
-      builder: (ctx) => Container(
-        height: 280,
-        color: CupertinoColors.white,
-        child: SafeArea(
-          top: false,
-          child: Column(
-            children: [
-              // Navigation bar
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Batal', style: AppTypography.actionButton),
-                    ),
-                    Text(title, style: AppTypography.navTitle),
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.of(ctx).pop(temp),
-                      child: const Text('Selesai', style: AppTypography.actionButton),
-                    ),
-                  ],
-                ),
-              ),
-              Expanded(
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: initial,
-                  minimumYear: 2020,
-                  maximumYear: 2035,
-                  minimumDate: minimumDate,
-                  onDateTimeChanged: (dt) => temp = dt,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
+  void _onEndDateChanged(DateTime d) {
+    setState(() {
+      _endDate = d;
+      _dateError = null;
+    });
   }
 
-  Future<void> _pickCostume() async {
-    if (_costumes.isEmpty) return;
-    int initialIdx = _selectedCostume != null
-        ? _costumes.indexWhere((c) => c.id == _selectedCostume!.id)
-        : 0;
-    if (initialIdx < 0) initialIdx = 0;
-    final selected = await showCupertinoModalPopup<Costume>(
-      context: context,
-      builder: (ctx) {
-        int current = initialIdx;
-        return Container(
-          height: 280,
-          color: CupertinoColors.white,
-          child: SafeArea(
-            top: false,
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('Batal', style: AppTypography.actionButton),
-                      ),
-                      const Text('Pilih Kostum', style: AppTypography.navTitle),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () => Navigator.of(ctx).pop(_costumes[current]),
-                        child: const Text('Selesai', style: AppTypography.actionButton),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: CupertinoPicker(
-                    itemExtent: 36,
-                    scrollController: FixedExtentScrollController(initialItem: initialIdx),
-                    onSelectedItemChanged: (idx) => current = idx,
-                    children: _costumes
-                        .map((c) => Center(
-                              child: Text(
-                                '${c.name} (${c.size})',
-                                style: const TextStyle(fontSize: 15),
-                              ),
-                            ))
-                        .toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-    if (selected != null && mounted) {
-      setState(() {
-        _selectedCostume = selected;
-        _costumeError = null;
-      });
-    }
+  void _onCostumeChanged(int idx) {
+    if (idx < 0 || idx >= _costumes.length) return;
+    setState(() {
+      _selectedCostume = _costumes[idx];
+      _costumeError = null;
+    });
   }
 
-  Future<void> _pickPurpose() async {
-    const List<String> options = ['homecos', 'event', 'photoshoot', 'lainnya'];
-    const Map<String, String> labels = {
-      'homecos': 'Homecos (Pakai Sendiri)',
-      'event': 'Event Cosplay',
-      'photoshoot': 'Photoshoot',
-      'lainnya': 'Lainnya',
-    };
-    int initialIdx = options.indexOf(_purpose);
-    if (initialIdx < 0) initialIdx = 0;
-    final selected = await showCupertinoModalPopup<String>(
-      context: context,
-      builder: (ctx) {
-        int current = initialIdx;
-        return Container(
-          height: 280,
-          color: CupertinoColors.white,
-          child: SafeArea(
-            top: false,
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: const BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () => Navigator.of(ctx).pop(),
-                        child: const Text('Batal', style: AppTypography.actionButton),
-                      ),
-                      const Text('Keperluan', style: AppTypography.navTitle),
-                      CupertinoButton(
-                        padding: EdgeInsets.zero,
-                        onPressed: () => Navigator.of(ctx).pop(options[current]),
-                        child: const Text('Selesai', style: AppTypography.actionButton),
-                      ),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: CupertinoPicker(
-                    itemExtent: 36,
-                    scrollController: FixedExtentScrollController(initialItem: initialIdx),
-                    onSelectedItemChanged: (idx) => current = idx,
-                    children: options
-                        .map((v) => Center(
-                              child: Text(labels[v] ?? v, style: const TextStyle(fontSize: 15)),
-                            ))
-                        .toList(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-    if (selected != null && mounted) {
-      setState(() => _purpose = selected);
-    }
+  void _onPurposeChanged(int idx) {
+    const options = ['homecos', 'event', 'photoshoot', 'lainnya'];
+    if (idx < 0 || idx >= options.length) return;
+    setState(() => _purpose = options[idx]);
   }
 
   String get _purposeLabel {
@@ -448,6 +273,113 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       default:
         return 'Homecos (Pakai Sendiri)';
     }
+  }
+
+  // --- Collapsible inline picker builders (Apple HIG pattern) ---
+
+  Widget _buildDatePicker({
+    required DateTime value,
+    DateTime? minimumDate,
+    required ValueChanged<DateTime> onChanged,
+    required VoidCallback onClose,
+  }) {
+    return _pickerContainer(
+      child: CupertinoDatePicker(
+        mode: CupertinoDatePickerMode.date,
+        initialDateTime: value,
+        minimumYear: 2020,
+        maximumYear: 2035,
+        minimumDate: minimumDate,
+        onDateTimeChanged: onChanged,
+      ),
+      onClose: onClose,
+    );
+  }
+
+  Widget _buildCostumePicker() {
+    final initialIdx = _selectedCostume != null
+        ? _costumes.indexWhere((c) => c.id == _selectedCostume!.id)
+        : 0;
+    return _pickerContainer(
+      child: CupertinoPicker(
+        itemExtent: 36,
+        scrollController: FixedExtentScrollController(
+          initialItem: initialIdx < 0 ? 0 : initialIdx,
+        ),
+        onSelectedItemChanged: _onCostumeChanged,
+        children: _costumes
+            .map((c) => Center(
+                  child: Text(
+                    '${c.name} (${c.size})',
+                    style: const TextStyle(fontSize: 18, color: AppColors.textDark),
+                  ),
+                ))
+            .toList(),
+      ),
+      onClose: () => _togglePicker(),
+    );
+  }
+
+  Widget _buildPurposePicker() {
+    const options = ['homecos', 'event', 'photoshoot', 'lainnya'];
+    const labels = {
+      'homecos': 'Homecos (Pakai Sendiri)',
+      'event': 'Event Cosplay',
+      'photoshoot': 'Photoshoot',
+      'lainnya': 'Lainnya',
+    };
+    final initialIdx = options.indexOf(_purpose);
+    return _pickerContainer(
+      child: CupertinoPicker(
+        itemExtent: 36,
+        scrollController: FixedExtentScrollController(
+          initialItem: initialIdx < 0 ? 0 : initialIdx,
+        ),
+        onSelectedItemChanged: _onPurposeChanged,
+        children: options
+            .map((v) => Center(
+                  child: Text(
+                    labels[v] ?? v,
+                    style: const TextStyle(fontSize: 18, color: AppColors.textDark),
+                  ),
+                ))
+            .toList(),
+      ),
+      onClose: () => _togglePicker(),
+    );
+  }
+
+  Widget _pickerContainer({required Widget child, required VoidCallback onClose}) {
+    return Container(
+      // No opaque color — the picker renders its own background, and a
+      // flat white box would clip the section's rounded bottom corners.
+      decoration: const BoxDecoration(
+        border: Border(
+          top: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
+        ),
+      ),
+      padding: const EdgeInsets.only(top: 8, bottom: 12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(height: 180, child: child),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  onPressed: onClose,
+                  child: const Text('Selesai', style: AppTypography.actionButton),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   bool _validate() {
@@ -844,12 +776,27 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                               ),
                             )
                           : null,
-                      trailing: const Icon(
-                        CupertinoIcons.chevron_right,
-                        size: 14,
-                        color: Color(0xFFC7C7CC),
+                      trailing: AnimatedRotation(
+                        turns: _isCostumeExpanded ? 0.25 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOutCubic,
+                        child: const Icon(
+                          CupertinoIcons.chevron_right,
+                          size: 14,
+                          color: Color(0xFFC7C7CC),
+                        ),
                       ),
-                      onTap: _isLoadingCostumes ? null : _pickCostume,
+                      onTap: _isLoadingCostumes || _costumes.isEmpty
+                          ? null
+                          : () => _togglePicker(costume: !_isCostumeExpanded),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: _isCostumeExpanded && _costumes.isNotEmpty
+                          ? _buildCostumePicker()
+                          : const SizedBox.shrink(),
                     ),
                     CupertinoListTile(
                       key: const Key('manual_start_date_row'),
@@ -865,12 +812,30 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         dateFormat.format(_startDate),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                       ),
-                      trailing: const Icon(
-                        CupertinoIcons.chevron_right,
-                        size: 14,
-                        color: Color(0xFFC7C7CC),
+                      trailing: AnimatedRotation(
+                        turns: _isStartDateExpanded ? 0.25 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOutCubic,
+                        child: const Icon(
+                          CupertinoIcons.chevron_right,
+                          size: 14,
+                          color: Color(0xFFC7C7CC),
+                        ),
                       ),
-                      onTap: _pickStartDate,
+                      onTap: () => _togglePicker(start: !_isStartDateExpanded),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: _isStartDateExpanded
+                          ? _buildDatePicker(
+                              value: _startDate,
+                              minimumDate: DateTime(2020),
+                              onChanged: _onStartDateChanged,
+                              onClose: () => _togglePicker(),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                     CupertinoListTile(
                       key: const Key('manual_end_date_row'),
@@ -896,12 +861,30 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                               ),
                             )
                           : null,
-                      trailing: const Icon(
-                        CupertinoIcons.chevron_right,
-                        size: 14,
-                        color: Color(0xFFC7C7CC),
+                      trailing: AnimatedRotation(
+                        turns: _isEndDateExpanded ? 0.25 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOutCubic,
+                        child: const Icon(
+                          CupertinoIcons.chevron_right,
+                          size: 14,
+                          color: Color(0xFFC7C7CC),
+                        ),
                       ),
-                      onTap: _pickEndDate,
+                      onTap: () => _togglePicker(end: !_isEndDateExpanded),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: _isEndDateExpanded
+                          ? _buildDatePicker(
+                              value: _endDate,
+                              minimumDate: _startDate,
+                              onChanged: _onEndDateChanged,
+                              onClose: () => _togglePicker(),
+                            )
+                          : const SizedBox.shrink(),
                     ),
                     CupertinoListTile(
                       key: const Key('manual_purpose_row'),
@@ -917,12 +900,25 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         _purposeLabel,
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                       ),
-                      trailing: const Icon(
-                        CupertinoIcons.chevron_right,
-                        size: 14,
-                        color: Color(0xFFC7C7CC),
+                      trailing: AnimatedRotation(
+                        turns: _isPurposeExpanded ? 0.25 : 0.0,
+                        duration: const Duration(milliseconds: 250),
+                        curve: Curves.easeInOutCubic,
+                        child: const Icon(
+                          CupertinoIcons.chevron_right,
+                          size: 14,
+                          color: Color(0xFFC7C7CC),
+                        ),
                       ),
-                      onTap: _pickPurpose,
+                      onTap: () => _togglePicker(purpose: !_isPurposeExpanded),
+                    ),
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 300),
+                      curve: Curves.easeInOutCubic,
+                      alignment: Alignment.topCenter,
+                      child: _isPurposeExpanded
+                          ? _buildPurposePicker()
+                          : const SizedBox.shrink(),
                     ),
                   ],
                 ),

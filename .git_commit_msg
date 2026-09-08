@@ -1,26 +1,26 @@
-v1.0.51: UI consistency audit — unified design tokens across all modals
+v1.0.52: Convert Booking Manual picker rows to inline collapsible pattern
+
+Previously, Booking Manual's 4 picker rows (Kostum, Tanggal Mulai, Tanggal
+Selesai, Keperluan) opened separate bottom sheet popups via showCupertinoModal
+Popup. Now they expand inline with AnimatedRotation chevron + AnimatedSize +
+CupertinoPicker/CupertinoDatePicker, matching the pattern used by:
+- add_costume_sheet.dart size picker (CupertinoPicker)
+- installment_list_screen.dart date picker (CupertinoDatePicker)
 
 Changes:
-- Replace ALL hardcoded Color(0xFFF2F2F7) → AppColors.background across 10 files
-  (add_costume_sheet, calendar_screen, installment_list_screen,
-   installment_detail_screen, main_scaffold, draggable_sheet_container,
-   costume_card)
-- Replace inline TextStyle(fontSize:17,w600) → AppTypography.navTitle
-  in add_costume_sheet nav bar
-- Replace inline TextStyle(fontSize:15,w600,pink) → AppTypography.actionButton
-  in add_costume_sheet Simpan button
-- Add AppTypography import to add_costume_sheet
-- Add AppColors import to draggable_sheet_container
-- Fix add_costume_sheet size picker row: add title "Ukuran" with
-  value moved to additionalInfo (matches pattern of other modals)
-- Fix installment_list_screen date picker row: add title "Jatuh tempo"
-  with formatted date moved to additionalInfo
-- installment_list_screen: CupertinoFormSection → CupertinoListSection
-  (consistent with other modals)
+- Replace _pickStartDate, _pickEndDate, _pickCostume, _pickPurpose with
+  _togglePicker({start, end, costume, purpose}) - only one picker can be
+  open at a time (auto-closes siblings when opening a new one)
+- Remove _showDatePickerSheet method (replaced by inline picker)
+- Add collapsible picker builder methods: _buildDatePicker, _buildCostumePicker,
+  _buildPurposePicker, _pickerContainer
+- Each picker row: trailing Chevron wrapped in AnimatedRotation(turns: 0.25 if
+  expanded), AnimatedSize(300ms) below row with picker + Selesai button
+- Kostum row disabled (onTap: null) when costumes list is empty to prevent
+  opening empty picker
 
-Result: All 3 form modals (Kostum Baru, Booking Manual, Cicilan Baru)
-now share identical widget patterns, icon sizes, text alignment,
-color tokens, and typography styles.
-
-Verified: flutter analyze 0 issues, 89/89 tests passing.
-Pixel-verified text alignment x=211-213 across all rows in all modals.
+Side effect cleanup:
+- All 10 hardcoded Color(0xFFF2F2F7) references already migrated to
+  AppColors.background in v1.0.51
+- Update doc comment to reflect CupertinoListSection.insetGrouped + inline
+  picker pattern
