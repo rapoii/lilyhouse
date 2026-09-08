@@ -160,13 +160,6 @@ class _DraggableSheetContainerState extends State<DraggableSheetContainer>
           decoration: BoxDecoration(
             color: widget.backgroundColor ?? AppColors.background,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-            boxShadow: [
-              BoxShadow(
-                color: CupertinoColors.black.withValues(alpha: 0.10),
-                blurRadius: 18,
-                offset: const Offset(0, -4),
-              ),
-            ],
           ),
           clipBehavior: Clip.antiAlias,
           child: MediaQuery.removePadding(

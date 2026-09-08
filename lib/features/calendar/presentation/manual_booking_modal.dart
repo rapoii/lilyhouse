@@ -406,9 +406,10 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
           ),
           child: SafeArea(
             top: false,
-            child: ListView(
-              padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 24),
-              physics: const BouncingScrollPhysics(),
+            child: RepaintBoundary(
+              child: ListView(
+                padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 24),
+                physics: const BouncingScrollPhysics(),
               children: [
                 // ====== Section 1: DATA PENYEWA ======
                 CupertinoListSection.insetGrouped(
@@ -706,6 +707,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                   ],
                 ),
               ],
+            ),
             ),
           ),
         ),

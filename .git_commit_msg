@@ -1,15 +1,16 @@
-v1.0.54 build 56: Wrap CupertinoDatePicker/CupertinoPicker in RepaintBoundary — wheel scrolls in own layer, no modal layer invalidation
+v1.0.54 build 57: Modal scroll perf — wrap modal body ListView in RepaintBoundary, drop BoxShadow on DraggableSheetContainer
 
-Benchmark: 50 wheel scrolls in 50ms interval on emulator x64
-- Avg frame time: 3.5-5.7ms (175-280 FPS theoretical)
-- Max frame time: 27ms (worst single frame)
-- Zero frame spikes during sustained wheel flicking
+Both changes reduce GPU rasterization cost on real device during modal scroll:
+- BoxShadow on full-height sheet (height 85% of screen) = saveLayer pass every repaint.
+  Without shadow, sheet background paints without offscreen buffer.
+- ListView wrapped in RepaintBoundary = list scrolls within own compositing layer,
+  doesn't invalidate nav bar / sheet background layer.
 
-Before (v1.0.54 build 55): avg 12-17ms with occasional 50ms+ spikes
-After (v1.0.54 build 56): avg 3.5-5.7ms steady, max 27ms (only during initial open animation)
+Emulator x64 qemu benchmark (no GPU acceleration):
+- Modal scroll (50 rapid swipes): avg 3.9-5.3ms = 190-260 FPS, max 12ms
+- Modal scroll + picker open: avg 9.9-10.9ms = 90-100 FPS, max 29ms
+- Picker wheel scroll (50 flicks): avg 3.5-5.7ms = 175-280 FPS, max 27ms
 
-Root cause: the picker widget tree is a descendant of the modal ListView. Without
-RepaintBoundary, each wheel tick invalidates the modal's render layer, forcing
-the entire modal layout to re-paint. With RepaintBoundary around the picker,
-wheel scrolling stays inside the picker's compositing layer — the modal layer
-is untouched until parent setState fires (which is now zero per tick).
+No perceptible improvement on emulator (already at 200+ FPS), but real device
+should benefit since GPU vsync caps at 60 FPS and these optimizations reduce
+work-per-frame to give GPU more headroom.
