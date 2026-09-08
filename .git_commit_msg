@@ -1,26 +1,47 @@
-v1.0.52: Convert Booking Manual picker rows to inline collapsible pattern
+v1.0.53: Extract shared inline picker widget — performance fix for 3 modals
 
-Previously, Booking Manual's 4 picker rows (Kostum, Tanggal Mulai, Tanggal
-Selesai, Keperluan) opened separate bottom sheet popups via showCupertinoModal
-Popup. Now they expand inline with AnimatedRotation chevron + AnimatedSize +
-CupertinoPicker/CupertinoDatePicker, matching the pattern used by:
-- add_costume_sheet.dart size picker (CupertinoPicker)
-- installment_list_screen.dart date picker (CupertinoDatePicker)
+Refactored the collapsible inline picker pattern (AnimatedRotation chevron +
+AnimatedSize + CupertinoPicker/CupertinoDatePicker + Selesai button) used
+in Booking Manual, Kostum Baru, and Cicilan Baru into a single shared
+widget so setState calls no longer rebuild the entire modal.
 
-Changes:
-- Replace _pickStartDate, _pickEndDate, _pickCostume, _pickPurpose with
-  _togglePicker({start, end, costume, purpose}) - only one picker can be
-  open at a time (auto-closes siblings when opening a new one)
-- Remove _showDatePickerSheet method (replaced by inline picker)
-- Add collapsible picker builder methods: _buildDatePicker, _buildCostumePicker,
-  _buildPurposePicker, _pickerContainer
-- Each picker row: trailing Chevron wrapped in AnimatedRotation(turns: 0.25 if
-  expanded), AnimatedSize(300ms) below row with picker + Selesai button
-- Kostum row disabled (onTap: null) when costumes list is empty to prevent
-  opening empty picker
+What was slow: each tap or wheel-scroll on a picker called setState on the
+parent modal State. The parent rebuilds the whole ListView with all sections
+(text fields, image pickers, picker rows). With 4 pickers in Booking Manual
+and shared `setState` for every wheel micro-step on the date picker, this
+caused visible jank on slower devices.
 
-Side effect cleanup:
-- All 10 hardcoded Color(0xFFF2F2F7) references already migrated to
-  AppColors.background in v1.0.51
-- Update doc comment to reflect CupertinoListSection.insetGrouped + inline
-  picker pattern
+The fix: new core widget lib/core/widgets/inline_picker_row.dart owns the
+expand/collapse State internally. The parent modal now just supplies
+`items`, `selectedKey`, and `onSelected`/`onChanged` callbacks. The
+`CupertinoPicker`/`CupertinoDatePicker` widget tree (heavy: 180px wheel,
+scroll controllers, item children) lives inside the picker's own State, so
+parent rebuilds never re-create them.
+
+API:
+  InlinePickerRow  — generic CupertinoPicker row (used for Ukuran, Kostum,
+                     Keperluan). items: List<InlinePickerItem>, supports
+                     subtitle, disabled state, placeholder text.
+  InlineDatePickerRow — CupertinoDatePicker row (used for Tanggal Mulai,
+                     Tanggal Selesai, Jatuh tempo). Supports Hapus Tanggal
+                     secondary button.
+
+Verified visually on emulator for all 3 modals:
+  - Kostum Baru: Ukuran picker opens inline, S/M/L/XL/All Size/Custom shown.
+  - Cicilan Baru: Jatuh tempo picker opens inline, 3 wheels month/day/year,
+    Hapus Tanggal + Selesai buttons.
+  - Booking Manual: 4 pickers (Kostum, Tanggal Mulai, Tanggal Selesai,
+    Keperluan) all open inline, Selesai buttons.
+
+Code impact:
+  - manual_booking_modal.dart: removed 4 _isXExpanded bools, 5 helper
+    methods (_togglePicker/_onStartDateChanged/_onEndDateChanged/
+    _onCostumeChanged/_onPurposeChanged), 4 _build*Picker + _pickerContainer
+    methods (-209 lines).
+  - add_costume_sheet.dart: removed _isSizePickerExpanded state +
+    _showSizePicker method, replaced size row with InlinePickerRow.
+  - installment_list_screen.dart: removed isDatePickerExpanded state,
+    replaced date row with InlineDatePickerRow.
+  - 89/89 tests pass, flutter analyze clean.
+
+MEDIA:D:/Software/Hermes Workspace/projects/lilyhouse/LilyHouse-v1.0.53-arm64.apk

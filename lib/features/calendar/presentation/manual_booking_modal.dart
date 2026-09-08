@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
+import '../../../core/widgets/inline_picker_row.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../../costumes/data/costume_repository.dart';
 import '../../costumes/domain/costume.dart';
@@ -64,12 +65,6 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   bool _isSaving = false;
   String? _costumeError;
   String? _dateError;
-
-  // Collapsible inline picker states (Apple HIG pattern).
-  bool _isStartDateExpanded = false;
-  bool _isEndDateExpanded = false;
-  bool _isCostumeExpanded = false;
-  bool _isPurposeExpanded = false;
 
   @override
   void initState() {
@@ -219,17 +214,25 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     );
   }
 
-  // Apple HIG: only one inline picker can be open at a time — auto-close
-  // siblings when toggling a new one open.
-  void _togglePicker({bool? start, bool? end, bool? costume, bool? purpose}) {
-    setState(() {
-      _isStartDateExpanded = start ?? false;
-      _isEndDateExpanded = end ?? false;
-      _isCostumeExpanded = costume ?? false;
-      _isPurposeExpanded = purpose ?? false;
-    });
+  String get _purposeLabel {
+    switch (_purpose) {
+      case 'event':
+        return 'Event Cosplay';
+      case 'photoshoot':
+        return 'Photoshoot';
+      case 'lainnya':
+        return 'Lainnya';
+      case 'homecos':
+      default:
+        return 'Homecos (Pakai Sendiri)';
+    }
   }
 
+  // Picker callbacks. These still call setState on the parent so the
+  // date/costume/purpose value can be re-read by the rest of the form,
+  // but the heavy work (CupertinoPicker / CupertinoDatePicker scroll
+  // controllers, picker child widgets) is owned by the InlinePickerRow
+  // State, which is preserved across rebuilds.
   void _onStartDateChanged(DateTime d) {
     setState(() {
       _startDate = d;
@@ -245,141 +248,6 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       _endDate = d;
       _dateError = null;
     });
-  }
-
-  void _onCostumeChanged(int idx) {
-    if (idx < 0 || idx >= _costumes.length) return;
-    setState(() {
-      _selectedCostume = _costumes[idx];
-      _costumeError = null;
-    });
-  }
-
-  void _onPurposeChanged(int idx) {
-    const options = ['homecos', 'event', 'photoshoot', 'lainnya'];
-    if (idx < 0 || idx >= options.length) return;
-    setState(() => _purpose = options[idx]);
-  }
-
-  String get _purposeLabel {
-    switch (_purpose) {
-      case 'event':
-        return 'Event Cosplay';
-      case 'photoshoot':
-        return 'Photoshoot';
-      case 'lainnya':
-        return 'Lainnya';
-      case 'homecos':
-      default:
-        return 'Homecos (Pakai Sendiri)';
-    }
-  }
-
-  // --- Collapsible inline picker builders (Apple HIG pattern) ---
-
-  Widget _buildDatePicker({
-    required DateTime value,
-    DateTime? minimumDate,
-    required ValueChanged<DateTime> onChanged,
-    required VoidCallback onClose,
-  }) {
-    return _pickerContainer(
-      child: CupertinoDatePicker(
-        mode: CupertinoDatePickerMode.date,
-        initialDateTime: value,
-        minimumYear: 2020,
-        maximumYear: 2035,
-        minimumDate: minimumDate,
-        onDateTimeChanged: onChanged,
-      ),
-      onClose: onClose,
-    );
-  }
-
-  Widget _buildCostumePicker() {
-    final initialIdx = _selectedCostume != null
-        ? _costumes.indexWhere((c) => c.id == _selectedCostume!.id)
-        : 0;
-    return _pickerContainer(
-      child: CupertinoPicker(
-        itemExtent: 36,
-        scrollController: FixedExtentScrollController(
-          initialItem: initialIdx < 0 ? 0 : initialIdx,
-        ),
-        onSelectedItemChanged: _onCostumeChanged,
-        children: _costumes
-            .map((c) => Center(
-                  child: Text(
-                    '${c.name} (${c.size})',
-                    style: const TextStyle(fontSize: 18, color: AppColors.textDark),
-                  ),
-                ))
-            .toList(),
-      ),
-      onClose: () => _togglePicker(),
-    );
-  }
-
-  Widget _buildPurposePicker() {
-    const options = ['homecos', 'event', 'photoshoot', 'lainnya'];
-    const labels = {
-      'homecos': 'Homecos (Pakai Sendiri)',
-      'event': 'Event Cosplay',
-      'photoshoot': 'Photoshoot',
-      'lainnya': 'Lainnya',
-    };
-    final initialIdx = options.indexOf(_purpose);
-    return _pickerContainer(
-      child: CupertinoPicker(
-        itemExtent: 36,
-        scrollController: FixedExtentScrollController(
-          initialItem: initialIdx < 0 ? 0 : initialIdx,
-        ),
-        onSelectedItemChanged: _onPurposeChanged,
-        children: options
-            .map((v) => Center(
-                  child: Text(
-                    labels[v] ?? v,
-                    style: const TextStyle(fontSize: 18, color: AppColors.textDark),
-                  ),
-                ))
-            .toList(),
-      ),
-      onClose: () => _togglePicker(),
-    );
-  }
-
-  Widget _pickerContainer({required Widget child, required VoidCallback onClose}) {
-    return Container(
-      // No opaque color — the picker renders its own background, and a
-      // flat white box would clip the section's rounded bottom corners.
-      decoration: const BoxDecoration(
-        border: Border(
-          top: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
-        ),
-      ),
-      padding: const EdgeInsets.only(top: 8, bottom: 12),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(height: 180, child: child),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  onPressed: onClose,
-                  child: const Text('Selesai', style: AppTypography.actionButton),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   bool _validate() {
@@ -743,182 +611,76 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
-                    CupertinoListTile(
+                    InlinePickerRow(
                       key: const Key('manual_costume_row'),
-                      leading: const SquircleIcon(
-                        icon: CupertinoIcons.bag_fill,
-                        color: Color(0xFFFF85A1),
-                      ),
-                      title: const Text(
-                        'Kostum',
-                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
-                      ),
-                      additionalInfo: Text(
-                        _isLoadingCostumes
-                            ? 'Memuat...'
-                            : (_selectedCostume != null
-                                ? '${_selectedCostume!.name} (${_selectedCostume!.size})'
-                                : 'Pilih kostum'),
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: _selectedCostume != null
-                              ? AppColors.textDark
-                              : const Color(0xFF8E8E93),
-                        ),
-                      ),
-                      subtitle: _costumeError != null
-                          ? Text(
-                              _costumeError!,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppColors.dangerRose,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            )
-                          : null,
-                      trailing: AnimatedRotation(
-                        turns: _isCostumeExpanded ? 0.25 : 0.0,
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOutCubic,
-                        child: const Icon(
-                          CupertinoIcons.chevron_right,
-                          size: 14,
-                          color: Color(0xFFC7C7CC),
-                        ),
-                      ),
-                      onTap: _isLoadingCostumes || _costumes.isEmpty
-                          ? null
-                          : () => _togglePicker(costume: !_isCostumeExpanded),
+                      icon: CupertinoIcons.bag_fill,
+                      iconColor: const Color(0xFFFF85A1),
+                      label: 'Kostum',
+                      value: _isLoadingCostumes
+                          ? 'Memuat...'
+                          : (_selectedCostume != null
+                              ? '${_selectedCostume!.name} (${_selectedCostume!.size})'
+                              : null),
+                      placeholder: 'Pilih kostum',
+                      subtitle: _costumeError,
+                      items: _costumes
+                          .map((c) => InlinePickerItem(
+                                c.id,
+                                '${c.name} (${c.size})',
+                              ))
+                          .toList(growable: false),
+                      selectedKey: _selectedCostume?.id,
+                      disabled: _isLoadingCostumes || _costumes.isEmpty,
+                      onSelected: (key, _) {
+                        final c = _costumes.firstWhere(
+                          (x) => x.id == key,
+                          orElse: () => _costumes.first,
+                        );
+                        setState(() {
+                          _selectedCostume = c;
+                          _costumeError = null;
+                        });
+                      },
                     ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOutCubic,
-                      alignment: Alignment.topCenter,
-                      child: _isCostumeExpanded && _costumes.isNotEmpty
-                          ? _buildCostumePicker()
-                          : const SizedBox.shrink(),
-                    ),
-                    CupertinoListTile(
+                    InlineDatePickerRow(
                       key: const Key('manual_start_date_row'),
-                      leading: const SquircleIcon(
-                        icon: CupertinoIcons.calendar,
-                        color: Color(0xFFFF9500),
-                      ),
-                      title: const Text(
-                        'Tanggal Mulai',
-                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
-                      ),
-                      additionalInfo: Text(
-                        dateFormat.format(_startDate),
-                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                      ),
-                      trailing: AnimatedRotation(
-                        turns: _isStartDateExpanded ? 0.25 : 0.0,
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOutCubic,
-                        child: const Icon(
-                          CupertinoIcons.chevron_right,
-                          size: 14,
-                          color: Color(0xFFC7C7CC),
-                        ),
-                      ),
-                      onTap: () => _togglePicker(start: !_isStartDateExpanded),
+                      icon: CupertinoIcons.calendar,
+                      iconColor: const Color(0xFFFF9500),
+                      label: 'Tanggal Mulai',
+                      value: _startDate,
+                      formatValue: dateFormat.format,
+                      initialDate: _startDate,
+                      minimumDate: DateTime(2020),
+                      onChanged: _onStartDateChanged,
                     ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOutCubic,
-                      alignment: Alignment.topCenter,
-                      child: _isStartDateExpanded
-                          ? _buildDatePicker(
-                              value: _startDate,
-                              minimumDate: DateTime(2020),
-                              onChanged: _onStartDateChanged,
-                              onClose: () => _togglePicker(),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                    CupertinoListTile(
+                    InlineDatePickerRow(
                       key: const Key('manual_end_date_row'),
-                      leading: const SquircleIcon(
-                        icon: CupertinoIcons.calendar_badge_minus,
-                        color: Color(0xFFFF3B30),
-                      ),
-                      title: const Text(
-                        'Tanggal Selesai',
-                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
-                      ),
-                      additionalInfo: Text(
-                        dateFormat.format(_endDate),
-                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                      ),
-                      subtitle: _dateError != null
-                          ? Text(
-                              _dateError!,
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppColors.dangerRose,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            )
-                          : null,
-                      trailing: AnimatedRotation(
-                        turns: _isEndDateExpanded ? 0.25 : 0.0,
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOutCubic,
-                        child: const Icon(
-                          CupertinoIcons.chevron_right,
-                          size: 14,
-                          color: Color(0xFFC7C7CC),
-                        ),
-                      ),
-                      onTap: () => _togglePicker(end: !_isEndDateExpanded),
+                      icon: CupertinoIcons.calendar_badge_minus,
+                      iconColor: const Color(0xFFFF3B30),
+                      label: 'Tanggal Selesai',
+                      value: _endDate,
+                      formatValue: dateFormat.format,
+                      initialDate: _endDate,
+                      minimumDate: _startDate,
+                      subtitle: _dateError,
+                      onChanged: _onEndDateChanged,
                     ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOutCubic,
-                      alignment: Alignment.topCenter,
-                      child: _isEndDateExpanded
-                          ? _buildDatePicker(
-                              value: _endDate,
-                              minimumDate: _startDate,
-                              onChanged: _onEndDateChanged,
-                              onClose: () => _togglePicker(),
-                            )
-                          : const SizedBox.shrink(),
-                    ),
-                    CupertinoListTile(
+                    InlinePickerRow(
                       key: const Key('manual_purpose_row'),
-                      leading: const SquircleIcon(
-                        icon: CupertinoIcons.tag_fill,
-                        color: Color(0xFF5856D6),
-                      ),
-                      title: const Text(
-                        'Keperluan',
-                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
-                      ),
-                      additionalInfo: Text(
-                        _purposeLabel,
-                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                      ),
-                      trailing: AnimatedRotation(
-                        turns: _isPurposeExpanded ? 0.25 : 0.0,
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOutCubic,
-                        child: const Icon(
-                          CupertinoIcons.chevron_right,
-                          size: 14,
-                          color: Color(0xFFC7C7CC),
-                        ),
-                      ),
-                      onTap: () => _togglePicker(purpose: !_isPurposeExpanded),
-                    ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOutCubic,
-                      alignment: Alignment.topCenter,
-                      child: _isPurposeExpanded
-                          ? _buildPurposePicker()
-                          : const SizedBox.shrink(),
+                      icon: CupertinoIcons.tag_fill,
+                      iconColor: const Color(0xFF5856D6),
+                      label: 'Keperluan',
+                      value: _purposeLabel,
+                      items: const [
+                        InlinePickerItem('homecos', 'Homecos (Pakai Sendiri)'),
+                        InlinePickerItem('event', 'Event Cosplay'),
+                        InlinePickerItem('photoshoot', 'Photoshoot'),
+                        InlinePickerItem('lainnya', 'Lainnya'),
+                      ],
+                      selectedKey: _purpose,
+                      onSelected: (key, _) {
+                        setState(() => _purpose = key);
+                      },
                     ),
                   ],
                 ),

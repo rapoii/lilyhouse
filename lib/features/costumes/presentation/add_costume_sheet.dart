@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
+import '../../../core/widgets/inline_picker_row.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../data/costume_repository.dart';
 import '../domain/costume.dart';
@@ -33,7 +34,6 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
   final CostumeStatus _selectedStatus = CostumeStatus.available;
   String? _selectedImagePath;
   final List<String> _accessories = [];
-  bool _isSizePickerExpanded = false;
   bool _isSaving = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -126,12 +126,6 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
         ],
       ),
     );
-  }
-
-  void _showSizePicker() {
-    setState(() {
-      _isSizePickerExpanded = !_isSizePickerExpanded;
-    });
   }
 
   Future<void> _save() async {
@@ -337,107 +331,24 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                         decoration: null,
                       ),
                     ),
-                    CupertinoListTile(
-                      leading: const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
-                      title: const Text(
-                        'Ukuran',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: AppColors.textDark,
-                          fontWeight: FontWeight.w400,
-                        ),
-                      ),
-                      additionalInfo: Text(
-                        _selectedSize,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          color: Color(0xFF8E8E93),
-                        ),
-                      ),
-                      trailing: AnimatedRotation(
-                        turns: _isSizePickerExpanded ? 0.25 : 0.0,
-                        duration: const Duration(milliseconds: 250),
-                        curve: Curves.easeInOutCubic,
-                        child: const Icon(
-                          CupertinoIcons.chevron_right,
-                          size: 14,
-                          color: Color(0xFFC7C7CC),
-                        ),
-                      ),
-                      onTap: _showSizePicker,
-                    ),
-                    AnimatedSize(
-                      duration: const Duration(milliseconds: 300),
-                      curve: Curves.easeInOutCubic,
-                      alignment: Alignment.topCenter,
-                      child: _isSizePickerExpanded
-                          ? Container(
-                              // No opaque color — the CupertinoPicker below
-                              // renders its own background, and a flat white
-                              // box here would clip the section's rounded
-                              // bottom corners to a square.
-                              decoration: const BoxDecoration(
-                                border: Border(
-                                  top: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
-                                ),
-                              ),
-                              padding: const EdgeInsets.only(top: 8, bottom: 12),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  SizedBox(
-                                    height: 180,
-                                    child: CupertinoPicker(
-                                      itemExtent: 36,
-                                      scrollController: FixedExtentScrollController(
-                                        initialItem: ['S', 'M', 'L', 'XL', 'All Size', 'Custom']
-                                            .indexOf(_selectedSize)
-                                            .clamp(0, 5),
-                                      ),
-                                      onSelectedItemChanged: (idx) {
-                                        const sizes = ['S', 'M', 'L', 'XL', 'All Size', 'Custom'];
-                                        setState(() => _selectedSize = sizes[idx]);
-                                      },
-                                      children: const ['S', 'M', 'L', 'XL', 'All Size', 'Custom']
-                                          .map((s) => Center(
-                                                child: Text(
-                                                  s,
-                                                  style: const TextStyle(
-                                                    fontSize: 18,
-                                                    color: AppColors.textDark,
-                                                  ),
-                                                ),
-                                              ))
-                                          .toList(),
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        CupertinoButton(
-                                          padding: EdgeInsets.zero,
-                                          minimumSize: Size.zero,
-                                          onPressed: () {
-                                            setState(() => _isSizePickerExpanded = false);
-                                          },
-                                          child: const Text(
-                                            'Selesai',
-                                            style: TextStyle(
-                                              color: AppColors.primaryPink,
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : const SizedBox.shrink(),
+                    InlinePickerRow(
+                      icon: CupertinoIcons.tag_fill,
+                      iconColor: const Color(0xFFFF9500),
+                      label: 'Ukuran',
+                      value: _selectedSize,
+                      placeholder: 'Pilih',
+                      items: const [
+                        InlinePickerItem('S', 'S'),
+                        InlinePickerItem('M', 'M'),
+                        InlinePickerItem('L', 'L'),
+                        InlinePickerItem('XL', 'XL'),
+                        InlinePickerItem('All Size', 'All Size'),
+                        InlinePickerItem('Custom', 'Custom'),
+                      ],
+                      selectedKey: _selectedSize,
+                      onSelected: (key, _) {
+                        setState(() => _selectedSize = key);
+                      },
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.money_dollar_circle_fill, color: Color(0xFF34C759)),
