@@ -238,8 +238,8 @@ class _InlinePickerRowState extends State<InlinePickerRow> {
           onTap: widget.disabled ? null : _toggle,
         ),
         AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOutCubic,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
           alignment: Alignment.topCenter,
           child: _expanded
               ? _PickerBody(
@@ -248,14 +248,14 @@ class _InlinePickerRowState extends State<InlinePickerRow> {
                   onSelected: _onWheelChanged,
                   onClose: _onClose,
                 )
-              : const SizedBox.shrink(),
+              : const SizedBox(width: double.infinity),
         ),
       ],
     );
   }
 }
 
-class _PickerBody extends StatelessWidget {
+class _PickerBody extends StatefulWidget {
   final List<Widget> cachedChildren;
   final int initialIndex;
   final void Function(int) onSelected;
@@ -267,6 +267,25 @@ class _PickerBody extends StatelessWidget {
     required this.onSelected,
     required this.onClose,
   });
+
+  @override
+  State<_PickerBody> createState() => _PickerBodyState();
+}
+
+class _PickerBodyState extends State<_PickerBody> {
+  late final FixedExtentScrollController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = FixedExtentScrollController(initialItem: widget.initialIndex);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -287,10 +306,9 @@ class _PickerBody extends StatelessWidget {
               height: 180,
               child: CupertinoPicker(
                 itemExtent: 36,
-                scrollController:
-                    FixedExtentScrollController(initialItem: initialIndex),
-                onSelectedItemChanged: onSelected,
-                children: cachedChildren,
+                scrollController: _controller,
+                onSelectedItemChanged: widget.onSelected,
+                children: widget.cachedChildren,
               ),
             ),
           ),
@@ -302,8 +320,9 @@ class _PickerBody extends StatelessWidget {
                 CupertinoButton(
                   padding: EdgeInsets.zero,
                   minimumSize: Size.zero,
-                  onPressed: onClose,
-                  child: const Text('Selesai', style: AppTypography.actionButton),
+                  onPressed: widget.onClose,
+                  child: const Text('Selesai',
+                      style: AppTypography.actionButton),
                 ),
               ],
             ),
@@ -464,8 +483,8 @@ class _InlineDatePickerRowState extends State<InlineDatePickerRow> {
           onTap: _toggle,
         ),
         AnimatedSize(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOutCubic,
+          duration: const Duration(milliseconds: 220),
+          curve: Curves.easeOutCubic,
           alignment: Alignment.topCenter,
           child: _expanded
               ? _DatePickerBody(
@@ -509,6 +528,8 @@ class _DatePickerBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      // No opaque color — the picker renders its own background, and an
+      // opaque white box would clip the section's rounded bottom corners.
       decoration: const BoxDecoration(
         border: Border(
           top: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
@@ -535,8 +556,9 @@ class _DatePickerBody extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Row(
-              mainAxisAlignment:
-                  onClear != null ? MainAxisAlignment.spaceBetween : MainAxisAlignment.end,
+              mainAxisAlignment: onClear != null
+                  ? MainAxisAlignment.spaceBetween
+                  : MainAxisAlignment.end,
               children: [
                 if (onClear != null)
                   CupertinoButton(
@@ -556,7 +578,8 @@ class _DatePickerBody extends StatelessWidget {
                   padding: EdgeInsets.zero,
                   minimumSize: Size.zero,
                   onPressed: onClose,
-                  child: const Text('Selesai', style: AppTypography.actionButton),
+                  child: const Text('Selesai',
+                      style: AppTypography.actionButton),
                 ),
               ],
             ),
