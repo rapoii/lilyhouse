@@ -1,18 +1,26 @@
-v1.0.54 build 59: delay onConfirmed after collapse animation
+v1.0.55: replace inline picker with Cupertino sheet picker
 
-Root cause of collapse stutter: onConfirmed fires BEFORE the reverse
-animation completes. The parent modal's setState triggers a full modal
-rebuild during the 220ms collapse animation. Every animation frame
-competes with the modal rebuild for the frame budget.
+Inline picker (expand-collapse in form) stutters on real devices
+even after 10+ build attempts — root cause is the picker
+rebuilding inside a scrollable CupertinoListSection during animation,
+overlapping with parent setState on every tick.
 
-Fix: move onConfirmed call into the .then() callback of
-_expandController.reverse(). Parent setState now fires ONCE after the
-animation is complete and the picker is visually gone.
+New pattern: tap row -> showCupertinoModalPopup opens a Cupertino
+bottom sheet with the CupertinoPicker / CupertinoDatePicker. Done
+button commits. The picker renders in a separate overlay route with
+its own layer, so it never competes with the parent scroll form for
+GPU. The original modal does not rebuild while the picker is open.
 
-Also:
-- Replaced AnimatedSize with manual AnimationController + ClipRect +
-  Align(heightFactor: 0→1) from build 58. No per-frame parent layout.
-- Dropped AnimatedRotation on chevron (static Icon). Eliminates second
-  implicit ticker during expand/collapse.
-- Removed Offstage/TickerMode pre-mount (caused stale state issues).
-  Picker body conditionally rendered with `if (_expanded)`.
+This is the same UX pattern Apple uses in iOS Settings, Calendar,
+Reminders. Apple HIG compliant. Implemented as showSheetPicker<T>
+and showSheetDatePicker in lib/core/widgets/sheet_picker.dart.
+
+Replaced:
+- 4 call sites: manual_booking_modal (Kostum, Tgl Mulai, Tgl Selesai,
+  Keperluan), installment_list_screen (Jatuh tempo),
+  add_costume_sheet (Ukuran).
+- Old inline_picker_row.dart removed.
+
+Tested: flutter analyze 0 issues, flutter test 89/89 pass, arm64
+APK built (md5 d227241b0adc2a3d865e681ba72da335, libapp.so in
+arm64-v8a only).

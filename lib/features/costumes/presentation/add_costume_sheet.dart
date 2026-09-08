@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
-import '../../../core/widgets/inline_picker_row.dart';
+import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../data/costume_repository.dart';
 import '../domain/costume.dart';
@@ -331,23 +331,46 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                         decoration: null,
                       ),
                     ),
-                    InlinePickerRow(
-                      icon: CupertinoIcons.tag_fill,
-                      iconColor: const Color(0xFFFF9500),
-                      label: 'Ukuran',
-                      value: _selectedSize,
-                      placeholder: 'Pilih',
-                      items: const [
-                        InlinePickerItem('S', 'S'),
-                        InlinePickerItem('M', 'M'),
-                        InlinePickerItem('L', 'L'),
-                        InlinePickerItem('XL', 'XL'),
-                        InlinePickerItem('All Size', 'All Size'),
-                        InlinePickerItem('Custom', 'Custom'),
-                      ],
-                      selectedKey: _selectedSize,
-                      onConfirmed: (key, _) {
-                        setState(() => _selectedSize = key);
+                    CupertinoListTile(
+                      key: const Key('add_costume_size_row'),
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.tag_fill,
+                        color: Color(0xFFFF9500),
+                      ),
+                      title: const Text(
+                        'Ukuran',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        _selectedSize,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          color: AppColors.textDark,
+                        ),
+                      ),
+                      trailing: const Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 14,
+                        color: Color(0xFFC7C7CC),
+                      ),
+                      onTap: () async {
+                        const items = [
+                          SheetPickerItem('S', 'S'),
+                          SheetPickerItem('M', 'M'),
+                          SheetPickerItem('L', 'L'),
+                          SheetPickerItem('XL', 'XL'),
+                          SheetPickerItem('All Size', 'All Size'),
+                          SheetPickerItem('Custom', 'Custom'),
+                        ];
+                        final key = await showSheetPicker<String>(
+                          context: context,
+                          title: 'Ukuran',
+                          currentValue: _selectedSize,
+                          items: items,
+                        );
+                        if (key != null) {
+                          setState(() => _selectedSize = key);
+                        }
                       },
                     ),
                     CupertinoListTile(

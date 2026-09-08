@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
-import '../../../core/widgets/inline_picker_row.dart';
+import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../../costumes/data/costume_repository.dart';
 import '../../costumes/domain/costume.dart';
@@ -595,88 +595,181 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
-                    InlinePickerRow(
+                    CupertinoListTile(
                       key: const Key('manual_costume_row'),
-                      icon: CupertinoIcons.bag_fill,
-                      iconColor: const Color(0xFFFF85A1),
-                      label: 'Kostum',
-                      value: _isLoadingCostumes
-                          ? 'Memuat...'
-                          : (_selectedCostume != null
-                              ? '${_selectedCostume!.name} (${_selectedCostume!.size})'
-                              : null),
-                      placeholder: 'Pilih kostum',
-                      subtitle: _costumeError,
-                      items: _costumes
-                          .map((c) => InlinePickerItem(
-                                c.id,
-                                '${c.name} (${c.size})',
-                              ))
-                          .toList(growable: false),
-                      selectedKey: _selectedCostume?.id,
-                      disabled: _isLoadingCostumes || _costumes.isEmpty,
-                      onConfirmed: (key, _) {
-                        final c = _costumes.firstWhere(
-                          (x) => x.id == key,
-                          orElse: () => _costumes.first,
-                        );
-                        setState(() {
-                          _selectedCostume = c;
-                          _costumeError = null;
-                        });
-                      },
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.bag_fill,
+                        color: Color(0xFFFF85A1),
+                      ),
+                      title: const Text(
+                        'Kostum',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        _isLoadingCostumes
+                            ? 'Memuat...'
+                            : (_selectedCostume != null
+                                ? '${_selectedCostume!.name} (${_selectedCostume!.size})'
+                                : 'Pilih kostum'),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: _selectedCostume != null
+                              ? AppColors.textDark
+                              : const Color(0xFF8E8E93),
+                        ),
+                      ),
+                      subtitle: _costumeError == null
+                          ? null
+                          : Text(_costumeError!,
+                              style: const TextStyle(
+                                  fontSize: 12, color: AppColors.dangerRose)),
+                      trailing: const Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 14,
+                        color: Color(0xFFC7C7CC),
+                      ),
+                      onTap: _isLoadingCostumes || _costumes.isEmpty
+                          ? null
+                          : () async {
+                              final id = await showSheetPicker<String>(
+                                context: context,
+                                title: 'Pilih Kostum',
+                                currentValue: _selectedCostume?.id ?? '',
+                                items: _costumes
+                                    .map((c) => SheetPickerItem<String>(
+                                          c.id,
+                                          '${c.name} (${c.size})',
+                                        ))
+                                    .toList(growable: false),
+                              );
+                              if (id != null) {
+                                final c = _costumes.firstWhere(
+                                  (x) => x.id == id,
+                                  orElse: () => _costumes.first,
+                                );
+                                setState(() {
+                                  _selectedCostume = c;
+                                  _costumeError = null;
+                                });
+                              }
+                            },
                     ),
-                    InlineDatePickerRow(
+                    CupertinoListTile(
                       key: const Key('manual_start_date_row'),
-                      icon: CupertinoIcons.calendar,
-                      iconColor: const Color(0xFFFF9500),
-                      label: 'Tanggal Mulai',
-                      value: _startDate,
-                      formatValue: dateFormat.format,
-                      initialDate: _startDate,
-                      minimumDate: DateTime(2020),
-                      onConfirmed: (d) {
-                        setState(() {
-                          _startDate = d;
-                          if (_endDate.isBefore(_startDate)) {
-                            _endDate = _startDate.add(const Duration(days: 3));
-                          }
-                          _dateError = null;
-                        });
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.calendar,
+                        color: Color(0xFFFF9500),
+                      ),
+                      title: const Text(
+                        'Tanggal Mulai',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        dateFormat.format(_startDate),
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      trailing: const Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 14,
+                        color: Color(0xFFC7C7CC),
+                      ),
+                      onTap: () async {
+                        final d = await showSheetDatePicker(
+                          context: context,
+                          title: 'Tanggal Mulai',
+                          initialDate: _startDate,
+                          minimumDate: DateTime(2020),
+                        );
+                        if (d != null) {
+                          setState(() {
+                            _startDate = d;
+                            if (_endDate.isBefore(_startDate)) {
+                              _endDate = _startDate.add(const Duration(days: 3));
+                            }
+                            _dateError = null;
+                          });
+                        }
                       },
                     ),
-                    InlineDatePickerRow(
+                    CupertinoListTile(
                       key: const Key('manual_end_date_row'),
-                      icon: CupertinoIcons.calendar_badge_minus,
-                      iconColor: const Color(0xFFFF3B30),
-                      label: 'Tanggal Selesai',
-                      value: _endDate,
-                      formatValue: dateFormat.format,
-                      initialDate: _endDate,
-                      minimumDate: _startDate,
-                      subtitle: _dateError,
-                      onConfirmed: (d) {
-                        setState(() {
-                          _endDate = d;
-                          _dateError = null;
-                        });
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.calendar_badge_minus,
+                        color: Color(0xFFFF3B30),
+                      ),
+                      title: const Text(
+                        'Tanggal Selesai',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        dateFormat.format(_endDate),
+                        style: TextStyle(
+                          fontSize: 15,
+                          color: _dateError != null
+                              ? AppColors.dangerRose
+                              : AppColors.textDark,
+                        ),
+                      ),
+                      subtitle: _dateError == null
+                          ? null
+                          : Text(_dateError!,
+                              style: const TextStyle(
+                                  fontSize: 12, color: AppColors.dangerRose)),
+                      trailing: const Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 14,
+                        color: Color(0xFFC7C7CC),
+                      ),
+                      onTap: () async {
+                        final d = await showSheetDatePicker(
+                          context: context,
+                          title: 'Tanggal Selesai',
+                          initialDate: _endDate,
+                          minimumDate: _startDate,
+                        );
+                        if (d != null) {
+                          setState(() {
+                            _endDate = d;
+                            _dateError = null;
+                          });
+                        }
                       },
                     ),
-                    InlinePickerRow(
+                    CupertinoListTile(
                       key: const Key('manual_purpose_row'),
-                      icon: CupertinoIcons.tag_fill,
-                      iconColor: const Color(0xFF5856D6),
-                      label: 'Keperluan',
-                      value: _purposeLabel,
-                      items: const [
-                        InlinePickerItem('homecos', 'Homecos (Pakai Sendiri)'),
-                        InlinePickerItem('event', 'Event Cosplay'),
-                        InlinePickerItem('photoshoot', 'Photoshoot'),
-                        InlinePickerItem('lainnya', 'Lainnya'),
-                      ],
-                      selectedKey: _purpose,
-                      onConfirmed: (key, _) {
-                        setState(() => _purpose = key);
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.tag_fill,
+                        color: Color(0xFF5856D6),
+                      ),
+                      title: const Text(
+                        'Keperluan',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        _purposeLabel,
+                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      trailing: const Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 14,
+                        color: Color(0xFFC7C7CC),
+                      ),
+                      onTap: () async {
+                        const items = [
+                          SheetPickerItem('homecos', 'Homecos (Pakai Sendiri)'),
+                          SheetPickerItem('event', 'Event Cosplay'),
+                          SheetPickerItem('photoshoot', 'Photoshoot'),
+                          SheetPickerItem('lainnya', 'Lainnya'),
+                        ];
+                        final key = await showSheetPicker<String>(
+                          context: context,
+                          title: 'Keperluan',
+                          currentValue: _purpose,
+                          items: items,
+                        );
+                        if (key != null) {
+                          setState(() => _purpose = key);
+                        }
                       },
                     ),
                   ],

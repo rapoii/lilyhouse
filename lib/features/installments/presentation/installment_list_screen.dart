@@ -4,7 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/apple_sliding_segmented_control.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
-import '../../../core/widgets/inline_picker_row.dart';
+import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../data/installment_repository.dart';
 import '../domain/installment.dart';
@@ -207,23 +207,42 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                 decoration: null,
                               ),
                             ),
-                            InlineDatePickerRow(
-                              icon: CupertinoIcons.calendar,
-                              iconColor: const Color(0xFFFF3B30),
-                              label: 'Jatuh tempo',
-                              value: selectedDueDate,
-                              placeholder: 'Opsional',
-                              formatValue: (d) =>
-                                  '${d.day} ${_monthName(d.month)} ${d.year}',
-                              initialDate: selectedDueDate ??
-                                  DateTime.now().add(const Duration(days: 30)),
-                              onConfirmed: (d) {
-                                setSheetState(() => selectedDueDate = d);
-                              },
-                              onClear: () {
-                                setSheetState(() {
-                                  selectedDueDate = null;
-                                });
+                            CupertinoListTile(
+                              key: const Key('installment_due_date_row'),
+                              leading: const SquircleIcon(
+                                icon: CupertinoIcons.calendar,
+                                color: Color(0xFFFF3B30),
+                              ),
+                              title: const Text(
+                                'Jatuh tempo',
+                                style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                              ),
+                              additionalInfo: Text(
+                                selectedDueDate == null
+                                    ? 'Opsional'
+                                    : '${selectedDueDate!.day} ${_monthName(selectedDueDate!.month)} ${selectedDueDate!.year}',
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  color: selectedDueDate == null
+                                      ? const Color(0xFF8E8E93)
+                                      : AppColors.textDark,
+                                ),
+                              ),
+                              trailing: const Icon(
+                                CupertinoIcons.chevron_right,
+                                size: 14,
+                                color: Color(0xFFC7C7CC),
+                              ),
+                              onTap: () async {
+                                final d = await showSheetDatePicker(
+                                  context: ctx,
+                                  title: 'Jatuh Tempo',
+                                  initialDate: selectedDueDate ??
+                                      DateTime.now().add(const Duration(days: 30)),
+                                );
+                                if (d != null) {
+                                  setSheetState(() => selectedDueDate = d);
+                                }
                               },
                             ),
                           ],
