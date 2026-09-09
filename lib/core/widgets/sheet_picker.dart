@@ -81,10 +81,11 @@ Future<DateTime?> showSheetDatePicker({
   );
 }
 
-/// Stateful wrapper that defers CupertinoDatePicker build by one frame.
-/// During the first frame the picker area is an empty Container with the
-/// same background colour — visually invisible. After that single frame
-/// the real CupertinoDatePicker is swapped in and the user never notices.
+/// Stateful wrapper that defers CupertinoDatePicker build until
+/// the modal route's entrance animation has completed.  During the
+/// slide-up transition only a lightweight placeholder is shown, so the
+/// compositing cost stays near zero and animation runs at full fps.
+/// Once the transition settles, the heavy CupertinoDatePicker is swapped in.
 class _DeferredDatePickerSheet extends StatefulWidget {
   final String title;
   final DateTime initialDate;
@@ -108,13 +109,29 @@ class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet> {
   bool _ready = false;
 
   @override
-  void initState() {
-    super.initState();
-    // Schedule the heavy picker build for after the first frame so the
-    // slide-up transition animates at full fps.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) setState(() => _ready = true);
-    });
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_ready) return;
+    final route = ModalRoute.of(context);
+    if (route == null) {
+      // Fallback: no route — build immediately.
+      setState(() => _ready = true);
+      return;
+    }
+    if (route.animation!.isCompleted) {
+      // Animation already done (e.g. instant push).
+      setState(() => _ready = true);
+    } else {
+      // Wait for the entrance animation to finish before building
+      // the heavy CupertinoDatePicker.
+      void listener(AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
+          route.animation!.removeStatusListener(listener);
+          if (mounted) setState(() => _ready = true);
+        }
+      }
+      route.animation!.addStatusListener(listener);
+    }
   }
 
   @override

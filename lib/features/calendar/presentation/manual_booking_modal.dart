@@ -637,6 +637,12 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       onTap: _isLoadingCostumes || _costumes.isEmpty
                           ? null
                           : () async {
+                              final hadFocus = FocusScope.of(context).hasFocus;
+                              if (hadFocus) {
+                                FocusScope.of(context).unfocus();
+                                await Future<void>.delayed(const Duration(milliseconds: 150));
+                                if (!mounted) return;
+                              }
                               final id = await showSheetPicker<String>(
                                 context: context,
                                 title: 'Pilih Kostum',
@@ -680,6 +686,12 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         color: Color(0xFFC7C7CC),
                       ),
                       onTap: () async {
+                        final hadFocus = FocusScope.of(context).hasFocus;
+                        if (hadFocus) {
+                          FocusScope.of(context).unfocus();
+                          await Future<void>.delayed(const Duration(milliseconds: 150));
+                          if (!mounted) return;
+                        }
                         final d = await showSheetDatePicker(
                           context: context,
                           title: 'Tanggal Mulai',
@@ -727,6 +739,12 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         color: Color(0xFFC7C7CC),
                       ),
                       onTap: () async {
+                        final hadFocus = FocusScope.of(context).hasFocus;
+                        if (hadFocus) {
+                          FocusScope.of(context).unfocus();
+                          await Future<void>.delayed(const Duration(milliseconds: 150));
+                          if (!mounted) return;
+                        }
                         final d = await showSheetDatePicker(
                           context: context,
                           title: 'Tanggal Selesai',
@@ -761,6 +779,12 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         color: Color(0xFFC7C7CC),
                       ),
                       onTap: () async {
+                        final hadFocus = FocusScope.of(context).hasFocus;
+                        if (hadFocus) {
+                          FocusScope.of(context).unfocus();
+                          await Future<void>.delayed(const Duration(milliseconds: 150));
+                          if (!mounted) return;
+                        }
                         const items = [
                           SheetPickerItem('homecos', 'Homecos (Pakai Sendiri)'),
                           SheetPickerItem('event', 'Event Cosplay'),
