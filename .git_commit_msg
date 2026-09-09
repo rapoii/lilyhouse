@@ -1,6 +1,11 @@
-v1.0.55 build 69: Booking Manual picker lag — RepaintBoundary per section
+v1.0.55 build 70: deferred CupertinoDatePicker build for smooth animation
 
-Wrap each CupertinoListSection in manual_booking_modal in its own
-RepaintBoundary so opening the date picker no longer forces the whole
-form (5 textfields + 2 image slots + 4 picker rows) to repaint behind
-the modal barrier.
+showSheetDatePicker now wraps CupertinoDatePicker in a stateful
+_DeferredDatePickerSheet that defers the heavy picker build by
+one frame (addPostFrameCallback). During the first frame, only a
+lightweight Container(color: cardBg) is rendered — the slide-up
+animation starts at full fps. After that single frame the real
+CupertinoDatePicker is swapped in.
+
+Also includes build 69 RepaintBoundary-per-section fix for
+manual_booking_modal and build 68 fontFamily consistency fix.

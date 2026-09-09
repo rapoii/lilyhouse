@@ -8,7 +8,8 @@ import '../theme/app_colors.dart';
 ///
 /// The picker is rendered in a separate `showCupertinoModalPopup` overlay
 /// (Flutter's native modal — no custom animation, no layout competition with
-/// the parent scroll form). Zero lag on real devices, by design.
+/// the parent scroll form). The date picker defers its heavy first build
+/// by one frame so the slide-up animation stays smooth.
 ///
 /// Usage:
 ///   onTap: () => showSheetPicker<`T`>(context, ...);
@@ -56,6 +57,9 @@ Future<T?> showSheetPicker<T>({
 
 /// Shows a Cupertino date picker in an iOS bottom sheet.
 /// Returns the selected DateTime, or `null` if cancelled.
+///
+/// The date picker is deferred by one frame so the slide-up animation
+/// doesn't jank from the heavy CupertinoDatePicker first build.
 Future<DateTime?> showSheetDatePicker({
   required BuildContext context,
   required String title,
@@ -67,21 +71,69 @@ Future<DateTime?> showSheetDatePicker({
     context: context,
     barrierColor: const Color(0x66000000),
     builder: (ctx) {
-      var tempDate = initialDate;
-      return _SheetPickerHost(
+      return _DeferredDatePickerSheet(
         title: title,
-        onDone: () => Navigator.of(ctx).pop(tempDate),
-        child: CupertinoDatePicker(
-          mode: CupertinoDatePickerMode.date,
-          initialDateTime: initialDate,
-          minimumDate: minimumDate,
-          maximumDate: maximumDate,
-          backgroundColor: AppColors.cardBg,
-          onDateTimeChanged: (d) => tempDate = d,
-        ),
+        initialDate: initialDate,
+        minimumDate: minimumDate,
+        maximumDate: maximumDate,
       );
     },
   );
+}
+
+/// Stateful wrapper that defers CupertinoDatePicker build by one frame.
+/// During the first frame the picker area is an empty Container with the
+/// same background colour — visually invisible. After that single frame
+/// the real CupertinoDatePicker is swapped in and the user never notices.
+class _DeferredDatePickerSheet extends StatefulWidget {
+  final String title;
+  final DateTime initialDate;
+  final DateTime? minimumDate;
+  final DateTime? maximumDate;
+
+  const _DeferredDatePickerSheet({
+    required this.title,
+    required this.initialDate,
+    this.minimumDate,
+    this.maximumDate,
+  });
+
+  @override
+  State<_DeferredDatePickerSheet> createState() =>
+      _DeferredDatePickerSheetState();
+}
+
+class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet> {
+  late DateTime _tempDate = widget.initialDate;
+  bool _ready = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Schedule the heavy picker build for after the first frame so the
+    // slide-up transition animates at full fps.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() => _ready = true);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _SheetPickerHost(
+      title: widget.title,
+      onDone: () => Navigator.of(context).pop(_tempDate),
+      child: _ready
+          ? CupertinoDatePicker(
+              mode: CupertinoDatePickerMode.date,
+              initialDateTime: widget.initialDate,
+              minimumDate: widget.minimumDate,
+              maximumDate: widget.maximumDate,
+              backgroundColor: AppColors.cardBg,
+              onDateTimeChanged: (d) => _tempDate = d,
+            )
+          : Container(color: AppColors.cardBg),
+    );
+  }
 }
 
 /// iOS-style sheet bar button. Uses GestureDetector to avoid Material
