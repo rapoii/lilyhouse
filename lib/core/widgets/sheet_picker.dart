@@ -108,17 +108,20 @@ class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet>
     with SingleTickerProviderStateMixin {
   late DateTime _tempDate = widget.initialDate;
   bool _ready = false;
-  late final AnimationController _fadeCtrl;
-  late final Animation<double> _fadeAnim;
+  late final AnimationController _slideCtrl;
+  late final Animation<Offset> _slideAnim;
 
   @override
   void initState() {
     super.initState();
-    _fadeCtrl = AnimationController(
+    _slideCtrl = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 220),
+      duration: const Duration(milliseconds: 250),
     );
-    _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOut));
   }
 
   @override
@@ -145,12 +148,12 @@ class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet>
 
   void _showPicker() {
     setState(() => _ready = true);
-    _fadeCtrl.forward();
+    _slideCtrl.forward();
   }
 
   @override
   void dispose() {
-    _fadeCtrl.dispose();
+    _slideCtrl.dispose();
     super.dispose();
   }
 
@@ -160,15 +163,17 @@ class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet>
       title: widget.title,
       onDone: () => Navigator.of(context).pop(_tempDate),
       child: _ready
-          ? FadeTransition(
-              opacity: _fadeAnim,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.date,
-                initialDateTime: widget.initialDate,
-                minimumDate: widget.minimumDate,
-                maximumDate: widget.maximumDate,
-                backgroundColor: AppColors.cardBg,
-                onDateTimeChanged: (d) => _tempDate = d,
+          ? ClipRect(
+              child: SlideTransition(
+                position: _slideAnim,
+                child: CupertinoDatePicker(
+                  mode: CupertinoDatePickerMode.date,
+                  initialDateTime: widget.initialDate,
+                  minimumDate: widget.minimumDate,
+                  maximumDate: widget.maximumDate,
+                  backgroundColor: AppColors.cardBg,
+                  onDateTimeChanged: (d) => _tempDate = d,
+                ),
               ),
             )
           : Container(color: AppColors.cardBg),

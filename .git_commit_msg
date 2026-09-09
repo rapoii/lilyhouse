@@ -1,5 +1,7 @@
-v1.0.55 build 73: smooth fade-in transition for deferred CupertinoDatePicker
+v1.0.55 build 74: replace FadeTransition with SlideTransition for smooth wheel entrance
 
-- sheet_picker.dart: added FadeTransition with 220ms easeOut curve to
-  _DeferredDatePickerSheet so when the picker swaps in after the modal
-  entrance completes, it fades in softly instead of popping/teleporting in.
+- sheet_picker.dart: FadeTransition caused opacity compositing overhead on
+  the 3-column ListWheelScrollView which made the animation laggy again.
+  Replaced with SlideTransition (offset translation only, no opacity layer)
+  + ClipRect so the wheel slides up smoothly into place once the modal
+  settles, without triggering heavy GPU compositing passes.
