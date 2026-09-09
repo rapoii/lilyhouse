@@ -410,9 +410,11 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
               child: ListView(
                 padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 24),
                 physics: const BouncingScrollPhysics(),
+                addRepaintBoundaries: false,
               children: [
                 // ====== Section 1: DATA PENYEWA ======
-                CupertinoListSection.insetGrouped(
+                RepaintBoundary(
+                  child: CupertinoListSection.insetGrouped(
                   header: const Text('DATA PENYEWA'),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -503,9 +505,11 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                     ),
                   ],
                 ),
+                ),
 
                 // ====== Section 2: DOKUMEN IDENTITAS ======
-                CupertinoListSection.insetGrouped(
+                RepaintBoundary(
+                  child: CupertinoListSection.insetGrouped(
                   header: const Text('DOKUMEN IDENTITAS'),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -588,9 +592,11 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                     ),
                   ],
                 ),
+                ),
 
                 // ====== Section 3: KOSTUM & JADWAL ======
-                CupertinoListSection.insetGrouped(
+                RepaintBoundary(
+                  child: CupertinoListSection.insetGrouped(
                   header: const Text('KOSTUM & JADWAL'),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -774,9 +780,11 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                     ),
                   ],
                 ),
+                ),
 
                 // ====== Section 4: PEMBAYARAN ======
-                CupertinoListSection.insetGrouped(
+                RepaintBoundary(
+                  child: CupertinoListSection.insetGrouped(
                   header: const Text('PEMBAYARAN'),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -798,6 +806,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       ),
                     ),
                   ],
+                ),
                 ),
               ],
             ),
