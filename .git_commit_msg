@@ -1,12 +1,16 @@
-v1.0.55 build 65: title bar — unified font scale (Apple HIG)
+v1.0.55 build 66: Selesai button — pink konsistensi seluruh app
 
-Title "Ukuran" rendered in AppTypography.navTitle (17pt, w600) while
-button labels rendered at 15pt. Result: title visually heavier than
-buttons, breaking iOS sheet convention where all bar elements share
-the same 17pt scale.
+Selesai button di title bar sheet picker sebelumnya pakai
+CupertinoColors.systemBlue (iOS HIG default). Tapi SELURUH app
+LilyHouse pakai primaryPink (#FF85A1) untuk semua action button
+(Batal di modal, Tambah, Oke, dll).
 
-Fix:
-- Title: 17pt, w500 (medium) — clearly the title, not overpowering
-- Button labels: 17pt, w400 / w600 — same scale as title
+User feedback: "warna biru" — Selesai visually out of place
+dibanding action button lain yang pink. Fix: Selesai pakai
+primaryPink juga. Weight difference (Batal w400, Selesai w600)
+sudah cukup untuk visual hierarchy.
 
-Also dropped the now-unused `app_typography` import.
+Verified on emulator (x86_64):
+- Batal: RGB(255, 133, 161) = #FF85A1
+- Selesai: RGB(255, 133, 161) = #FF85A1
+- Yellow underline: 0 pixels

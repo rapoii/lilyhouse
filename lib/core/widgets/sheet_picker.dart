@@ -118,9 +118,7 @@ class _SheetPickerBarButtonState extends State<_SheetPickerBarButton>
 
   @override
   Widget build(BuildContext context) {
-    final color = widget.primary
-        ? CupertinoColors.systemBlue
-        : AppColors.primaryPink;
+    final color = AppColors.primaryPink;
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTapDown: (_) => _press.forward(),
