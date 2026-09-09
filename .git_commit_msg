@@ -1,5 +1,12 @@
-v1.0.55 build 64: title bar — perfect horizontal centering
+v1.0.55 build 65: title bar — unified font scale (Apple HIG)
 
-The title "Ukuran" was 28px to the left of the screen's true horizontal
-center in build 63. Root cause: the Row's `spaceBetween` + `Expanded` +
-`Center` c...[truncated]
+Title "Ukuran" rendered in AppTypography.navTitle (17pt, w600) while
+button labels rendered at 15pt. Result: title visually heavier than
+buttons, breaking iOS sheet convention where all bar elements share
+the same 17pt scale.
+
+Fix:
+- Title: 17pt, w500 (medium) — clearly the title, not overpowering
+- Button labels: 17pt, w400 / w600 — same scale as title
+
+Also dropped the now-unused `app_typography` import.

@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 
 import '../theme/app_colors.dart';
-import '../theme/app_typography.dart';
 
 /// Apple HIG sheet-style picker — Apple-style iOS bottom sheet that opens
 /// from a tappable row, with a native `CupertinoPicker` or
@@ -141,7 +140,7 @@ class _SheetPickerBarButtonState extends State<_SheetPickerBarButton>
         child: Text(
           widget.label,
           style: TextStyle(
-            fontSize: 15,
+            fontSize: 17,
             fontWeight: widget.primary ? FontWeight.w600 : FontWeight.w400,
             letterSpacing: -0.2,
             color: CupertinoDynamicColor.maybeResolve(color, context),
@@ -190,8 +189,16 @@ class _SheetPickerHost extends StatelessWidget {
               children: [
                 // Title: absolute horizontal center of the bar, regardless
                 // of the asymmetric widths of Batal/Selesai buttons.
+                // Same 17pt as buttons; medium weight so it's clearly the
+                // title without overpowering the action buttons.
                 DefaultTextStyle(
-                  style: AppTypography.navTitle,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.w500,
+                    letterSpacing: -0.2,
+                    color: AppColors.textDark,
+                    decoration: TextDecoration.none,
+                  ),
                   child: Text(title),
                 ),
                 // Row of action buttons sits on top, aligned to edges.
