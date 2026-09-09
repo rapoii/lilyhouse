@@ -148,7 +148,11 @@ class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet>
 
   void _showPicker() {
     setState(() => _ready = true);
-    _slideCtrl.forward();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _slideCtrl.forward();
+      }
+    });
   }
 
   @override

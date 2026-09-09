@@ -33,8 +33,8 @@ class LilyHouseApp extends StatelessWidget {
         if (isTestMode) return child ?? const SizedBox.shrink();
         return Stack(
           children: [
-            const _CupertinoPickerPrewarmer(),
             if (child != null) child,
+            const _CupertinoPickerPrewarmer(),
           ],
         );
       },
@@ -78,27 +78,30 @@ class _CupertinoPickerPrewarmerState extends State<_CupertinoPickerPrewarmer> {
         ignoring: true,
         child: ExcludeSemantics(
           excluding: true,
-          child: SizedBox(
-            width: 320,
-            height: 216,
-            child: Stack(
-              children: [
-                RepaintBoundary(
-                  child: CupertinoDatePicker(
-                    mode: CupertinoDatePickerMode.date,
-                    initialDateTime: DateTime.now(),
-                    onDateTimeChanged: (_) {},
+          child: Opacity(
+            opacity: 0.005,
+            child: SizedBox(
+              width: 320,
+              height: 216,
+              child: Stack(
+                children: [
+                  RepaintBoundary(
+                    child: CupertinoDatePicker(
+                      mode: CupertinoDatePickerMode.date,
+                      initialDateTime: DateTime.now(),
+                      onDateTimeChanged: (_) {},
+                    ),
                   ),
-                ),
-                RepaintBoundary(
-                  child: CupertinoPicker(
-                    itemExtent: 36,
-                    scrollController: FixedExtentScrollController(),
-                    onSelectedItemChanged: (_) {},
-                    children: const [Text('Prewarm')],
+                  RepaintBoundary(
+                    child: CupertinoPicker(
+                      itemExtent: 36,
+                      scrollController: FixedExtentScrollController(),
+                      onSelectedItemChanged: (_) {},
+                      children: const [Text('Prewarm')],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

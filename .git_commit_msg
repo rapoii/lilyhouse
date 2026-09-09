@@ -1,10 +1,13 @@
-v1.0.55 build 75: pre-warm Cupertino pickers at launch & RepaintBoundary wheel
+v1.0.55 build 76: fix first-time picker frame drop via foreground prewarm & post-frame animation tick
 
-- main.dart: added _CupertinoPickerPrewarmer in MaterialApp.builder (behind
-  opaque MainScaffold). Pre-builds CupertinoDatePicker and CupertinoPicker
-  for 1.5s on app launch, pre-warming HarfBuzz font shaping (50+ calls to
-  TextPainter.computeMaxIntrinsicWidth), date localization tables, and GPU
-  SkSL/Impeller wheel shaders before the user ever opens a picker.
-- sheet_picker.dart: wrapped CupertinoDatePicker inside SlideTransition with
-  RepaintBoundary, keeping the rasterized wheel as a cached GPU layer during
-  the slide translation rather than repainting every frame.
+- main.dart: moved _CupertinoPickerPrewarmer to the TOP of the Stack in
+  MaterialApp.builder with Opacity(0.005). Previously it was underneath
+  MainScaffold, causing Impeller's occlusion culler to completely discard
+  its draw calls and skip compiling the OpenGLES shaders. With it on top
+  and semi-transparent, Impeller is forced to rasterize glyphs and compile
+  shaders during launch, while remaining invisible to the human eye.
+- sheet_picker.dart: decoupled CupertinoDatePicker mount from SlideTransition
+  ticker start via WidgetsBinding.instance.addPostFrameCallback. In frame 1,
+  the widget mounts and rasterizes into RepaintBoundary while the ticker is
+  idle (0ms elapsed). In frame 2+, the ticker animates purely translating
+  the pre-existing GPU texture, eliminating the 40ms first-frame hitch.
