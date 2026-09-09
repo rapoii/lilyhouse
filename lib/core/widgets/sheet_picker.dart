@@ -166,13 +166,15 @@ class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet>
           ? ClipRect(
               child: SlideTransition(
                 position: _slideAnim,
-                child: CupertinoDatePicker(
-                  mode: CupertinoDatePickerMode.date,
-                  initialDateTime: widget.initialDate,
-                  minimumDate: widget.minimumDate,
-                  maximumDate: widget.maximumDate,
-                  backgroundColor: AppColors.cardBg,
-                  onDateTimeChanged: (d) => _tempDate = d,
+                child: RepaintBoundary(
+                  child: CupertinoDatePicker(
+                    mode: CupertinoDatePickerMode.date,
+                    initialDateTime: widget.initialDate,
+                    minimumDate: widget.minimumDate,
+                    maximumDate: widget.maximumDate,
+                    backgroundColor: AppColors.cardBg,
+                    onDateTimeChanged: (d) => _tempDate = d,
+                  ),
                 ),
               ),
             )

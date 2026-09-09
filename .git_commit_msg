@@ -1,7 +1,10 @@
-v1.0.55 build 74: replace FadeTransition with SlideTransition for smooth wheel entrance
+v1.0.55 build 75: pre-warm Cupertino pickers at launch & RepaintBoundary wheel
 
-- sheet_picker.dart: FadeTransition caused opacity compositing overhead on
-  the 3-column ListWheelScrollView which made the animation laggy again.
-  Replaced with SlideTransition (offset translation only, no opacity layer)
-  + ClipRect so the wheel slides up smoothly into place once the modal
-  settles, without triggering heavy GPU compositing passes.
+- main.dart: added _CupertinoPickerPrewarmer in MaterialApp.builder (behind
+  opaque MainScaffold). Pre-builds CupertinoDatePicker and CupertinoPicker
+  for 1.5s on app launch, pre-warming HarfBuzz font shaping (50+ calls to
+  TextPainter.computeMaxIntrinsicWidth), date localization tables, and GPU
+  SkSL/Impeller wheel shaders before the user ever opens a picker.
+- sheet_picker.dart: wrapped CupertinoDatePicker inside SlideTransition with
+  RepaintBoundary, keeping the rasterized wheel as a cached GPU layer during
+  the slide translation rather than repainting every frame.
