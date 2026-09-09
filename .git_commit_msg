@@ -1,16 +1,24 @@
-v1.0.55 build 66: Selesai button — pink konsistensi seluruh app
+v1.0.55 build 67: title bar — match actionButton/navTitle styles
 
-Selesai button di title bar sheet picker sebelumnya pakai
-CupertinoColors.systemBlue (iOS HIG default). Tapi SELURUH app
-LilyHouse pakai primaryPink (#FF85A1) untuk semua action button
-(Batal di modal, Tambah, Oke, dll).
+User feedback: setelah build 66 (Selesai jadi pink), weight masih
+beda:
+- Top sheet (Kostum Baru) Batal & Simpan pakai AppTypography.actionButton
+  (15pt, w600, primaryPink)
+- Bottom sheet (Ukuran picker) pakai 17pt w400/w600 (size 17, weight beda)
 
-User feedback: "warna biru" — Selesai visually out of place
-dibanding action button lain yang pink. Fix: Selesai pakai
-primaryPink juga. Weight difference (Batal w400, Selesai w600)
-sudah cukup untuk visual hierarchy.
+User minta: samain ketebalan ke yang dilingkari merah (actionButton).
+
+Fix:
+- Button text 17pt → 15pt (same as actionButton)
+- Button weight w400 (Batal) / w600 (Selesai) → w600 (both, like Simpan)
+- Title 17pt w500 → 17pt w600 (match AppTypography.navTitle)
+
+Sekarang seluruh title bar (Batal, Ukuran, Selesai) bobotnya konsisten
+dengan top sheet "Kostum Baru" form modal. Warna semua #FF85A1
+untuk button, #2D2D3A untuk title.
 
 Verified on emulator (x86_64):
-- Batal: RGB(255, 133, 161) = #FF85A1
-- Selesai: RGB(255, 133, 161) = #FF85A1
+- Batal: RGB(255, 133, 161) = #FF85A1 w600
+- Selesai: RGB(255, 133, 161) = #FF85A1 w600
+- Ukuran: dark #2D2D3A w600, center 538 vs screen 540 (2px off, perfect)
 - Yellow underline: 0 pixels
