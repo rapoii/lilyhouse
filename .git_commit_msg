@@ -1,30 +1,5 @@
-v1.0.55 build 63: finally fix double yellow underline
+v1.0.55 build 64: title bar — perfect horizontal centering
 
-Root cause: Material's _errorTextStyle fallback in
-packages/flutter/lib/src/material/app.dart (line 46-56):
-
-  const TextStyle _errorTextStyle = TextStyle(
-    color: Color(0xD0FF0000),
-    decoration: TextDecoration.underline,
-    decorationColor: Color(0xFFFFFF00),         // PURE YELLOW
-    decorationStyle: TextDecorationStyle.double, // DOUBLE LINE
-    debugLabel: 'fallback style; consider putting your text in a Material',
-  );
-
-When a Text widget has no DefaultTextStyle ancestor in scope, Flutter
-falls back to this _errorTextStyle. Our sheet picker's title Text
-was inside Container > Column > Row > Expanded > Center > Text, with
-no DefaultTextStyle above it. So Flutter painted the double yellow
-underline under the title as a debug-indicator warning that there's
-no Material/DefaultTextStyle context.
-
-Fix: wrap title in DefaultTextStyle(style: AppTypography.navTitle)
-(not .merge — that still inherits decoration). DefaultTextStyle
-constructor (not merge) provides a non-merged style that Flutter
-honors instead of falling back to the error style.
-
-Also removed unused Material import (was added in build 62 for
-Theme.of() workaround, no longer needed).
-
-Tested: flutter analyze 0 issues, flutter test 89/89 pass. arm64 APK
-md5 3ce67ba62ee2610418cda96e3598ff8c, libapp.so in arm64-v8a only.
+The title "Ukuran" was 28px to the left of the screen's true horizontal
+center in build 63. Root cause: the Row's `spaceBetween` + `Expanded` +
+`Center` c...[truncated]

@@ -185,25 +185,29 @@ class _SheetPickerHost extends StatelessWidget {
                 bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Stack(
+              alignment: Alignment.center,
               children: [
-                _SheetPickerBarButton(
-                  label: 'Batal',
-                  onPressed: () => Navigator.of(context).pop(),
+                // Title: absolute horizontal center of the bar, regardless
+                // of the asymmetric widths of Batal/Selesai buttons.
+                DefaultTextStyle(
+                  style: AppTypography.navTitle,
+                  child: Text(title),
                 ),
-                Expanded(
-                  child: Center(
-                    child: DefaultTextStyle(
-                      style: AppTypography.navTitle,
-                      child: Text(title),
+                // Row of action buttons sits on top, aligned to edges.
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _SheetPickerBarButton(
+                      label: 'Batal',
+                      onPressed: () => Navigator.of(context).pop(),
                     ),
-                  ),
-                ),
-                _SheetPickerBarButton(
-                  label: 'Selesai',
-                  onPressed: onDone,
-                  primary: true,
+                    _SheetPickerBarButton(
+                      label: 'Selesai',
+                      onPressed: onDone,
+                      primary: true,
+                    ),
+                  ],
                 ),
               ],
             ),
