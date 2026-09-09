@@ -1,18 +1,5 @@
-v1.0.55 build 72: fix modal open animation jank via post-transition deferral
+v1.0.55 build 73: smooth fade-in transition for deferred CupertinoDatePicker
 
-Researched via Playwright / web resources:
-1. Modal open animation stutter is caused by heavy widget build +
-   compositing overhead during the slide-up transition.
-2. In booking manual, the parent form is heavy (5+ text fields, 2 image slots)
-   which makes compositing even more expensive during route animation.
-3. Deferred build via addPostFrameCallback was insufficient because it only
-   waited 1 frame (16ms) while the transition takes 335ms.
-
-Fix:
-- sheet_picker.dart: _DeferredDatePickerSheet now listens to the route's
-  animation status and only builds the heavy CupertinoDatePicker AFTER
-  AnimationStatus.completed. During the 335ms transition, only a lightweight
-  empty Container(color: cardBg) is rendered, eliminating compositing overhead.
-- manual_booking_modal.dart: added FocusScope.of(context).unfocus() + 150ms
-  delay when keyboard is visible before opening pickers, preventing concurrent
-  keyboard-dismiss and modal-open animations.
+- sheet_picker.dart: added FadeTransition with 220ms easeOut curve to
+  _DeferredDatePickerSheet so when the picker swaps in after the modal
+  entrance completes, it fades in softly instead of popping/teleporting in.

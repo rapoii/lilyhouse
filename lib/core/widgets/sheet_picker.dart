@@ -104,9 +104,22 @@ class _DeferredDatePickerSheet extends StatefulWidget {
       _DeferredDatePickerSheetState();
 }
 
-class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet> {
+class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet>
+    with SingleTickerProviderStateMixin {
   late DateTime _tempDate = widget.initialDate;
   bool _ready = false;
+  late final AnimationController _fadeCtrl;
+  late final Animation<double> _fadeAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    _fadeCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 220),
+    );
+    _fadeAnim = CurvedAnimation(parent: _fadeCtrl, curve: Curves.easeOut);
+  }
 
   @override
   void didChangeDependencies() {
@@ -114,24 +127,31 @@ class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet> {
     if (_ready) return;
     final route = ModalRoute.of(context);
     if (route == null) {
-      // Fallback: no route — build immediately.
-      setState(() => _ready = true);
+      _showPicker();
       return;
     }
     if (route.animation!.isCompleted) {
-      // Animation already done (e.g. instant push).
-      setState(() => _ready = true);
+      _showPicker();
     } else {
-      // Wait for the entrance animation to finish before building
-      // the heavy CupertinoDatePicker.
       void listener(AnimationStatus status) {
         if (status == AnimationStatus.completed) {
           route.animation!.removeStatusListener(listener);
-          if (mounted) setState(() => _ready = true);
+          if (mounted) _showPicker();
         }
       }
       route.animation!.addStatusListener(listener);
     }
+  }
+
+  void _showPicker() {
+    setState(() => _ready = true);
+    _fadeCtrl.forward();
+  }
+
+  @override
+  void dispose() {
+    _fadeCtrl.dispose();
+    super.dispose();
   }
 
   @override
@@ -140,13 +160,16 @@ class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet> {
       title: widget.title,
       onDone: () => Navigator.of(context).pop(_tempDate),
       child: _ready
-          ? CupertinoDatePicker(
-              mode: CupertinoDatePickerMode.date,
-              initialDateTime: widget.initialDate,
-              minimumDate: widget.minimumDate,
-              maximumDate: widget.maximumDate,
-              backgroundColor: AppColors.cardBg,
-              onDateTimeChanged: (d) => _tempDate = d,
+          ? FadeTransition(
+              opacity: _fadeAnim,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.date,
+                initialDateTime: widget.initialDate,
+                minimumDate: widget.minimumDate,
+                maximumDate: widget.maximumDate,
+                backgroundColor: AppColors.cardBg,
+                onDateTimeChanged: (d) => _tempDate = d,
+              ),
             )
           : Container(color: AppColors.cardBg),
     );
