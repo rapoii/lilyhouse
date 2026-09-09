@@ -95,4 +95,35 @@ class DatabaseHelper {
     final db = await database;
     return await db.delete(AppTables.syncQueue);
   }
+
+  Future<Map<String, int>> getTableCounts() async {
+    final db = await database;
+    try {
+      final costumes = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM ${AppTables.costumes}'),
+      ) ?? 0;
+      final rentals = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM ${AppTables.rentals}'),
+      ) ?? 0;
+      final customers = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM ${AppTables.customers}'),
+      ) ?? 0;
+      final installments = Sqflite.firstIntValue(
+        await db.rawQuery('SELECT COUNT(*) FROM ${AppTables.installments}'),
+      ) ?? 0;
+      return {
+        'costumes': costumes,
+        'rentals': rentals,
+        'customers': customers,
+        'installments': installments,
+      };
+    } catch (_) {
+      return {
+        'costumes': 0,
+        'rentals': 0,
+        'customers': 0,
+        'installments': 0,
+      };
+    }
+  }
 }

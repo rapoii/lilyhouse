@@ -1,9 +1,19 @@
-v1.0.55 build 77: align size & generic wheel pickers with smooth deferred slide transition
+v1.0.55 build 78: revamp Settings screen with 100% interactive Apple HIG & zero dead chevrons
 
-- sheet_picker.dart: refactored showSheetPicker<T> to use _DeferredWheelPickerSheet<T>.
-  Now has the exact same architecture as the date picker: sheet container slides
-  up with lightweight placeholder, waits for route animation completion, mounts
-  CupertinoPicker inside RepaintBoundary, and executes smooth 250ms easeOut
-  SlideTransition via post-frame callback.
-- add_costume_sheet.dart: added keyboard unfocus guard before showing 'Ukuran'
-  picker, preventing keyboard dismissal physics from competing with sheet popup.
+- settings_screen.dart: created dedicated modular SettingsScreen adhering strictly
+  to Apple HIG (iOS 18) grouped list standards.
+- Zero dead chevrons: every row with a chevron ('>') is fully interactive and opens
+  a dedicated Cupertino modal sheet or action sheet; purely informational rows (Status,
+  Terakhir Sinkron) use status pills/clean values without misleading chevrons.
+- Fixed text truncation: eliminated horizontal collisions (Status Si..., Script Ba...)
+  by utilizing proper subtitles and flexible badges.
+- Features wired:
+  * Antrean Offline: opens queue inspector sheet showing pending items & sync state.
+  * Panduan Setup: opens step-by-step Google Apps Script deployment walkthrough.
+  * File Backend: copy button copies filename with iOS Dynamic Island-style floating pill toast.
+  * Statistik Database: queries SQLite database and displays live counts for costumes, rentals,
+    customers, and installment logs.
+  * Bersihkan Cache: CupertinoActionSheet confirmation to clean temporary thumbnails safely.
+  * Tentang Aplikasi & Design System & Catatan Rilis: comprehensive Apple HIG detail sheets.
+- main_scaffold.dart: removed hardcoded 250-line embedded settings tab and wired SettingsScreen.
+- db_helper.dart: added getTableCounts() for instant database stats.

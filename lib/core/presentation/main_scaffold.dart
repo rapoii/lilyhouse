@@ -4,16 +4,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import '../../core/sync/sync_state_notifier.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/theme/app_typography.dart';
 import '../../features/calendar/presentation/calendar_screen.dart';
 import '../../features/costumes/data/costume_repository.dart';
 import '../../features/costumes/presentation/costume_list_screen.dart';
 import '../../features/installments/data/installment_repository.dart';
 import '../../features/installments/presentation/installment_list_screen.dart';
 import '../../features/rentals/data/rental_repository.dart';
+import '../../features/settings/presentation/settings_screen.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
   final int initialIndex;
@@ -97,7 +96,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           : InstallmentListScreen(
               repository: widget.installmentRepository ?? InstallmentRepository(),
             ),
-      _buildSettingsTab(syncState),
+      const SettingsScreen(),
     ];
 
     return Scaffold(
@@ -498,255 +497,6 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
         color: badgeColor,
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white, width: 1.5),
-      ),
-    );
-  }
-
-  Widget _buildSettingsTab(SyncState syncState) {
-    String statusText;
-    Color statusColor;
-    IconData statusIcon;
-
-    switch (syncState.status) {
-      case SyncStatus.idle:
-        if (syncState.lastSyncedAt == null && syncState.pendingCount == 0) {
-          statusText = 'Siap untuk sinkronisasi';
-          statusColor = AppColors.primaryPink;
-          statusIcon = CupertinoIcons.cloud;
-        } else {
-          statusText = syncState.pendingCount > 0
-              ? '${syncState.pendingCount} item menunggu'
-              : 'Tersinkronisasi';
-          statusColor = syncState.pendingCount > 0
-              ? const Color(0xFFFF9500)
-              : const Color(0xFF34C759);
-          statusIcon = CupertinoIcons.cloud_fill;
-        }
-        break;
-      case SyncStatus.syncing:
-        statusText = 'Sedang menyinkronkan...';
-        statusColor = AppColors.primaryPink;
-        statusIcon = CupertinoIcons.arrow_2_circlepath;
-        break;
-      case SyncStatus.success:
-        statusText = 'Sinkronisasi berhasil';
-        statusColor = const Color(0xFF34C759);
-        statusIcon = CupertinoIcons.checkmark_alt_circle_fill;
-        break;
-      case SyncStatus.error:
-        statusText = 'Gagal sinkron';
-        statusColor = const Color(0xFFFF3B30);
-        statusIcon = CupertinoIcons.exclamationmark_circle_fill;
-        break;
-    }
-
-    final formattedLastSync = syncState.lastSyncedAt != null
-        ? DateFormat('d MMM yyyy, HH:mm').format(syncState.lastSyncedAt!)
-        : 'Belum pernah';
-
-    return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text(
-          'Pengaturan',
-          style: AppTypography.largeTitle,
-        ),
-        backgroundColor: AppColors.background,
-        elevation: 0,
-        centerTitle: false,
-      ),
-      body: ListView(
-        padding: const EdgeInsets.only(bottom: 110),
-        children: [
-          // Section 1: CLOUD SYNC
-          CupertinoListSection.insetGrouped(
-            header: const Text(
-              'SINKRONISASI CLOUD',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF6C6C70), // iOS secondary label
-                letterSpacing: -0.05,
-              ),
-            ),
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            backgroundColor: Colors.transparent,
-            children: [
-              CupertinoListTile(
-                leading: Container(
-                  width: 29,
-                  height: 29,
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    borderRadius: BorderRadius.circular(6.5),
-                  ),
-                  child: Icon(statusIcon, color: Colors.white, size: 16),
-                ),
-                title: const Text('Status Sinkronisasi', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: Text(
-                  statusText,
-                  style: TextStyle(
-                    color: statusColor,
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                trailing: syncState.status == SyncStatus.syncing
-                    ? const CupertinoActivityIndicator()
-                    : const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
-              ),
-              CupertinoListTile(
-                leading: Container(
-                  width: 29,
-                  height: 29,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFF9500),
-                    borderRadius: BorderRadius.circular(6.5),
-                  ),
-                  child: const Icon(CupertinoIcons.tray_arrow_up_fill, color: Colors.white, size: 16),
-                ),
-                title: const Text('Antrean Offline', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: Text(
-                  '${syncState.pendingCount} item',
-                  style: const TextStyle(
-                    color: Color(0xFF8E8E93),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
-              ),
-              CupertinoListTile(
-                leading: Container(
-                  width: 29,
-                  height: 29,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF34C759),
-                    borderRadius: BorderRadius.circular(6.5),
-                  ),
-                  child: const Icon(CupertinoIcons.clock_fill, color: Colors.white, size: 16),
-                ),
-                title: const Text('Terakhir Sinkron', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: Text(
-                  formattedLastSync,
-                  style: const TextStyle(
-                    color: Color(0xFF8E8E93),
-                    fontSize: 15,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
-              ),
-              CupertinoListTile(
-                title: Center(
-                  child: Text(
-                    syncState.status == SyncStatus.syncing
-                        ? 'Menyinkronkan...'
-                        : 'Sinkronkan Sekarang',
-                    style: const TextStyle(
-                      color: AppColors.primaryPink,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                onTap: syncState.status == SyncStatus.syncing
-                    ? null
-                    : () => ref.read(syncStateProvider.notifier).syncNow(),
-              ),
-            ],
-          ),
-
-          // Section 2: INTEGRATION
-          CupertinoListSection.insetGrouped(
-            header: const Text(
-              'INTEGRASI GOOGLE APPS SCRIPT',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF6C6C70),
-                letterSpacing: -0.05,
-              ),
-            ),
-            footer: const Text(
-              'Backend Web App gratis tanpa server, tersinkron ke Google Sheets & Google Drive.',
-              style: TextStyle(
-                fontSize: 12,
-                color: Color(0xFF8E8E93),
-              ),
-            ),
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            backgroundColor: Colors.transparent,
-            children: [
-              CupertinoListTile(
-                leading: Container(
-                  width: 29,
-                  height: 29,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF5856D6),
-                    borderRadius: BorderRadius.circular(6.5),
-                  ),
-                  child: const Icon(CupertinoIcons.doc_text_fill, color: Colors.white, size: 16),
-                ),
-                title: const Text('Script Backend', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text(
-                  'google_apps_script.js',
-                  style: TextStyle(fontFamily: 'monospace', fontSize: 13, color: Color(0xFF8E8E93)),
-                ),
-                trailing: const Icon(CupertinoIcons.doc_on_clipboard, size: 18, color: AppColors.primaryPink),
-                onTap: () {
-                  // iOS style subtle haptic feedback or toast
-                  // (no Android bottom SnackBar)
-                },
-              ),
-            ],
-          ),
-
-          // Section 3: ABOUT
-          CupertinoListSection.insetGrouped(
-            header: const Text(
-              'TENTANG APLIKASI',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF6C6C70),
-                letterSpacing: -0.05,
-              ),
-            ),
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            backgroundColor: Colors.transparent,
-            children: [
-              CupertinoListTile(
-                leading: Container(
-                  width: 29,
-                  height: 29,
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryPink,
-                    borderRadius: BorderRadius.circular(6.5),
-                  ),
-                  child: const Icon(CupertinoIcons.heart_fill, color: Colors.white, size: 16),
-                ),
-                title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.0', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
-              ),
-              CupertinoListTile(
-                leading: Container(
-                  width: 29,
-                  height: 29,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF007AFF),
-                    borderRadius: BorderRadius.circular(6.5),
-                  ),
-                  child: const Icon(CupertinoIcons.paintbrush_fill, color: Colors.white, size: 16),
-                ),
-                title: const Text('Design System', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('Apple HIG / iOS 18', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
-              ),
-            ],
-          ),
-        ],
       ),
     );
   }
