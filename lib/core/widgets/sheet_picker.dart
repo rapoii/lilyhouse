@@ -31,28 +31,140 @@ Future<T?> showSheetPicker<T>({
     context: context,
     barrierColor: const Color(0x66000000),
     builder: (ctx) {
-      int initialIndex = items.indexWhere((i) => i.value == currentValue);
-      if (initialIndex < 0) initialIndex = 0;
-      var tempIndex = initialIndex;
-      return _SheetPickerHost(
+      return _DeferredWheelPickerSheet<T>(
         title: title,
-        onDone: () => Navigator.of(ctx).pop(items[tempIndex].value),
-        child: CupertinoPicker(
-          itemExtent: 36,
-          scrollController: FixedExtentScrollController(initialItem: initialIndex),
-          onSelectedItemChanged: (i) => tempIndex = i,
-          children: items
-              .map((it) => Center(
-                    child: Text(
-                      it.label,
-                      style: const TextStyle(fontSize: 18, color: AppColors.textDark),
-                    ),
-                  ))
-              .toList(growable: false),
-        ),
+        items: items,
+        currentValue: currentValue,
       );
     },
   );
+}
+
+class _DeferredWheelPickerSheet<T> extends StatefulWidget {
+  final String title;
+  final List<SheetPickerItem<T>> items;
+  final T currentValue;
+
+  const _DeferredWheelPickerSheet({
+    required this.title,
+    required this.items,
+    required this.currentValue,
+  });
+
+  @override
+  State<_DeferredWheelPickerSheet<T>> createState() =>
+      _DeferredWheelPickerSheetState<T>();
+}
+
+class _DeferredWheelPickerSheetState<T>
+    extends State<_DeferredWheelPickerSheet<T>>
+    with SingleTickerProviderStateMixin {
+  late int _tempIndex;
+  late final FixedExtentScrollController _scrollController;
+  bool _ready = false;
+  late final AnimationController _slideCtrl;
+  late final Animation<Offset> _slideAnim;
+  Animation<double>? _routeAnim;
+
+  @override
+  void initState() {
+    super.initState();
+    int initialIndex =
+        widget.items.indexWhere((i) => i.value == widget.currentValue);
+    if (initialIndex < 0) initialIndex = 0;
+    _tempIndex = initialIndex;
+    _scrollController =
+        FixedExtentScrollController(initialItem: initialIndex);
+
+    _slideCtrl = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+    _slideAnim = Tween<Offset>(
+      begin: const Offset(0, 1),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOut));
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_ready) return;
+    final route = ModalRoute.of(context);
+    if (route == null) {
+      _showPicker();
+      return;
+    }
+    if (_routeAnim == null) {
+      _routeAnim = route.animation;
+      if (_routeAnim!.isCompleted) {
+        _showPicker();
+      } else {
+        void listener(AnimationStatus status) {
+          if (status == AnimationStatus.completed) {
+            _routeAnim?.removeStatusListener(listener);
+            if (mounted) _showPicker();
+          }
+        }
+        _routeAnim!.addStatusListener(listener);
+      }
+    }
+  }
+
+  void _showPicker() {
+    setState(() => _ready = true);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _slideCtrl.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _slideCtrl.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _SheetPickerHost(
+      title: widget.title,
+      onDone: () {
+        if (widget.items.isEmpty) {
+          Navigator.of(context).pop(null);
+        } else {
+          Navigator.of(context).pop(widget.items[_tempIndex].value);
+        }
+      },
+      child: _ready
+          ? ClipRect(
+              child: SlideTransition(
+                position: _slideAnim,
+                child: RepaintBoundary(
+                  child: CupertinoPicker(
+                    itemExtent: 36,
+                    scrollController: _scrollController,
+                    onSelectedItemChanged: (i) => _tempIndex = i,
+                    children: widget.items
+                        .map((it) => Center(
+                              child: Text(
+                                it.label,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                            ))
+                        .toList(growable: false),
+                  ),
+                ),
+              ),
+            )
+          : Container(color: AppColors.cardBg),
+    );
+  }
 }
 
 /// Shows a Cupertino date picker in an iOS bottom sheet.

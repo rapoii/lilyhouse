@@ -1,13 +1,9 @@
-v1.0.55 build 76: fix first-time picker frame drop via foreground prewarm & post-frame animation tick
+v1.0.55 build 77: align size & generic wheel pickers with smooth deferred slide transition
 
-- main.dart: moved _CupertinoPickerPrewarmer to the TOP of the Stack in
-  MaterialApp.builder with Opacity(0.005). Previously it was underneath
-  MainScaffold, causing Impeller's occlusion culler to completely discard
-  its draw calls and skip compiling the OpenGLES shaders. With it on top
-  and semi-transparent, Impeller is forced to rasterize glyphs and compile
-  shaders during launch, while remaining invisible to the human eye.
-- sheet_picker.dart: decoupled CupertinoDatePicker mount from SlideTransition
-  ticker start via WidgetsBinding.instance.addPostFrameCallback. In frame 1,
-  the widget mounts and rasterizes into RepaintBoundary while the ticker is
-  idle (0ms elapsed). In frame 2+, the ticker animates purely translating
-  the pre-existing GPU texture, eliminating the 40ms first-frame hitch.
+- sheet_picker.dart: refactored showSheetPicker<T> to use _DeferredWheelPickerSheet<T>.
+  Now has the exact same architecture as the date picker: sheet container slides
+  up with lightweight placeholder, waits for route animation completion, mounts
+  CupertinoPicker inside RepaintBoundary, and executes smooth 250ms easeOut
+  SlideTransition via post-frame callback.
+- add_costume_sheet.dart: added keyboard unfocus guard before showing 'Ukuran'
+  picker, preventing keyboard dismissal physics from competing with sheet popup.

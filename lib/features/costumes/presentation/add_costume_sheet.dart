@@ -354,6 +354,12 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                         color: Color(0xFFC7C7CC),
                       ),
                       onTap: () async {
+                        final hadFocus = FocusScope.of(context).hasFocus;
+                        if (hadFocus) {
+                          FocusScope.of(context).unfocus();
+                          await Future<void>.delayed(const Duration(milliseconds: 150));
+                          if (!context.mounted) return;
+                        }
                         const items = [
                           SheetPickerItem('S', 'S'),
                           SheetPickerItem('M', 'M'),
