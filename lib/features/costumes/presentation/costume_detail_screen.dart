@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
@@ -47,6 +48,35 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
           (Match m) => '${m[1]}.',
         );
     return 'Rp $parts';
+  }
+
+  Widget _buildCoverPhoto(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => const Center(
+          child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
+        ),
+      );
+    }
+    if (path.startsWith('/') || path.startsWith('file:') || File(path).existsSync()) {
+      final cleanPath = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
+      return Image.file(
+        File(cleanPath),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => const Center(
+          child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
+        ),
+      );
+    }
+    return Image.asset(
+      path,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => const Center(
+        child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
+      ),
+    );
   }
 
   (Color bg, Color text, String label) _getStatusBadgeData(CostumeStatus status) {
@@ -112,13 +142,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(28.0),
                 child: widget.costume.coverPhoto != null && widget.costume.coverPhoto!.isNotEmpty
-                    ? Image.asset(
-                        widget.costume.coverPhoto!,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) => const Center(
-                          child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
-                        ),
-                      )
+                    ? _buildCoverPhoto(widget.costume.coverPhoto!)
                     : const Center(
                         child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
                       ),

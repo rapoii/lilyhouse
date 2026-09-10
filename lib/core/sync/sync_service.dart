@@ -172,7 +172,7 @@ class SyncService {
 
       final Map<String, dynamic> data = jsonDecode(response.body) as Map<String, dynamic>;
       if (data['status'] == 'success') {
-        return data['url'] as String?;
+        return (data['file_url'] ?? data['url']) as String?;
       } else {
         throw Exception(data['message'] ?? 'Unggah gagal');
       }

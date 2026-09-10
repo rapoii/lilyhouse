@@ -315,26 +315,48 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           ),
           const SizedBox(height: 20),
 
-          // Add payment button
-          SizedBox(
-            width: double.infinity,
-            child: CupertinoButton.filled(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              borderRadius: BorderRadius.circular(10),
-              onPressed: _showAddPaymentDialog,
+          // Add payment button or Paid Off badge
+          if (inst.isPaidOff)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE3F9EC),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFF34C759).withValues(alpha: 0.3)),
+              ),
               child: const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(CupertinoIcons.creditcard_fill, color: Colors.white, size: 18),
+                  Icon(CupertinoIcons.checkmark_seal_fill, color: Color(0xFF1E824C), size: 18),
                   SizedBox(width: 8),
                   Text(
-                    '+ Catat Pembayaran',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                    'Cicilan Sudah Lunas ✨',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1E824C)),
                   ),
                 ],
               ),
+            )
+          else
+            SizedBox(
+              width: double.infinity,
+              child: CupertinoButton.filled(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                borderRadius: BorderRadius.circular(10),
+                onPressed: _showAddPaymentDialog,
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(CupertinoIcons.creditcard_fill, color: Colors.white, size: 18),
+                    SizedBox(width: 8),
+                    Text(
+                      '+ Catat Pembayaran',
+                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                    ),
+                  ],
+                ),
+              ),
             ),
-          ),
           const SizedBox(height: 24),
 
           // Logs ledger

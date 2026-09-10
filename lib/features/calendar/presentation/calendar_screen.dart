@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../costumes/data/costume_repository.dart';
+import '../../costumes/domain/costume.dart';
 import '../../rentals/data/form_parser.dart';
 import '../../rentals/data/rental_repository.dart';
 import '../../rentals/domain/customer.dart';
@@ -41,6 +42,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   List<Rental> _allRentals = [];
   Map<String, Customer> _customerCache = {};
+  Map<String, Costume> _costumeCache = {};
   bool _isLoading = true;
 
   @override
@@ -59,16 +61,23 @@ class _CalendarScreenState extends State<CalendarScreen> {
     setState(() => _isLoading = true);
     final rentals = await _repository.getAllRentals();
     final customers = await _repository.getAllCustomers();
+    final costumes = await _costumeRepository.getAllCostumes();
 
     final cache = <String, Customer>{};
     for (final c in customers) {
       cache[c.id] = c;
     }
 
+    final costCache = <String, Costume>{};
+    for (final c in costumes) {
+      costCache[c.id] = c;
+    }
+
     if (mounted) {
       setState(() {
         _allRentals = rentals;
         _customerCache = cache;
+        _costumeCache = costCache;
         _isLoading = false;
       });
     }
@@ -453,10 +462,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       itemBuilder: (context, index) {
                         final rental = selectedDayRentals[index];
                         final customer = _customerCache[rental.customerId];
+                        final costume = _costumeCache[rental.costumeId];
                         return _RentalSlotCard(
                           rental: rental,
                           customer: customer,
+                          costume: costume,
                           allRentals: _allRentals,
+                          repository: _repository,
+                          onRentalUpdated: _loadData,
                         );
                       },
                     ),
@@ -472,13 +485,93 @@ class _CalendarScreenState extends State<CalendarScreen> {
 class _RentalSlotCard extends StatelessWidget {
   final Rental rental;
   final Customer? customer;
+  final Costume? costume;
   final List<Rental> allRentals;
+  final IRentalRepository? repository;
+  final VoidCallback? onRentalUpdated;
 
   const _RentalSlotCard({
     required this.rental,
     required this.customer,
+    this.costume,
     required this.allRentals,
+    this.repository,
+    this.onRentalUpdated,
   });
+
+  void _showRentalActionSheet(BuildContext context) {
+    final custName = customer?.fullName ?? 'Penyewa';
+    final custPhone = customer?.phone ?? '-';
+    final custAddr = customer?.address ?? '-';
+    final custSosmed = customer?.socialMedia ?? '-';
+    final costName = costume?.name ?? rental.costumeId;
+
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text(costName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+        message: Text('Penyewa: $custName ($custPhone)\nAlamat: $custAddr\nSosmed: $custSosmed\nTotal Biaya: Rp ${rental.totalPrice.toInt()}'),
+        actions: [
+          if (rental.itemStatus != RentalItemStatus.rented &&
+              rental.itemStatus != RentalItemStatus.returned &&
+              rental.itemStatus != RentalItemStatus.completed)
+            CupertinoActionSheetAction(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                if (repository != null) {
+                  final updated = rental.copyWith(itemStatus: RentalItemStatus.rented);
+                  await repository!.updateRental(updated);
+                  onRentalUpdated?.call();
+                }
+              },
+              child: const Text('Tandai Sedang Disewa', style: TextStyle(color: Color(0xFF289868), fontSize: 16)),
+            ),
+          if (rental.itemStatus != RentalItemStatus.returned &&
+              rental.itemStatus != RentalItemStatus.completed)
+            CupertinoActionSheetAction(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                if (repository != null) {
+                  final updated = rental.copyWith(itemStatus: RentalItemStatus.returned);
+                  await repository!.updateRental(updated);
+                  onRentalUpdated?.call();
+                }
+              },
+              child: const Text('Tandai Sudah Dikembalikan', style: TextStyle(color: AppColors.primaryPink, fontSize: 16)),
+            ),
+          if (rental.paymentStatus != RentalPaymentStatus.paid)
+            CupertinoActionSheetAction(
+              onPressed: () async {
+                Navigator.pop(ctx);
+                if (repository != null) {
+                  final updated = rental.copyWith(paymentStatus: RentalPaymentStatus.paid);
+                  await repository!.updateRental(updated);
+                  onRentalUpdated?.call();
+                }
+              },
+              child: const Text('Tandai Pembayaran Lunas', style: TextStyle(color: Color(0xFF34C759), fontSize: 16)),
+            ),
+          if (rental.itemStatus != RentalItemStatus.cancelled)
+            CupertinoActionSheetAction(
+              isDestructiveAction: true,
+              onPressed: () async {
+                Navigator.pop(ctx);
+                if (repository != null) {
+                  final updated = rental.copyWith(itemStatus: RentalItemStatus.cancelled);
+                  await repository!.updateRental(updated);
+                  onRentalUpdated?.call();
+                }
+              },
+              child: const Text('Batalkan Booking'),
+            ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.w600)),
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -489,67 +582,69 @@ class _RentalSlotCard extends StatelessWidget {
     // Check if this rental has any conflict with other rentals
     final hasConflict = BookingConflictEngine.hasConflict(allRentals, rental);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: hasConflict ? AppColors.dangerRose : AppColors.borderSubtle,
-          width: hasConflict ? 1.5 : 1,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return GestureDetector(
+      onTap: () => _showRentalActionSheet(context),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.cardBg,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: hasConflict ? AppColors.dangerRose : AppColors.borderSubtle,
+            width: hasConflict ? 1.5 : 1,
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (hasConflict)
-            Container(
-              margin: const EdgeInsets.only(bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.dangerRose.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.warning_amber_rounded, size: 14, color: AppColors.dangerRose),
-                  SizedBox(width: 4),
-                  Text(
-                    'Konflik Terdeteksi!',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.dangerRose,
-                    ),
-                  ),
-                ],
-              ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  rental.costumeId,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
-                  ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (hasConflict)
+              Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: AppColors.dangerRose.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.warning_amber_rounded, size: 14, color: AppColors.dangerRose),
+                    SizedBox(width: 4),
+                    Text(
+                      'Konflik Terdeteksi!',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.dangerRose,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              _buildPaymentStatusPill(rental.paymentStatus),
-            ],
-          ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    costume?.name ?? rental.costumeId,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textDark,
+                    ),
+                  ),
+                ),
+                _buildPaymentStatusPill(rental.paymentStatus),
+              ],
+            ),
           const SizedBox(height: 6),
           Row(
             children: [
@@ -605,8 +700,9 @@ class _RentalSlotCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildPaymentStatusPill(RentalPaymentStatus status) {
     Color bg;

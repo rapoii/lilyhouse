@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -20,6 +21,41 @@ class CostumeCard extends StatelessWidget {
           (Match m) => '${m[1]}.',
         );
     return 'Rp $parts';
+  }
+
+  Widget _buildCoverPhoto(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => const Icon(
+          CupertinoIcons.sparkles,
+          color: AppColors.primaryPink,
+          size: 32,
+        ),
+      );
+    }
+    if (path.startsWith('/') || path.startsWith('file:') || File(path).existsSync()) {
+      final cleanPath = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
+      return Image.file(
+        File(cleanPath),
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) => const Icon(
+          CupertinoIcons.sparkles,
+          color: AppColors.primaryPink,
+          size: 32,
+        ),
+      );
+    }
+    return Image.asset(
+      path,
+      fit: BoxFit.cover,
+      errorBuilder: (context, error, stackTrace) => const Icon(
+        CupertinoIcons.sparkles,
+        color: AppColors.primaryPink,
+        size: 32,
+      ),
+    );
   }
 
   (Color bg, Color text, String label) _getStatusBadgeData(CostumeStatus status) {
@@ -77,15 +113,7 @@ class CostumeCard extends StatelessWidget {
                     child: costume.coverPhoto != null && costume.coverPhoto!.isNotEmpty
                         ? ClipRRect(
                             borderRadius: BorderRadius.circular(12.0),
-                            child: Image.asset(
-                              costume.coverPhoto!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) => const Icon(
-                                CupertinoIcons.sparkles,
-                                color: AppColors.primaryPink,
-                                size: 32,
-                              ),
-                            ),
+                            child: _buildCoverPhoto(costume.coverPhoto!),
                           )
                         : const Icon(
                             CupertinoIcons.sparkles,
