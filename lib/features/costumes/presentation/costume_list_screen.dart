@@ -232,14 +232,14 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                                 Container(
                                   width: 72,
                                   height: 72,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFFE5E5EA), // iOS systemGray5
+                                  decoration: BoxDecoration(
+                                    color: AppColors.primaryPink.withValues(alpha: 0.12),
                                     shape: BoxShape.circle,
                                   ),
                                   child: const Icon(
                                     CupertinoIcons.sparkles,
                                     size: 36,
-                                    color: Color(0xFF8E8E93), // iOS secondaryLabel
+                                    color: AppColors.primaryPink,
                                   ),
                                 ),
                                 const SizedBox(height: 16),
