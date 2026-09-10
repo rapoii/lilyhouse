@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'tables.dart';
@@ -94,6 +95,44 @@ class DatabaseHelper {
   Future<int> clearSyncQueue() async {
     final db = await database;
     return await db.delete(AppTables.syncQueue);
+  }
+
+  /// Automatically enqueues any existing records in all tables that have not yet been synced.
+  Future<int> enqueueAllUnsyncedRecords() async {
+    final db = await database;
+    int enqueuedCount = 0;
+
+    final existingQueue = await db.query(AppTables.syncQueue);
+    final queuedKeys = existingQueue.map((q) => '${q['table_name']}_${q['record_id']}').toSet();
+
+    final tablesToSync = [
+      AppTables.costumes,
+      AppTables.accessories,
+      AppTables.customers,
+      AppTables.rentals,
+      AppTables.installments,
+      AppTables.installmentLogs,
+    ];
+
+    for (final table in tablesToSync) {
+      final rows = await db.query(table);
+      for (final row in rows) {
+        final id = row['id'] as String;
+        final key = '${table}_$id';
+        if (!queuedKeys.contains(key)) {
+          await enqueueSync(
+            id: '${table}_${id}_${DateTime.now().millisecondsSinceEpoch}',
+            tableName: table,
+            recordId: id,
+            action: 'INSERT',
+            payload: jsonEncode(row),
+          );
+          queuedKeys.add(key);
+          enqueuedCount++;
+        }
+      }
+    }
+    return enqueuedCount;
   }
 
   Future<Map<String, int>> getTableCounts() async {

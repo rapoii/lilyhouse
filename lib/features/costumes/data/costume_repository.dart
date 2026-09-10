@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import '../../../core/database/tables.dart';
 import '../../../core/database/db_helper.dart';
@@ -26,14 +27,32 @@ class CostumeRepository implements ICostumeRepository {
     return db ?? await DatabaseHelper.instance.database;
   }
 
+  Future<void> _recordSync(Database database, String table, String recordId, String action, Map<String, dynamic> payload) async {
+    await database.insert(
+      AppTables.syncQueue,
+      {
+        'id': '${table}_${recordId}_${DateTime.now().millisecondsSinceEpoch}',
+        'table_name': table,
+        'record_id': recordId,
+        'action': action,
+        'payload': jsonEncode(payload),
+        'created_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   @override
   Future<int> insertCostume(Costume costume) async {
     final database = await _db;
-    return await database.insert(
+    final row = costume.toSqlite();
+    final result = await database.insert(
       AppTables.costumes,
-      costume.toSqlite(),
+      row,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await _recordSync(database, AppTables.costumes, costume.id, 'INSERT', row);
+    return result;
   }
 
   @override
@@ -99,32 +118,40 @@ class CostumeRepository implements ICostumeRepository {
   @override
   Future<int> updateCostume(Costume costume) async {
     final database = await _db;
-    return await database.update(
+    final row = costume.toSqlite();
+    final result = await database.update(
       AppTables.costumes,
-      costume.toSqlite(),
+      row,
       where: 'id = ?',
       whereArgs: [costume.id],
     );
+    await _recordSync(database, AppTables.costumes, costume.id, 'UPDATE', row);
+    return result;
   }
 
   @override
   Future<int> deleteCostume(String id) async {
     final database = await _db;
-    return await database.delete(
+    final result = await database.delete(
       AppTables.costumes,
       where: 'id = ?',
       whereArgs: [id],
     );
+    await _recordSync(database, AppTables.costumes, id, 'DELETE', {'id': id});
+    return result;
   }
 
   @override
   Future<int> addAccessory(Accessory accessory) async {
     final database = await _db;
-    return await database.insert(
+    final row = accessory.toSqlite();
+    final result = await database.insert(
       AppTables.accessories,
-      accessory.toSqlite(),
+      row,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await _recordSync(database, AppTables.accessories, accessory.id, 'INSERT', row);
+    return result;
   }
 
   // Alias
@@ -157,21 +184,26 @@ class CostumeRepository implements ICostumeRepository {
   @override
   Future<int> updateAccessory(Accessory accessory) async {
     final database = await _db;
-    return await database.update(
+    final row = accessory.toSqlite();
+    final result = await database.update(
       AppTables.accessories,
-      accessory.toSqlite(),
+      row,
       where: 'id = ?',
       whereArgs: [accessory.id],
     );
+    await _recordSync(database, AppTables.accessories, accessory.id, 'UPDATE', row);
+    return result;
   }
 
   @override
   Future<int> deleteAccessory(String id) async {
     final database = await _db;
-    return await database.delete(
+    final result = await database.delete(
       AppTables.accessories,
       where: 'id = ?',
       whereArgs: [id],
     );
+    await _recordSync(database, AppTables.accessories, id, 'DELETE', {'id': id});
+    return result;
   }
 }

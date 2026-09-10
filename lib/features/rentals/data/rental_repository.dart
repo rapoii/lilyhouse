@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import '../../../core/database/tables.dart';
 import '../../../core/database/db_helper.dart';
@@ -37,16 +38,34 @@ class RentalRepository implements IRentalRepository {
     return db ?? await DatabaseHelper.instance.database;
   }
 
+  Future<void> _recordSync(Database database, String table, String recordId, String action, Map<String, dynamic> payload) async {
+    await database.insert(
+      AppTables.syncQueue,
+      {
+        'id': '${table}_${recordId}_${DateTime.now().millisecondsSinceEpoch}',
+        'table_name': table,
+        'record_id': recordId,
+        'action': action,
+        'payload': jsonEncode(payload),
+        'created_at': DateTime.now().toIso8601String(),
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+  }
+
   // --- Customer Operations ---
 
   @override
   Future<int> insertCustomer(Customer customer) async {
     final database = await _db;
-    return await database.insert(
+    final row = customer.toSqlite();
+    final result = await database.insert(
       AppTables.customers,
-      customer.toSqlite(),
+      row,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await _recordSync(database, AppTables.customers, customer.id, 'INSERT', row);
+    return result;
   }
 
   @override
@@ -89,22 +108,27 @@ class RentalRepository implements IRentalRepository {
   @override
   Future<int> updateCustomer(Customer customer) async {
     final database = await _db;
-    return await database.update(
+    final row = customer.toSqlite();
+    final result = await database.update(
       AppTables.customers,
-      customer.toSqlite(),
+      row,
       where: 'id = ?',
       whereArgs: [customer.id],
     );
+    await _recordSync(database, AppTables.customers, customer.id, 'UPDATE', row);
+    return result;
   }
 
   @override
   Future<int> deleteCustomer(String id) async {
     final database = await _db;
-    return await database.delete(
+    final result = await database.delete(
       AppTables.customers,
       where: 'id = ?',
       whereArgs: [id],
     );
+    await _recordSync(database, AppTables.customers, id, 'DELETE', {'id': id});
+    return result;
   }
 
   // --- Rental Operations ---
@@ -112,11 +136,14 @@ class RentalRepository implements IRentalRepository {
   @override
   Future<int> insertRental(Rental rental) async {
     final database = await _db;
-    return await database.insert(
+    final row = rental.toSqlite();
+    final result = await database.insert(
       AppTables.rentals,
-      rental.toSqlite(),
+      row,
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    await _recordSync(database, AppTables.rentals, rental.id, 'INSERT', row);
+    return result;
   }
 
   @override
@@ -191,22 +218,27 @@ class RentalRepository implements IRentalRepository {
   @override
   Future<int> updateRental(Rental rental) async {
     final database = await _db;
-    return await database.update(
+    final row = rental.toSqlite();
+    final result = await database.update(
       AppTables.rentals,
-      rental.toSqlite(),
+      row,
       where: 'id = ?',
       whereArgs: [rental.id],
     );
+    await _recordSync(database, AppTables.rentals, rental.id, 'UPDATE', row);
+    return result;
   }
 
   @override
   Future<int> deleteRental(String id) async {
     final database = await _db;
-    return await database.delete(
+    final result = await database.delete(
       AppTables.rentals,
       where: 'id = ?',
       whereArgs: [id],
     );
+    await _recordSync(database, AppTables.rentals, id, 'DELETE', {'id': id});
+    return result;
   }
 
   @override

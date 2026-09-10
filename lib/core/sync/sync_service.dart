@@ -52,6 +52,7 @@ class SyncService {
   /// and removes successfully processed records from the local sync queue.
   Future<SyncResult> syncPending() async {
     try {
+      await dbHelper.enqueueAllUnsyncedRecords();
       final pendingItems = await dbHelper.getPendingSyncItems();
       if (pendingItems.isEmpty) {
         return const SyncResult(
