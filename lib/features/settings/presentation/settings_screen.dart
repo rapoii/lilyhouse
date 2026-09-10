@@ -880,12 +880,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     ),
                   ),
                 ),
-                subtitle: const Center(
-                  child: Text(
-                    'Ambil database dari Google Sheets (setelah install ulang)',
-                    style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
-                  ),
-                ),
                 onTap: syncState.status == SyncStatus.syncing ? null : _handleRestore,
               ),
             ],
@@ -952,7 +946,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.55 (Build 88)', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.55 (Build 89)', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),
