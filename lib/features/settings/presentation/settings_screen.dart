@@ -99,6 +99,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _showIosToast('File script disalin ke clipboard');
   }
 
+  void _copyEndpointUrl() {
+    Clipboard.setData(const ClipboardData(
+      text:
+          'https://script.google.com/macros/s/AKfycbxLnaF6AG1Ag06TD2MDp0Tws45ZOlVC9NJNdQKmYMGg6gy1OQmJfZVdkuX0hD9xfoz9ug/exec',
+    ));
+    _showIosToast('URL Endpoint disalin ke clipboard');
+  }
+
+  void _copySpreadsheetUrl() {
+    Clipboard.setData(const ClipboardData(
+      text:
+          'https://docs.google.com/spreadsheets/d/1ey7p0jETE1IsNITdFxK_FVYPdKTnH1wIF6QbLcLclIg/edit',
+    ));
+    _showIosToast('Link Google Sheets disalin ke clipboard');
+  }
+
   void _showPendingQueueSheet() {
     HapticFeedback.selectionClick();
     showCupertinoModalPopup<void>(
@@ -623,7 +639,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.55 (Build 79)',
+                    'Versi 1.0.55 (Build 80)',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -1019,7 +1035,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             backgroundColor: Colors.transparent,
             children: [
-              // Row 1: File Script Backend (HAS action copy button)
+              // Row 1: Endpoint URL (HAS copy action)
+              CupertinoListTile(
+                leading: const SquircleIcon(
+                  icon: CupertinoIcons.cloud_fill,
+                  color: Color(0xFF34C759),
+                ),
+                title: const Text('Endpoint Web App', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                subtitle: const Text(
+                  'script.google.com/.../exec',
+                  style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: Color(0xFF8E8E93)),
+                ),
+                trailing: const Icon(CupertinoIcons.doc_on_clipboard, size: 18, color: AppColors.primaryPink),
+                onTap: _copyEndpointUrl,
+              ),
+
+              // Row 2: Spreadsheet Data (HAS copy action)
+              CupertinoListTile(
+                leading: const SquircleIcon(
+                  icon: CupertinoIcons.table_badge_more_fill,
+                  color: Color(0xFF30B0C7),
+                ),
+                title: const Text('Spreadsheet Cloud', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                subtitle: const Text(
+                  'LilyHouse_Data (Google Sheets)',
+                  style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                ),
+                trailing: const Icon(CupertinoIcons.doc_on_clipboard, size: 18, color: AppColors.primaryPink),
+                onTap: _copySpreadsheetUrl,
+              ),
+
+              // Row 3: File Script Backend (HAS action copy button)
               CupertinoListTile(
                 leading: const SquircleIcon(
                   icon: CupertinoIcons.doc_text_fill,
@@ -1034,7 +1080,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onTap: _copyScriptBackend,
               ),
 
-              // Row 2: Panduan Deployment (HAS chevron — opens guide sheet)
+              // Row 4: Panduan Deployment (HAS chevron — opens guide sheet)
               CupertinoListTile(
                 leading: const SquircleIcon(
                   icon: CupertinoIcons.book_fill,
@@ -1109,7 +1155,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.55 (Build 79)', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.55 (Build 80)', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),

@@ -39,7 +39,8 @@ class SyncState {
 /// Provider for the SyncService instance
 final syncServiceProvider = Provider<SyncService>((ref) {
   return SyncService(
-    endpointUrl: '', // Default blank; configured by app settings or env
+    endpointUrl:
+        'https://script.google.com/macros/s/AKfycbxLnaF6AG1Ag06TD2MDp0Tws45ZOlVC9NJNdQKmYMGg6gy1OQmJfZVdkuX0hD9xfoz9ug/exec',
   );
 });
 

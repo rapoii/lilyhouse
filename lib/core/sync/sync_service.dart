@@ -30,6 +30,24 @@ class SyncService {
   })  : dbHelper = dbHelper ?? DatabaseHelper.instance,
         _client = httpClient ?? http.Client();
 
+  Future<http.Response> _postWithRedirect(
+    Uri uri, {
+    Map<String, String>? headers,
+    Object? body,
+  }) async {
+    final initialResponse = await _client.post(uri, headers: headers, body: body);
+    if ((initialResponse.statusCode == 301 ||
+            initialResponse.statusCode == 302 ||
+            initialResponse.statusCode == 303 ||
+            initialResponse.statusCode == 307 ||
+            initialResponse.statusCode == 308) &&
+        initialResponse.headers.containsKey('location')) {
+      final redirectUrl = initialResponse.headers['location']!;
+      return await _client.get(Uri.parse(redirectUrl));
+    }
+    return initialResponse;
+  }
+
   /// Reads pending items in sync_queue, posts them in batch to Google Apps Script,
   /// and removes successfully processed records from the local sync queue.
   Future<SyncResult> syncPending() async {
@@ -65,7 +83,7 @@ class SyncService {
         'items': itemsPayload,
       });
 
-      final response = await _client.post(
+      final response = await _postWithRedirect(
         Uri.parse(endpointUrl),
         headers: {
           'Content-Type': 'application/json',
@@ -140,7 +158,7 @@ class SyncService {
         'mime_type': mimeType,
       });
 
-      final response = await _client.post(
+      final response = await _postWithRedirect(
         Uri.parse(endpointUrl),
         headers: {
           'Content-Type': 'application/json',
