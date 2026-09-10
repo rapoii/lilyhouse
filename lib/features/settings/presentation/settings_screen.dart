@@ -770,10 +770,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 letterSpacing: -0.05,
               ),
             ),
-            footer: const Text(
-              'Perubahan data rental & cicilan otomatis masuk ke antrean jika offline, dan tersinkron ke cloud saat online.',
-              style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
-            ),
             margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             backgroundColor: Colors.transparent,
             children: [
@@ -946,7 +942,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.55 (Build 89)', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.55 (Build 90)', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),
