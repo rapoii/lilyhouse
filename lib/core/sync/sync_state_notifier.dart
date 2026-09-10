@@ -100,6 +100,43 @@ class SyncStateNotifier extends StateNotifier<SyncState> {
 
     return result;
   }
+
+  /// Downloads all cloud data and replaces local tables.
+  /// Used after reinstall/uninstall to pull the database back into the app.
+  Future<RestoreResult> restoreNow() async {
+    if (state.status == SyncStatus.syncing) {
+      return const RestoreResult(
+        isSuccess: false,
+        errorMessage: 'Sinkronisasi sedang berjalan',
+      );
+    }
+
+    state = state.copyWith(
+      status: SyncStatus.syncing,
+      errorMessage: null,
+    );
+
+    final result = await _syncService.restoreFromCloud();
+
+    if (result.isSuccess) {
+      state = state.copyWith(
+        status: SyncStatus.success,
+        pendingCount: 0,
+        lastSyncedAt: DateTime.now(),
+        errorMessage: null,
+      );
+    } else {
+      final remainingItems =
+          await _syncService.dbHelper.getPendingSyncItems();
+      state = state.copyWith(
+        status: SyncStatus.error,
+        pendingCount: remainingItems.length,
+        errorMessage: result.errorMessage,
+      );
+    }
+
+    return result;
+  }
 }
 
 /// Provider for SyncStateNotifier

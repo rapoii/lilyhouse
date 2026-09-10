@@ -223,5 +223,115 @@ void main() {
       expect(result.syncedCount, 0);
       expect(networkCalled, isFalse);
     });
+
+    test('Restores cloud fetch_all payload into local tables and clears queue', () async {
+      await testDb.insert(AppTables.costumes, {
+        'id': 'cos-stale',
+        'name': 'Stale Costume',
+        'anime_series': 'Old Series',
+        'size': 'M',
+        'rent_price_3days': 100000.0,
+        'status': 'available',
+        'cover_photo': null,
+        'gallery_photos': '[]',
+        'included_accessories': '[]',
+        'notes': null,
+        'sync_status': 'synced',
+      });
+      await dbHelper.enqueueSync(
+        id: 'sync-stale',
+        tableName: AppTables.costumes,
+        recordId: 'cos-stale',
+        action: 'insert',
+        payload: '{}',
+      );
+
+      final mockClient = MockClient((request) async {
+        expect(request.method, 'GET');
+        expect(request.url.queryParameters['action'], 'fetch_all');
+        return http.Response(
+          jsonEncode({
+            'status': 'success',
+            'data': {
+              'costumes': [
+                {
+                  'id': 'cost_1',
+                  'name': 'Furina_Archon',
+                  'anime_series': 'Genshin_Impact',
+                  'size': 'M',
+                  'rent_price_3days': 150000,
+                  'status': 'available',
+                  'cover_photo': null,
+                  'gallery_photos': '[]',
+                  'included_accessories': '[]',
+                  'notes': null,
+                  'sync_status': 'pending',
+                  'updated_at': '2026-09-10T00:00:00.000Z',
+                },
+              ],
+              'accessories': [
+                {
+                  'id': 'acc_1',
+                  'name': 'Wig_Stylist',
+                  'type': 'Aksesori',
+                  'related_costume_id': 'cost_1',
+                  'condition_status': 'minor_damage',
+                  'photo_url': null,
+                  'sync_status': 'pending',
+                },
+              ],
+              'customers': [],
+              'rentals': [],
+              'installments': [],
+              'installment_logs': [],
+            },
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final syncService = SyncService(
+        endpointUrl: 'https://script.google.com/macros/s/test-script-id/exec',
+        dbHelper: dbHelper,
+        httpClient: mockClient,
+      );
+
+      final result = await syncService.restoreFromCloud();
+
+      expect(result.isSuccess, isTrue);
+      expect(result.totalCount, equals(2));
+      expect(result.tableCounts[AppTables.costumes], equals(1));
+      expect(result.tableCounts[AppTables.accessories], equals(1));
+
+      final costumes = await testDb.query(AppTables.costumes);
+      expect(costumes.length, equals(1));
+      expect(costumes.first['id'], equals('cost_1'));
+      expect(costumes.first['name'], equals('Furina_Archon'));
+      expect(costumes.first['sync_status'], equals('synced'));
+
+      final accessories = await testDb.query(AppTables.accessories);
+      expect(accessories.length, equals(1));
+      expect(accessories.first['condition_status'], equals('minor_damage'));
+
+      final queue = await dbHelper.getPendingSyncItems();
+      expect(queue, isEmpty);
+    });
+
+    test('Restore fails gracefully on server error and preserves local data', () async {
+      final mockClient = MockClient((request) async {
+        return http.Response('Internal Server Error', 500);
+      });
+
+      final syncService = SyncService(
+        endpointUrl: 'https://script.google.com/macros/s/test-script-id/exec',
+        dbHelper: dbHelper,
+        httpClient: mockClient,
+      );
+
+      final result = await syncService.restoreFromCloud();
+      expect(result.isSuccess, isFalse);
+      expect(result.errorMessage, contains('500'));
+    });
   });
 }

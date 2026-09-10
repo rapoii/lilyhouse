@@ -18,6 +18,20 @@ class SyncResult {
   });
 }
 
+class RestoreResult {
+  final bool isSuccess;
+  final int totalCount;
+  final Map<String, int> tableCounts;
+  final String? errorMessage;
+
+  const RestoreResult({
+    required this.isSuccess,
+    this.totalCount = 0,
+    this.tableCounts = const {},
+    this.errorMessage,
+  });
+}
+
 class SyncService {
   final String endpointUrl;
   final DatabaseHelper dbHelper;
@@ -136,6 +150,63 @@ class SyncService {
       return SyncResult(
         isSuccess: false,
         syncedCount: 0,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  /// Downloads all cloud tables (GAS fetch_all) and replaces local tables.
+  /// Returns per-table restored counts. Overwrites local rows — intended for
+  /// fresh installs after uninstall. Sync queue is cleared on success.
+  Future<RestoreResult> restoreFromCloud() async {
+    try {
+      if (endpointUrl.isEmpty) {
+        return const RestoreResult(
+          isSuccess: false,
+          errorMessage: 'URL endpoint sinkronisasi belum diatur.',
+        );
+      }
+
+      final uri = Uri.parse(endpointUrl).replace(queryParameters: {'action': 'fetch_all'});
+      final response = await _client.get(uri);
+
+      if (response.statusCode != 200) {
+        return RestoreResult(
+          isSuccess: false,
+          errorMessage: 'Server merespons dengan HTTP ${response.statusCode}',
+        );
+      }
+
+      final Map<String, dynamic> responseData =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      if (responseData['status'] != 'success') {
+        return RestoreResult(
+          isSuccess: false,
+          errorMessage: responseData['message']?.toString() ?? 'Gagal mengambil data cloud',
+        );
+      }
+
+      final rawData = responseData['data'];
+      if (rawData is! Map) {
+        return const RestoreResult(
+          isSuccess: false,
+          errorMessage: 'Format data cloud tidak valid',
+        );
+      }
+
+      final cloudData = <String, dynamic>{};
+      rawData.forEach((k, v) => cloudData[k.toString()] = v);
+
+      final counts = await dbHelper.restoreAll(cloudData);
+      final total = counts.values.fold<int>(0, (sum, c) => sum + c);
+      return RestoreResult(
+        isSuccess: true,
+        totalCount: total,
+        tableCounts: counts,
+      );
+    } catch (e) {
+      return RestoreResult(
+        isSuccess: false,
         errorMessage: e.toString(),
       );
     }

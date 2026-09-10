@@ -120,7 +120,9 @@ class Installment {
       totalCost: (map['total_cost'] as num).toDouble(),
       totalPaid: (map['total_paid'] as num).toDouble(),
       remainingBalance: (map['remaining_balance'] as num).toDouble(),
-      dueDate: map['due_date'] != null ? DateTime.parse(map['due_date'] as String) : null,
+      dueDate: (map['due_date'] == null || (map['due_date'] as String).trim().isEmpty)
+          ? null
+          : DateTime.parse(map['due_date'] as String),
       status: InstallmentStatus.fromString(map['status'] as String),
       syncStatus: (map['sync_status'] as String?) ?? 'pending',
     );

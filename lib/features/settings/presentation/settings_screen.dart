@@ -94,6 +94,44 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _handleRestore() async {
+    HapticFeedback.selectionClick();
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Pulihkan dari Cloud?'),
+        content: const Text(
+          'Seluruh data lokal akan diganti dengan data dari Google Sheets. '
+          'Gunakan ini setelah install ulang aplikasi.',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Batal'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Pulihkan'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    HapticFeedback.mediumImpact();
+    final result = await ref.read(syncStateProvider.notifier).restoreNow();
+    if (!mounted) return;
+    if (result.isSuccess) {
+      _showIosToast('Pemulihan berhasil: ${result.totalCount} data dari cloud');
+    } else {
+      _showIosToast(
+        result.errorMessage ?? 'Gagal memulihkan dari cloud',
+        icon: CupertinoIcons.exclamationmark_circle_fill,
+      );
+    }
+  }
+
   void _copyScriptBackend() {
     Clipboard.setData(const ClipboardData(text: 'google_apps_script.js'));
     _showIosToast('File script disalin ke clipboard');
@@ -639,7 +677,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.55 (Build 85)',
+                    'Versi 1.0.55 (Build 86)',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -1014,6 +1052,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 onTap: syncState.status == SyncStatus.syncing ? null : _handleSync,
               ),
+
+              // Row 5: Action Button (Pulihkan dari Cloud — after reinstall)
+              CupertinoListTile(
+                title: const Center(
+                  child: Text(
+                    'Pulihkan dari Cloud',
+                    style: TextStyle(
+                      color: Color(0xFF007AFF),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+                subtitle: const Center(
+                  child: Text(
+                    'Ambil database dari Google Sheets (setelah install ulang)',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                  ),
+                ),
+                onTap: syncState.status == SyncStatus.syncing ? null : _handleRestore,
+              ),
             ],
           ),
 
@@ -1155,7 +1214,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.55 (Build 85)', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.55 (Build 86)', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),
