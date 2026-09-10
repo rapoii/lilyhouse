@@ -4,6 +4,19 @@ enum AccessoryCondition {
   needsRepair,
   lost;
 
+  String get displayName {
+    switch (this) {
+      case AccessoryCondition.good:
+        return 'Baik';
+      case AccessoryCondition.minorDamage:
+        return 'Rusak Ringan';
+      case AccessoryCondition.needsRepair:
+        return 'Perlu Servis';
+      case AccessoryCondition.lost:
+        return 'Hilang';
+    }
+  }
+
   static AccessoryCondition fromString(String value) {
     return AccessoryCondition.values.firstWhere(
       (e) => e.name.toLowerCase() == value.toLowerCase().replaceAll('_', ''),

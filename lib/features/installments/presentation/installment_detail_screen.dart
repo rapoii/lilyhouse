@@ -170,7 +170,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Detail Cicilan & Ledger'),
+        title: const Text('Detail & Riwayat Cicilan'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20.0),

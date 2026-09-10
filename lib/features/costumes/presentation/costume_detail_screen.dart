@@ -295,11 +295,20 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               )
             else ...[
               // Registered Accessory objects from DB
-              ..._accessories.map((acc) => _buildAccessoryRow(acc.name, acc.type, acc.conditionStatus.name, accessoryId: acc.id)),
+              ..._accessories.map((acc) => _buildAccessoryRow(
+                    acc.name,
+                    acc.type,
+                    acc.conditionStatus,
+                    accessory: acc,
+                  )),
               // Legacy strings list in includedAccessories
               ...widget.costume.includedAccessories
                   .where((accStr) => !_accessories.any((a) => a.name.toLowerCase() == accStr.toLowerCase()))
-                  .map((accStr) => _buildAccessoryRow(accStr, 'Set Piece', 'good')),
+                  .map((accStr) => _buildAccessoryRow(
+                        accStr,
+                        'Kelengkapan Set',
+                        AccessoryCondition.good,
+                      )),
             ],
           ],
         ),
@@ -342,52 +351,160 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
     );
   }
 
-  void _showAddAccessoryDialog() {
-    final controller = TextEditingController();
-    showCupertinoDialog<void>(
+  ({Color bg, Color text}) _getConditionColors(AccessoryCondition condition) {
+    switch (condition) {
+      case AccessoryCondition.good:
+        return (bg: const Color(0xFFE3F9EC), text: const Color(0xFF1E824C));
+      case AccessoryCondition.minorDamage:
+        return (bg: const Color(0xFFFFF4E5), text: const Color(0xFFD97706));
+      case AccessoryCondition.needsRepair:
+        return (bg: const Color(0xFFFFEBF0), text: AppColors.dangerRose);
+      case AccessoryCondition.lost:
+        return (bg: const Color(0xFFFEE2E2), text: const Color(0xFFDC2626));
+    }
+  }
+
+  void _showChangeConditionSheet(Accessory acc) {
+    showCupertinoModalPopup<void>(
       context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Tambah Aksesori'),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: CupertinoTextField(
-            controller: controller,
-            placeholder: 'Contoh: Wig Stylist, Senjata Prop, Tiara',
-            autofocus: true,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(10),
-          ),
-        ),
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text('Kondisi Aksesori: ${acc.name}'),
+        message: const Text('Pilih status kondisi aksesori saat ini:'),
         actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(ctx),
-            isDestructiveAction: true,
-            child: const Text('Batal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
+          CupertinoActionSheetAction(
             onPressed: () async {
-              final value = controller.text.trim();
-              if (value.isNotEmpty) {
-                final acc = Accessory(
-                  id: 'acc_${DateTime.now().millisecondsSinceEpoch}',
-                  name: value,
-                  type: 'Aksesori & Properti',
-                  relatedCostumeId: widget.costume.id,
-                );
-                await _repository.addAccessory(acc);
-                await _loadAccessories();
-              }
-              if (mounted && Navigator.canPop(ctx)) {
-                Navigator.pop(ctx);
-              }
+              Navigator.pop(ctx);
+              await _repository.updateAccessory(acc.copyWith(conditionStatus: AccessoryCondition.good));
+              await _loadAccessories();
             },
-            child: const Text('Tambah', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+            child: const Text('Baik', style: TextStyle(color: Color(0xFF1E824C), fontWeight: FontWeight.w600)),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _repository.updateAccessory(acc.copyWith(conditionStatus: AccessoryCondition.minorDamage));
+              await _loadAccessories();
+            },
+            child: const Text('Rusak Ringan', style: TextStyle(color: Color(0xFFD97706), fontWeight: FontWeight.w600)),
+          ),
+          CupertinoActionSheetAction(
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _repository.updateAccessory(acc.copyWith(conditionStatus: AccessoryCondition.needsRepair));
+              await _loadAccessories();
+            },
+            child: const Text('Perlu Servis', style: TextStyle(color: AppColors.dangerRose, fontWeight: FontWeight.w600)),
+          ),
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _repository.updateAccessory(acc.copyWith(conditionStatus: AccessoryCondition.lost));
+              await _loadAccessories();
+            },
+            child: const Text('Hilang'),
           ),
         ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Batal'),
+        ),
+      ),
+    );
+  }
+
+  void _showAddAccessoryDialog() {
+    final controller = TextEditingController();
+    AccessoryCondition selectedCondition = AccessoryCondition.good;
+
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => CupertinoAlertDialog(
+          title: const Text('Tambah Aksesori'),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 12),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CupertinoTextField(
+                  controller: controller,
+                  placeholder: 'Contoh: Wig Stylist, Senjata Prop, Tiara',
+                  autofocus: true,
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.all(10),
+                ),
+                const SizedBox(height: 12),
+                const Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Kondisi Aksesori:',
+                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted),
+                  ),
+                ),
+                const SizedBox(height: 6),
+                CupertinoSlidingSegmentedControl<AccessoryCondition>(
+                  groupValue: selectedCondition,
+                  children: const {
+                    AccessoryCondition.good: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      child: Text('Baik', style: TextStyle(fontSize: 11)),
+                    ),
+                    AccessoryCondition.minorDamage: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      child: Text('Ringan', style: TextStyle(fontSize: 11)),
+                    ),
+                    AccessoryCondition.needsRepair: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      child: Text('Servis', style: TextStyle(fontSize: 11)),
+                    ),
+                    AccessoryCondition.lost: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      child: Text('Hilang', style: TextStyle(fontSize: 11)),
+                    ),
+                  },
+                  onValueChanged: (val) {
+                    if (val != null) {
+                      setDialogState(() => selectedCondition = val);
+                    }
+                  },
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.pop(ctx),
+              isDestructiveAction: true,
+              child: const Text('Batal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+            ),
+            CupertinoDialogAction(
+              isDefaultAction: true,
+              onPressed: () async {
+                final value = controller.text.trim();
+                if (value.isNotEmpty) {
+                  final acc = Accessory(
+                    id: 'acc_${DateTime.now().millisecondsSinceEpoch}',
+                    name: value,
+                    type: 'Aksesori & Properti',
+                    conditionStatus: selectedCondition,
+                    relatedCostumeId: widget.costume.id,
+                  );
+                  await _repository.addAccessory(acc);
+                  await _loadAccessories();
+                }
+                if (mounted && Navigator.canPop(ctx)) {
+                  Navigator.pop(ctx);
+                }
+              },
+              child: const Text('Tambah', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -417,7 +534,14 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
     );
   }
 
-  Widget _buildAccessoryRow(String name, String type, String condition, {String? accessoryId}) {
+  Widget _buildAccessoryRow(
+    String name,
+    String type,
+    AccessoryCondition condition, {
+    Accessory? accessory,
+  }) {
+    final colors = _getConditionColors(condition);
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -452,24 +576,36 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               ],
             ),
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(color: AppColors.borderSubtle),
-            ),
-            child: Text(
-              condition.toUpperCase(),
-              style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textMuted),
+          GestureDetector(
+            onTap: accessory != null ? () => _showChangeConditionSheet(accessory) : null,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: colors.bg,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: colors.text.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    condition.displayName.toUpperCase(),
+                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colors.text),
+                  ),
+                  if (accessory != null) ...[
+                    const SizedBox(width: 4),
+                    Icon(CupertinoIcons.chevron_down, size: 10, color: colors.text),
+                  ],
+                ],
+              ),
             ),
           ),
-          if (accessoryId != null) ...[
+          if (accessory != null) ...[
             const SizedBox(width: 8),
             CupertinoButton(
               padding: EdgeInsets.zero,
               minimumSize: Size.zero,
-              onPressed: () => _confirmDeleteAccessory(accessoryId, name),
+              onPressed: () => _confirmDeleteAccessory(accessory.id, name),
               child: const Icon(CupertinoIcons.trash, color: Color(0xFFFF3B30), size: 18),
             ),
           ],
