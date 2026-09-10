@@ -7,6 +7,7 @@ import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../data/costume_repository.dart';
+import '../domain/accessory.dart';
 import '../domain/costume.dart';
 
 /// Authentic 10/10 Apple HIG Inset-Grouped Modal Sheet for adding costumes & accessories.
@@ -154,6 +155,15 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
         notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
       );
       await widget.repository.insertCostume(costume);
+      for (final accName in _accessories) {
+        final acc = Accessory(
+          id: 'acc_${DateTime.now().millisecondsSinceEpoch}_${accName.hashCode.abs()}',
+          name: accName,
+          type: 'Aksesori & Properti',
+          relatedCostumeId: costume.id,
+        );
+        await widget.repository.addAccessory(acc);
+      }
       if (!mounted) return;
       Navigator.of(context).pop();
       widget.onSaved();

@@ -242,13 +242,38 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
             const SizedBox(height: 24),
 
             // Accessories Section
-            const Text(
-              'Aksesori & Properti Termasuk',
-              style: TextStyle(
-                fontSize: 17,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textDark,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Aksesori & Properti Termasuk',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textDark,
+                  ),
+                ),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  onPressed: _showAddAccessoryDialog,
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(CupertinoIcons.plus_circle_fill, color: AppColors.primaryPink, size: 20),
+                      SizedBox(width: 4),
+                      Text(
+                        'Tambah',
+                        style: TextStyle(
+                          color: AppColors.primaryPink,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 12),
 
@@ -270,7 +295,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               )
             else ...[
               // Registered Accessory objects from DB
-              ..._accessories.map((acc) => _buildAccessoryRow(acc.name, acc.type, acc.conditionStatus.name)),
+              ..._accessories.map((acc) => _buildAccessoryRow(acc.name, acc.type, acc.conditionStatus.name, accessoryId: acc.id)),
               // Legacy strings list in includedAccessories
               ...widget.costume.includedAccessories
                   .where((accStr) => !_accessories.any((a) => a.name.toLowerCase() == accStr.toLowerCase()))
@@ -317,7 +342,82 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
     );
   }
 
-  Widget _buildAccessoryRow(String name, String type, String condition) {
+  void _showAddAccessoryDialog() {
+    final controller = TextEditingController();
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Tambah Aksesori'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: CupertinoTextField(
+            controller: controller,
+            placeholder: 'Contoh: Wig Stylist, Senjata Prop, Tiara',
+            autofocus: true,
+            decoration: BoxDecoration(
+              color: AppColors.background,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            padding: const EdgeInsets.all(10),
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx),
+            isDestructiveAction: true,
+            child: const Text('Batal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+          ),
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () async {
+              final value = controller.text.trim();
+              if (value.isNotEmpty) {
+                final acc = Accessory(
+                  id: 'acc_${DateTime.now().millisecondsSinceEpoch}',
+                  name: value,
+                  type: 'Aksesori & Properti',
+                  relatedCostumeId: widget.costume.id,
+                );
+                await _repository.addAccessory(acc);
+                await _loadAccessories();
+              }
+              if (mounted && Navigator.canPop(ctx)) {
+                Navigator.pop(ctx);
+              }
+            },
+            child: const Text('Tambah', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmDeleteAccessory(String id, String name) {
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => CupertinoActionSheet(
+        title: Text('Hapus Aksesori "$name"?'),
+        actions: [
+          CupertinoActionSheetAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _repository.deleteAccessory(id);
+              await _loadAccessories();
+            },
+            child: const Text('Hapus Aksesori'),
+          ),
+        ],
+        cancelButton: CupertinoActionSheetAction(
+          isDefaultAction: true,
+          onPressed: () => Navigator.pop(ctx),
+          child: const Text('Batal'),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAccessoryRow(String name, String type, String condition, {String? accessoryId}) {
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -364,6 +464,15 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.textMuted),
             ),
           ),
+          if (accessoryId != null) ...[
+            const SizedBox(width: 8),
+            CupertinoButton(
+              padding: EdgeInsets.zero,
+              minimumSize: Size.zero,
+              onPressed: () => _confirmDeleteAccessory(accessoryId, name),
+              child: const Icon(CupertinoIcons.trash, color: Color(0xFFFF3B30), size: 18),
+            ),
+          ],
         ],
       ),
     );
