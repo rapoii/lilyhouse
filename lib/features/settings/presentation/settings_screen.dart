@@ -132,26 +132,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
-  void _copyScriptBackend() {
-    Clipboard.setData(const ClipboardData(text: 'google_apps_script.js'));
-    _showIosToast('File script disalin ke clipboard');
-  }
 
-  void _copyEndpointUrl() {
-    Clipboard.setData(const ClipboardData(
-      text:
-          'https://script.google.com/macros/s/AKfycbxLnaF6AG1Ag06TD2MDp0Tws45ZOlVC9NJNdQKmYMGg6gy1OQmJfZVdkuX0hD9xfoz9ug/exec',
-    ));
-    _showIosToast('URL Endpoint disalin ke clipboard');
-  }
-
-  void _copySpreadsheetUrl() {
-    Clipboard.setData(const ClipboardData(
-      text:
-          'https://docs.google.com/spreadsheets/d/1ey7p0jETE1IsNITdFxK_FVYPdKTnH1wIF6QbLcLclIg/edit',
-    ));
-    _showIosToast('Link Google Sheets disalin ke clipboard');
-  }
 
   void _showPendingQueueSheet() {
     HapticFeedback.selectionClick();
@@ -284,173 +265,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 
-  void _showBackendGuideSheet() {
-    HapticFeedback.selectionClick();
-    showCupertinoModalPopup<void>(
-      context: context,
-      builder: (ctx) => DraggableSheetContainer(
-        backgroundColor: AppColors.background,
-        initialHeightFraction: 0.85,
-        maxHeightFraction: 0.95,
-        builder: (sheetCtx) => DefaultTextStyle(
-          style: const TextStyle(
-            decoration: TextDecoration.none,
-            fontFamily: '.SF Pro Text',
-            color: AppColors.textDark,
-          ),
-          child: CupertinoPageScaffold(
-            backgroundColor: AppColors.background,
-            navigationBar: CupertinoNavigationBar(
-              backgroundColor: AppColors.background,
-              border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
-              middle: const Text('Panduan Deployment', style: AppTypography.navTitle),
-              trailing: CupertinoButton(
-                padding: EdgeInsets.zero,
-                onPressed: () => Navigator.pop(sheetCtx),
-                child: const Text('Tutup', style: AppTypography.actionButton),
-              ),
-            ),
-            child: ListView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.cardBg,
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: const Color(0xFFE5E5EA)),
-                  ),
-                  child: Row(
-                    children: [
-                      const SquircleIcon(
-                        icon: CupertinoIcons.doc_text_fill,
-                        color: Color(0xFF5856D6),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              'google_apps_script.js',
-                              style: TextStyle(
-                                fontFamily: 'monospace',
-                                fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                color: AppColors.textDark,
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              'Script serverless untuk Google Sheets & Drive',
-                              style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
-                            ),
-                          ],
-                        ),
-                      ),
-                      CupertinoButton(
-                        padding: const EdgeInsets.all(8),
-                        onPressed: _copyScriptBackend,
-                        child: const Icon(CupertinoIcons.doc_on_clipboard, size: 20, color: AppColors.primaryPink),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  'LANGKAH DEPLOYMENT',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xFF6C6C70),
-                    letterSpacing: -0.05,
-                  ),
-                ),
-                const SizedBox(height: 10),
-                _buildGuideStep(
-                  step: '1',
-                  title: 'Buat Spreadsheet Baru',
-                  desc: 'Buka Google Sheets di browser, buat spreadsheet baru untuk database rental kostum.',
-                ),
-                _buildGuideStep(
-                  step: '2',
-                  title: 'Buka Apps Script Editor',
-                  desc: 'Di menu Google Sheets, pilih Extensions > Apps Script untuk membuka code editor.',
-                ),
-                _buildGuideStep(
-                  step: '3',
-                  title: 'Tempel Kode Script',
-                  desc: 'Salin seluruh isi file google_apps_script.js dari folder proyek dan tempel ke Code.gs.',
-                ),
-                _buildGuideStep(
-                  step: '4',
-                  title: 'Deploy sebagai Web App',
-                  desc: 'Klik tombol Deploy > New Deployment > Web App. Atur "Execute as: Me" dan "Who has access: Anyone".',
-                ),
-                _buildGuideStep(
-                  step: '5',
-                  title: 'Dapatkan Endpoint URL',
-                  desc: 'Salin URL Web App yang dihasilkan. Endpoint ini siap menerima request sinkronisasi otomatis dari aplikasi.',
-                ),
-                const SizedBox(height: 30),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildGuideStep({required String step, required String title, required String desc}) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.cardBg,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 26,
-            height: 26,
-            decoration: BoxDecoration(
-              color: AppColors.primaryPink.withOpacity(0.15),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                step,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryPink,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  desc,
-                  style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93), height: 1.3),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _showDatabaseStatsSheet() {
     HapticFeedback.selectionClick();
@@ -1076,84 +891,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
 
-          // Section 2: INTEGRASI GOOGLE APPS SCRIPT
-          CupertinoListSection.insetGrouped(
-            header: const Text(
-              'INTEGRASI GOOGLE APPS SCRIPT',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF6C6C70),
-                letterSpacing: -0.05,
-              ),
-            ),
-            footer: const Text(
-              'Backend serverless gratis tanpa server, tersinkron ke Google Sheets & Google Drive.',
-              style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
-            ),
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-            backgroundColor: Colors.transparent,
-            children: [
-              // Row 1: Endpoint URL (HAS copy action)
-              CupertinoListTile(
-                leading: const SquircleIcon(
-                  icon: CupertinoIcons.cloud_fill,
-                  color: Color(0xFF34C759),
-                ),
-                title: const Text('Endpoint Web App', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                subtitle: const Text(
-                  'script.google.com/.../exec',
-                  style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: Color(0xFF8E8E93)),
-                ),
-                trailing: const Icon(CupertinoIcons.doc_on_clipboard, size: 18, color: AppColors.primaryPink),
-                onTap: _copyEndpointUrl,
-              ),
-
-              // Row 2: Spreadsheet Data (HAS copy action)
-              CupertinoListTile(
-                leading: const SquircleIcon(
-                  icon: CupertinoIcons.table_badge_more_fill,
-                  color: Color(0xFF30B0C7),
-                ),
-                title: const Text('Spreadsheet Cloud', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                subtitle: const Text(
-                  'LilyHouse_Data (Google Sheets)',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
-                ),
-                trailing: const Icon(CupertinoIcons.doc_on_clipboard, size: 18, color: AppColors.primaryPink),
-                onTap: _copySpreadsheetUrl,
-              ),
-
-              // Row 3: File Script Backend (HAS action copy button)
-              CupertinoListTile(
-                leading: const SquircleIcon(
-                  icon: CupertinoIcons.doc_text_fill,
-                  color: Color(0xFF5856D6),
-                ),
-                title: const Text('File Backend', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                subtitle: const Text(
-                  'google_apps_script.js',
-                  style: TextStyle(fontFamily: 'monospace', fontSize: 12, color: Color(0xFF8E8E93)),
-                ),
-                trailing: const Icon(CupertinoIcons.doc_on_clipboard, size: 18, color: AppColors.primaryPink),
-                onTap: _copyScriptBackend,
-              ),
-
-              // Row 4: Panduan Deployment (HAS chevron — opens guide sheet)
-              CupertinoListTile(
-                leading: const SquircleIcon(
-                  icon: CupertinoIcons.book_fill,
-                  color: Color(0xFF007AFF),
-                ),
-                title: const Text('Panduan Setup', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                subtitle: const Text('Langkah deploy ke Google Apps Script', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
-                onTap: _showBackendGuideSheet,
-              ),
-            ],
-          ),
-
-          // Section 3: DATA & PENYIMPANAN
+          // Section 2: DATA & PENYIMPANAN
           CupertinoListSection.insetGrouped(
             header: const Text(
               'DATA & PENYIMPANAN',
@@ -1193,7 +931,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ],
           ),
 
-          // Section 4: TENTANG APLIKASI
+          // Section 3: TENTANG APLIKASI
           CupertinoListSection.insetGrouped(
             header: const Text(
               'TENTANG APLIKASI',
@@ -1214,7 +952,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.55 (Build 87)', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.55 (Build 88)', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),
