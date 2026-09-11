@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/apple_sliding_segmented_control.dart';
 import '../data/costume_repository.dart';
 import '../domain/costume.dart';
 import 'widgets/costume_card.dart';
@@ -109,8 +108,26 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
     }
   }
 
+  String _getStatusLabel(CostumeStatus status) {
+    switch (status) {
+      case CostumeStatus.available:
+        return 'Tersedia';
+      case CostumeStatus.booked:
+        return 'Dibooking';
+      case CostumeStatus.rented:
+        return 'Disewa';
+      case CostumeStatus.laundry:
+        return 'Dicuci';
+      case CostumeStatus.maintenance:
+        return 'Perawatan';
+    }
+  }
+
   Widget _buildFilterButton() {
-    final bool hasActiveFilter = _selectedSeries != null || _selectedSortBy != 'name_asc';
+    final bool hasActiveFilter = _selectedSeries != null ||
+        _selectedStatus != null ||
+        _selectedSize != null ||
+        _selectedSortBy != 'name_asc';
     return CupertinoButton(
       padding: EdgeInsets.zero,
       minimumSize: Size.zero,
@@ -260,51 +277,11 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                     _buildFilterButton(),
                   ],
                 ),
-                const SizedBox(height: 12),
-                // Filter status - Full width iOS draggable segmented control
-                AppleSlidingSegmentedControl<String>(
-                  groupValue: _selectedStatus?.name ?? 'all',
-                  height: 36.0,
-                  fontSize: 12.5,
-                  items: const [
-                    SegmentItem(value: 'all', label: 'Semua'),
-                    SegmentItem(value: 'available', label: 'Tersedia'),
-                    SegmentItem(value: 'booked', label: 'Dibooking'),
-                    SegmentItem(value: 'rented', label: 'Disewa'),
-                  ],
-                  onValueChanged: (val) {
-                    setState(() {
-                      if (val == 'all') {
-                        _selectedStatus = null;
-                      } else {
-                        _selectedStatus = CostumeStatus.values.firstWhere((e) => e.name == val);
-                      }
-                    });
-                    _fetchCostumes();
-                  },
-                ),
-                const SizedBox(height: 8),
-                // Filter ukuran - Full width iOS draggable segmented control
-                AppleSlidingSegmentedControl<String>(
-                  groupValue: _selectedSize ?? 'All',
-                  height: 32.0,
-                  fontSize: 12.0,
-                  items: const [
-                    SegmentItem(value: 'All', label: 'Semua'),
-                    SegmentItem(value: 'S', label: 'S'),
-                    SegmentItem(value: 'M', label: 'M'),
-                    SegmentItem(value: 'L', label: 'L'),
-                    SegmentItem(value: 'XL', label: 'XL'),
-                  ],
-                  onValueChanged: (val) {
-                    setState(() {
-                      _selectedSize = val == 'All' ? null : val;
-                    });
-                    _fetchCostumes();
-                  },
-                ),
-                if (_selectedSeries != null || _selectedSortBy != 'name_asc') ...[
-                  const SizedBox(height: 8),
+                if (_selectedSeries != null ||
+                    _selectedStatus != null ||
+                    _selectedSize != null ||
+                    _selectedSortBy != 'name_asc') ...[
+                  const SizedBox(height: 10),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
@@ -335,6 +312,64 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                                     _fetchCostumes();
                                   },
                                   child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: AppColors.primaryPink),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (_selectedStatus != null)
+                          Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE8F8F0),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: const Color(0xFFA3E6C4)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(CupertinoIcons.check_mark_circled_solid, size: 12, color: Color(0xFF1E824C)),
+                                const SizedBox(width: 5),
+                                Text(
+                                  _getStatusLabel(_selectedStatus!),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1E824C)),
+                                ),
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() => _selectedStatus = null);
+                                    _fetchCostumes();
+                                  },
+                                  child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF1E824C)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (_selectedSize != null)
+                          Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF4E5),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: const Color(0xFFFFD199)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(CupertinoIcons.tag_fill, size: 12, color: Color(0xFFD97706)),
+                                const SizedBox(width: 5),
+                                Text(
+                                  'Size ${_selectedSize!}',
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFD97706)),
+                                ),
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() => _selectedSize = null);
+                                    _fetchCostumes();
+                                  },
+                                  child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFFD97706)),
                                 ),
                               ],
                             ),
