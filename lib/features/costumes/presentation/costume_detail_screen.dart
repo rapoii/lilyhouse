@@ -246,7 +246,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 const Text(
-                  'Aksesori & Properti Termasuk',
+                  'Aksesori & Properti',
                   style: TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
