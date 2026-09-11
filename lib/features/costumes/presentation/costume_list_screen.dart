@@ -8,6 +8,7 @@ import '../domain/costume.dart';
 import 'widgets/costume_card.dart';
 import 'costume_detail_screen.dart';
 import 'add_costume_sheet.dart';
+import 'costume_filter_sheet.dart';
 
 class CostumeListScreen extends StatefulWidget {
   final ICostumeRepository? repository;
@@ -29,6 +30,8 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
   bool _isLoading = true;
   CostumeStatus? _selectedStatus;
   String? _selectedSize;
+  String? _selectedSeries;
+  String _selectedSortBy = 'name_asc';
 
   @override
   void initState() {
@@ -49,6 +52,8 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
       query: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
       status: _selectedStatus,
       size: (_selectedSize == null || _selectedSize == 'All') ? null : _selectedSize,
+      series: _selectedSeries,
+      sortBy: _selectedSortBy,
     );
     if (mounted) {
       setState(() {
@@ -60,6 +65,89 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
 
   void _onSearchChanged(String _) {
     _fetchCostumes();
+  }
+
+  Future<void> _showFilterSheet() async {
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext sheetCtx) {
+        return CostumeFilterSheet(
+          repository: _repository,
+          initialSeries: _selectedSeries,
+          initialStatus: _selectedStatus,
+          initialSize: _selectedSize,
+          initialSortBy: _selectedSortBy,
+          onApply: ({
+            required String? series,
+            required CostumeStatus? status,
+            required String? size,
+            required String sortBy,
+          }) {
+            setState(() {
+              _selectedSeries = series;
+              _selectedStatus = status;
+              _selectedSize = size;
+              _selectedSortBy = sortBy;
+            });
+            _fetchCostumes();
+          },
+        );
+      },
+    );
+  }
+
+  String _getSortLabel(String sort) {
+    switch (sort) {
+      case 'name_desc':
+        return 'Nama (Z-A)';
+      case 'price_asc':
+        return 'Harga Termurah';
+      case 'price_desc':
+        return 'Harga Termahal';
+      default:
+        return 'Nama (A-Z)';
+    }
+  }
+
+  Widget _buildFilterButton() {
+    final bool hasActiveFilter = _selectedSeries != null || _selectedSortBy != 'name_asc';
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      minimumSize: Size.zero,
+      onPressed: _showFilterSheet,
+      child: Container(
+        height: 38,
+        width: 38,
+        decoration: BoxDecoration(
+          color: hasActiveFilter ? AppColors.softPinkBg : const Color(0xFFE3E3E8),
+          borderRadius: BorderRadius.circular(10.0),
+          border: hasActiveFilter ? Border.all(color: AppColors.primaryPink.withValues(alpha: 0.5), width: 1.2) : null,
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.slider_horizontal_3,
+              size: 19,
+              color: hasActiveFilter ? AppColors.primaryPink : const Color(0xFF555558),
+            ),
+            if (hasActiveFilter)
+              Positioned(
+                top: 7,
+                right: 7,
+                child: Container(
+                  width: 7,
+                  height: 7,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryPink,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
   }
 
   // iOS Modal Presentation Sheet for adding a new costume
@@ -133,36 +221,44 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
             padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
             child: Column(
               children: [
-                // True iOS HIG Search Field
-                Container(
-                  height: 38,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE3E3E8), // iOS systemGray5/6
-                    borderRadius: BorderRadius.circular(10.0), // Standard Apple iOS search field radius
-                  ),
-                  child: TextField(
-                    controller: _searchController,
-                    onChanged: _onSearchChanged,
-                    style: const TextStyle(fontSize: 15, color: Colors.black87),
-                    decoration: InputDecoration(
-                      hintText: 'Cari kostum atau seri anime',
-                      hintStyle: const TextStyle(color: Color(0xFF8E8E93), fontSize: 15),
-                      prefixIcon: const Icon(CupertinoIcons.search, color: Color(0xFF8E8E93), size: 18),
-                      suffixIcon: _searchController.text.isNotEmpty
-                          ? CupertinoButton(
-                              padding: EdgeInsets.zero,
-                              onPressed: () {
-                                _searchController.clear();
-                                _fetchCostumes();
-                              },
-                              child: const Icon(CupertinoIcons.clear_circled_solid, color: Color(0xFF8E8E93), size: 18),
-                            )
-                          : null,
-                      border: InputBorder.none,
-                      contentPadding: const EdgeInsets.symmetric(vertical: 9),
-                      isDense: true,
+                // True iOS HIG Search Field + Filter Button
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE3E3E8), // iOS systemGray5/6
+                          borderRadius: BorderRadius.circular(10.0), // Standard Apple iOS search field radius
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: _onSearchChanged,
+                          style: const TextStyle(fontSize: 15, color: Colors.black87),
+                          decoration: InputDecoration(
+                            hintText: 'Cari kostum atau seri anime',
+                            hintStyle: const TextStyle(color: Color(0xFF8E8E93), fontSize: 15),
+                            prefixIcon: const Icon(CupertinoIcons.search, color: Color(0xFF8E8E93), size: 18),
+                            suffixIcon: _searchController.text.isNotEmpty
+                                ? CupertinoButton(
+                                    padding: EdgeInsets.zero,
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      _fetchCostumes();
+                                    },
+                                    child: const Icon(CupertinoIcons.clear_circled_solid, color: Color(0xFF8E8E93), size: 18),
+                                  )
+                                : null,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 9),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 8),
+                    _buildFilterButton(),
+                  ],
                 ),
                 const SizedBox(height: 12),
                 // Filter status - Full width iOS draggable segmented control
@@ -207,6 +303,74 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                     _fetchCostumes();
                   },
                 ),
+                if (_selectedSeries != null || _selectedSortBy != 'name_asc') ...[
+                  const SizedBox(height: 8),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: [
+                        if (_selectedSeries != null)
+                          Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.softPinkBg,
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: AppColors.pastelPink),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(CupertinoIcons.tv, size: 12, color: AppColors.primaryPink),
+                                const SizedBox(width: 5),
+                                Text(
+                                  _selectedSeries!,
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPink),
+                                ),
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() => _selectedSeries = null);
+                                    _fetchCostumes();
+                                  },
+                                  child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: AppColors.primaryPink),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (_selectedSortBy != 'name_asc')
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF2F2F7),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: const Color(0xFFD1D1D6)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(CupertinoIcons.sort_down, size: 12, color: Color(0xFF555558)),
+                                const SizedBox(width: 5),
+                                Text(
+                                  _getSortLabel(_selectedSortBy),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF555558)),
+                                ),
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() => _selectedSortBy = 'name_asc');
+                                    _fetchCostumes();
+                                  },
+                                  child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF8E8E93)),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
             ),
           ),

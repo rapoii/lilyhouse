@@ -14,11 +14,15 @@ import '../domain/costume.dart';
 class AddCostumeSheet extends StatefulWidget {
   final ICostumeRepository repository;
   final VoidCallback onSaved;
+  final Costume? initialCostume;
+  final VoidCallback? onDeleted;
 
   const AddCostumeSheet({
     super.key,
     required this.repository,
     required this.onSaved,
+    this.initialCostume,
+    this.onDeleted,
   });
 
   @override
@@ -26,18 +30,47 @@ class AddCostumeSheet extends StatefulWidget {
 }
 
 class _AddCostumeSheetState extends State<AddCostumeSheet> {
-  final _nameController = TextEditingController();
-  final _seriesController = TextEditingController();
-  final _priceController = TextEditingController();
-  final _notesController = TextEditingController();
+  bool get _isEditing => widget.initialCostume != null;
 
-  String _selectedSize = 'M';
-  final CostumeStatus _selectedStatus = CostumeStatus.available;
+  late TextEditingController _nameController;
+  late TextEditingController _seriesController;
+  late TextEditingController _priceController;
+  late TextEditingController _notesController;
+
+  late String _selectedSize;
+  late CostumeStatus _selectedStatus;
   String? _selectedImagePath;
   final List<String> _accessories = [];
   bool _isSaving = false;
 
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    final c = widget.initialCostume;
+    if (c != null) {
+      _nameController = TextEditingController(text: c.name);
+      _seriesController = TextEditingController(text: c.animeSeries == '-' ? '' : c.animeSeries);
+      _priceController = TextEditingController(
+        text: c.rentPrice3Days > 0
+            ? (c.rentPrice3Days % 1 == 0 ? c.rentPrice3Days.toInt().toString() : c.rentPrice3Days.toString())
+            : '',
+      );
+      _notesController = TextEditingController(text: c.notes ?? '');
+      _selectedSize = c.size;
+      _selectedStatus = c.status;
+      _selectedImagePath = c.coverPhoto;
+    } else {
+      _nameController = TextEditingController();
+      _seriesController = TextEditingController();
+      _priceController = TextEditingController();
+      _notesController = TextEditingController();
+      _selectedSize = 'M';
+      _selectedStatus = CostumeStatus.available;
+      _selectedImagePath = null;
+    }
+  }
 
   @override
   void dispose() {
@@ -46,6 +79,36 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
     _priceController.dispose();
     _notesController.dispose();
     super.dispose();
+  }
+
+  String _getStatusLabel(CostumeStatus status) {
+    switch (status) {
+      case CostumeStatus.available:
+        return 'Tersedia';
+      case CostumeStatus.booked:
+        return 'Dibooking';
+      case CostumeStatus.rented:
+        return 'Disewa';
+      case CostumeStatus.laundry:
+        return 'Dicuci';
+      case CostumeStatus.maintenance:
+        return 'Perawatan';
+    }
+  }
+
+  Color _getStatusColor(CostumeStatus status) {
+    switch (status) {
+      case CostumeStatus.available:
+        return const Color(0xFF1E824C);
+      case CostumeStatus.booked:
+        return const Color(0xFFD97706);
+      case CostumeStatus.rented:
+        return AppColors.primaryPink;
+      case CostumeStatus.laundry:
+        return const Color(0xFF2563EB);
+      case CostumeStatus.maintenance:
+        return AppColors.dangerRose;
+    }
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -143,26 +206,39 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
 
     setState(() => _isSaving = true);
     try {
-      final costume = Costume(
-        id: 'cost_${DateTime.now().millisecondsSinceEpoch}',
-        name: name,
-        animeSeries: _seriesController.text.trim().isEmpty ? '-' : _seriesController.text.trim(),
-        size: _selectedSize,
-        rentPrice3Days: price,
-        status: _selectedStatus,
-        coverPhoto: _selectedImagePath,
-        includedAccessories: List<String>.from(_accessories),
-        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-      );
-      await widget.repository.insertCostume(costume);
-      for (final accName in _accessories) {
-        final acc = Accessory(
-          id: 'acc_${DateTime.now().millisecondsSinceEpoch}_${accName.hashCode.abs()}',
-          name: accName,
-          type: 'Aksesori & Properti',
-          relatedCostumeId: costume.id,
+      if (_isEditing) {
+        final updatedCostume = widget.initialCostume!.copyWith(
+          name: name,
+          animeSeries: _seriesController.text.trim().isEmpty ? '-' : _seriesController.text.trim(),
+          size: _selectedSize,
+          rentPrice3Days: price,
+          status: _selectedStatus,
+          coverPhoto: _selectedImagePath,
+          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
         );
-        await widget.repository.addAccessory(acc);
+        await widget.repository.updateCostume(updatedCostume);
+      } else {
+        final costume = Costume(
+          id: 'cost_${DateTime.now().millisecondsSinceEpoch}',
+          name: name,
+          animeSeries: _seriesController.text.trim().isEmpty ? '-' : _seriesController.text.trim(),
+          size: _selectedSize,
+          rentPrice3Days: price,
+          status: _selectedStatus,
+          coverPhoto: _selectedImagePath,
+          includedAccessories: List<String>.from(_accessories),
+          notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+        );
+        await widget.repository.insertCostume(costume);
+        for (final accName in _accessories) {
+          final acc = Accessory(
+            id: 'acc_${DateTime.now().millisecondsSinceEpoch}_${accName.hashCode.abs()}',
+            name: accName,
+            type: 'Aksesori & Properti',
+            relatedCostumeId: costume.id,
+          );
+          await widget.repository.addAccessory(acc);
+        }
       }
       if (!mounted) return;
       Navigator.of(context).pop();
@@ -170,6 +246,46 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
     } catch (e) {
       if (!mounted) return;
       _showAlert('Gagal Menyimpan', 'Terjadi kesalahan: $e');
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
+  }
+
+  void _confirmDeleteCostume() {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Hapus Kostum?'),
+        content: Text('Kostum "${_nameController.text.trim()}" akan dihapus dari katalog beserta seluruh aksesorinya. Tindakan ini tidak dapat dibatalkan.'),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await _deleteCostume();
+            },
+            child: const Text('Hapus', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.dangerRose)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _deleteCostume() async {
+    if (!_isEditing) return;
+    setState(() => _isSaving = true);
+    try {
+      await widget.repository.deleteCostume(widget.initialCostume!.id);
+      if (!mounted) return;
+      Navigator.of(context).pop();
+      widget.onDeleted?.call();
+    } catch (e) {
+      if (!mounted) return;
+      _showAlert('Gagal Menghapus', 'Terjadi kesalahan: $e');
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -186,6 +302,93 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
             isDefaultAction: true,
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Oke', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPhotoPreview() {
+    if (_selectedImagePath == null || _selectedImagePath!.isEmpty) {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: 54,
+            height: 54,
+            decoration: const BoxDecoration(
+              color: AppColors.background,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(CupertinoIcons.camera, color: Color(0xFF8E8E93), size: 28),
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Unggah Foto Kostum',
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primaryPink),
+          ),
+          const SizedBox(height: 2),
+          const Text(
+            'Format JPG atau PNG (Opsional)',
+            style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+          ),
+        ],
+      );
+    }
+
+    Widget imageWidget;
+    final path = _selectedImagePath!;
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      imageWidget = Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const Center(
+          child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
+        ),
+      );
+    } else if (path.startsWith('/') || path.startsWith('file:') || File(path).existsSync()) {
+      final cleanPath = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
+      imageWidget = Image.file(
+        File(cleanPath),
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const Center(
+          child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
+        ),
+      );
+    } else {
+      imageWidget = Image.asset(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (_, _, _) => const Center(
+          child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          imageWidget,
+          Positioned(
+            right: 10,
+            bottom: 10,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(
+                color: CupertinoColors.black.withValues(alpha: 0.65),
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(CupertinoIcons.camera_fill, color: CupertinoColors.white, size: 14),
+                  SizedBox(width: 4),
+                  Text('Ubah', style: TextStyle(color: CupertinoColors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                ],
+              ),
+            ),
           ),
         ],
       ),
@@ -215,10 +418,10 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Batal', style: AppTypography.actionButton),
             ),
-            middle: const SizedBox(
+            middle: SizedBox(
               width: double.infinity,
               child: Center(
-                child: Text('Kostum Baru', style: AppTypography.navTitle),
+                child: Text(_isEditing ? 'Ubah Kostum' : 'Kostum Baru', style: AppTypography.navTitle),
               ),
             ),
             trailing: CupertinoButton(
@@ -232,7 +435,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
           child: SafeArea(
             top: false,
             child: ListView(
-              padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 24),
+              padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 80),
               physics: const BouncingScrollPhysics(),
               children: [
                 // Photo Uploader Card
@@ -256,89 +459,62 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                           ),
                         ],
                       ),
-                      child: _selectedImagePath != null && File(_selectedImagePath!).existsSync()
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  Image.file(File(_selectedImagePath!), fit: BoxFit.cover),
-                                  Positioned(
-                                    right: 10,
-                                    bottom: 10,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                      decoration: BoxDecoration(
-                                        color: CupertinoColors.black.withValues(alpha: 0.65),
-                                        borderRadius: BorderRadius.circular(14),
-                                      ),
-                                      child: const Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Icon(CupertinoIcons.camera_fill, color: CupertinoColors.white, size: 14),
-                                          SizedBox(width: 4),
-                                          Text('Ubah', style: TextStyle(color: CupertinoColors.white, fontSize: 12, fontWeight: FontWeight.w600)),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            )
-                          : Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                  width: 54,
-                                  height: 54,
-                                  decoration: const BoxDecoration(
-                                    color: AppColors.background,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(CupertinoIcons.camera, color: Color(0xFF8E8E93), size: 28),
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Unggah Foto Kostum',
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primaryPink),
-                                ),
-                                const SizedBox(height: 2),
-                                const Text(
-                                  'Format JPG atau PNG (Opsional)',
-                                  style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
-                                ),
-                              ],
-                            ),
+                      child: _buildPhotoPreview(),
                     ),
                   ),
                 ),
 
                 // Section 1: Informasi Dasar Kostum
                 CupertinoListSection.insetGrouped(
-                  header: const Text('INFORMASI UTAMA'),
+                  header: const Text(
+                    'INFORMASI UTAMA',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                  ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.sparkles, color: AppColors.primaryPink),
-                      title: CupertinoTextField(
-                        controller: _nameController,
-                        placeholder: 'Nama Kostum (cth: Furina Archon)',
-                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
-                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: null,
+                      title: Row(
+                        children: [
+                          const SizedBox(
+                            width: 100,
+                            child: Text('Nama', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                          ),
+                          Expanded(
+                            child: CupertinoTextField(
+                              controller: _nameController,
+                              textAlign: TextAlign.right,
+                              placeholder: 'Nama Kostum',
+                              placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                              style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: null,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.tv, color: Color(0xFF5856D6)),
-                      title: CupertinoTextField(
-                        controller: _seriesController,
-                        placeholder: 'Seri Anime / Game (cth: Genshin Impact)',
-                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
-                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: null,
+                      title: Row(
+                        children: [
+                          const SizedBox(
+                            width: 100,
+                            child: Text('Kategori', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                          ),
+                          Expanded(
+                            child: CupertinoTextField(
+                              controller: _seriesController,
+                              textAlign: TextAlign.right,
+                              placeholder: 'cth: Genshin Impact',
+                              placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                              style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: null,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     CupertinoListTile(
@@ -391,72 +567,139 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.money_dollar_circle_fill, color: Color(0xFF34C759)),
-                      title: CupertinoTextField(
-                        controller: _priceController,
-                        placeholder: 'Harga Sewa 3 Hari (cth: 150000)',
-                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
-                        style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                        keyboardType: TextInputType.number,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        decoration: null,
+                      title: Row(
+                        children: [
+                          const SizedBox(
+                            width: 100,
+                            child: Text('Tarif 3 Hari', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                          ),
+                          Expanded(
+                            child: CupertinoTextField(
+                              controller: _priceController,
+                              textAlign: TextAlign.right,
+                              placeholder: '150000',
+                              placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                              style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                              keyboardType: TextInputType.number,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              decoration: null,
+                            ),
+                          ),
+                        ],
                       ),
+                    ),
+                    CupertinoListTile(
+                      key: const Key('add_costume_status_row'),
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.arrow_2_circlepath_circle_fill,
+                        color: _getStatusColor(_selectedStatus),
+                      ),
+                      title: const Text(
+                        'Status Kostum',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        _getStatusLabel(_selectedStatus),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w600,
+                          color: _getStatusColor(_selectedStatus),
+                        ),
+                      ),
+                      trailing: const Icon(
+                        CupertinoIcons.chevron_right,
+                        size: 14,
+                        color: Color(0xFFC7C7CC),
+                      ),
+                      onTap: () async {
+                        final hadFocus = FocusScope.of(context).hasFocus;
+                        if (hadFocus) {
+                          FocusScope.of(context).unfocus();
+                          await Future<void>.delayed(const Duration(milliseconds: 150));
+                          if (!context.mounted) return;
+                        }
+                        const items = [
+                          SheetPickerItem('available', 'Tersedia'),
+                          SheetPickerItem('booked', 'Dibooking'),
+                          SheetPickerItem('rented', 'Disewa'),
+                          SheetPickerItem('laundry', 'Dicuci'),
+                          SheetPickerItem('maintenance', 'Perawatan'),
+                        ];
+                        final key = await showSheetPicker<String>(
+                          context: context,
+                          title: 'Status Kostum',
+                          currentValue: _selectedStatus.name,
+                          items: items,
+                        );
+                        if (key != null) {
+                          setState(() => _selectedStatus = CostumeStatus.fromString(key));
+                        }
+                      },
                     ),
                   ],
                 ),
 
-                // Section 2: Daftar Aksesori Termasuk
-                CupertinoListSection.insetGrouped(
-                  header: const Text('AKSESORI & KELENGKAPAN'),
-                  backgroundColor: AppColors.background,
-                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                  children: _accessories.isEmpty
-                      ? [
-                          CupertinoListTile(
-                            leading: const SquircleIcon(icon: CupertinoIcons.cube_box, color: Color(0xFF8E8E93)),
-                            title: const Text(
-                              'Belum ada aksesori terdaftar',
-                              style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93), fontStyle: FontStyle.italic),
-                            ),
-                            trailing: CupertinoButton(
-                              padding: EdgeInsets.zero,
-                              minimumSize: Size.zero,
-                              onPressed: _showAddAccessoryDialog,
-                              child: const Icon(CupertinoIcons.plus_circle_fill, color: AppColors.primaryPink, size: 22),
-                            ),
-                            onTap: _showAddAccessoryDialog,
-                          ),
-                        ]
-                      : [
-                          ..._accessories.asMap().entries.map((entry) {
-                            final idx = entry.key;
-                            final acc = entry.value;
-                            return CupertinoListTile(
-                              leading: const SquircleIcon(icon: CupertinoIcons.check_mark_circled_solid, color: Color(0xFF34C759)),
-                              title: Text(acc, style: const TextStyle(fontSize: 15, color: AppColors.textDark, fontWeight: FontWeight.w500)),
+                if (!_isEditing) ...[
+                  // Section 2: Daftar Aksesori Termasuk (Saat tambah baru)
+                  CupertinoListSection.insetGrouped(
+                    header: const Text(
+                      'AKSESORI & KELENGKAPAN',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    ),
+                    backgroundColor: AppColors.background,
+                    margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                    children: _accessories.isEmpty
+                        ? [
+                            CupertinoListTile(
+                              leading: const SquircleIcon(icon: CupertinoIcons.cube_box, color: Color(0xFF8E8E93)),
+                              title: const Text(
+                                'Belum ada aksesori terdaftar',
+                                style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93), fontStyle: FontStyle.italic),
+                              ),
                               trailing: CupertinoButton(
                                 padding: EdgeInsets.zero,
                                 minimumSize: Size.zero,
-                                onPressed: () {
-                                  setState(() => _accessories.removeAt(idx));
-                                },
-                                child: const Icon(CupertinoIcons.minus_circle_fill, color: Color(0xFFFF3B30), size: 20),
+                                onPressed: _showAddAccessoryDialog,
+                                child: const Icon(CupertinoIcons.plus_circle_fill, color: AppColors.primaryPink, size: 22),
                               ),
-                            );
-                          }),
-                          CupertinoListTile(
-                            leading: const SquircleIcon(icon: CupertinoIcons.add, color: AppColors.primaryPink),
-                            title: const Text(
-                              'Tambah Aksesori',
-                              style: TextStyle(fontSize: 15, color: AppColors.primaryPink, fontWeight: FontWeight.w500),
+                              onTap: _showAddAccessoryDialog,
                             ),
-                            onTap: _showAddAccessoryDialog,
-                          ),
-                        ],
-                ),
+                          ]
+                        : [
+                            ..._accessories.asMap().entries.map((entry) {
+                              final idx = entry.key;
+                              final acc = entry.value;
+                              return CupertinoListTile(
+                                leading: const SquircleIcon(icon: CupertinoIcons.check_mark_circled_solid, color: Color(0xFF34C759)),
+                                title: Text(acc, style: const TextStyle(fontSize: 15, color: AppColors.textDark, fontWeight: FontWeight.w500)),
+                                trailing: CupertinoButton(
+                                  padding: EdgeInsets.zero,
+                                  minimumSize: Size.zero,
+                                  onPressed: () {
+                                    setState(() => _accessories.removeAt(idx));
+                                  },
+                                  child: const Icon(CupertinoIcons.minus_circle_fill, color: Color(0xFFFF3B30), size: 20),
+                                ),
+                              );
+                            }),
+                            CupertinoListTile(
+                              leading: const SquircleIcon(icon: CupertinoIcons.add, color: AppColors.primaryPink),
+                              title: const Text(
+                                'Tambah Aksesori',
+                                style: TextStyle(fontSize: 15, color: AppColors.primaryPink, fontWeight: FontWeight.w500),
+                              ),
+                              onTap: _showAddAccessoryDialog,
+                            ),
+                          ],
+                  ),
+                ],
 
                 // Section 3: Catatan Khusus
                 CupertinoListSection.insetGrouped(
-                  header: const Text('CATATAN TAMBAHAN'),
+                  header: const Text(
+                    'CATATAN TAMBAHAN',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                  ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
@@ -473,6 +716,35 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                     ),
                   ],
                 ),
+
+                if (_isEditing) ...[
+                  // Section: Zona Bahaya (Hapus Kostum)
+                  CupertinoListSection.insetGrouped(
+                    header: const Text(
+                      'ZONA BAHAYA',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    ),
+                    backgroundColor: AppColors.background,
+                    margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),
+                    children: [
+                      CupertinoListTile(
+                        leading: const SquircleIcon(
+                          icon: CupertinoIcons.trash_fill,
+                          color: AppColors.dangerRose,
+                        ),
+                        title: const Text(
+                          'Hapus Kostum',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.dangerRose,
+                          ),
+                        ),
+                        onTap: _confirmDeleteCostume,
+                      ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),

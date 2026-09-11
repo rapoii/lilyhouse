@@ -26,7 +26,15 @@ class MockCostumeRepository implements ICostumeRepository {
   @override
   Future<List<Costume>> getAllCostumes() async => costumes;
   @override
-  Future<List<Costume>> searchCostumes({String? query, CostumeStatus? status, String? size}) async => costumes;
+  Future<List<Costume>> searchCostumes({
+    String? query,
+    CostumeStatus? status,
+    String? size,
+    String? series,
+    String? sortBy,
+  }) async => costumes;
+  @override
+  Future<List<String>> getDistinctAnimeSeries() async => [];
   @override
   Future<int> updateCostume(Costume costume) async => 1;
   @override

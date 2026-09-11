@@ -5,6 +5,8 @@ import '../../../core/theme/app_colors.dart';
 import '../data/costume_repository.dart';
 import '../domain/costume.dart';
 import '../domain/accessory.dart';
+import '../../../core/theme/app_typography.dart';
+import 'add_costume_sheet.dart';
 
 class CostumeDetailScreen extends StatefulWidget {
   final Costume costume;
@@ -22,24 +24,55 @@ class CostumeDetailScreen extends StatefulWidget {
 
 class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
   late ICostumeRepository _repository;
+  late Costume _costume;
   List<Accessory> _accessories = [];
   bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
+    _costume = widget.costume;
     _repository = widget.repository ?? CostumeRepository();
     _loadAccessories();
   }
 
   Future<void> _loadAccessories() async {
-    final list = await _repository.getAccessoriesByCostumeId(widget.costume.id);
+    final list = await _repository.getAccessoriesByCostumeId(_costume.id);
     if (mounted) {
       setState(() {
         _accessories = list;
         _isLoading = false;
       });
     }
+  }
+
+  Future<void> _reloadCostume() async {
+    final updated = await _repository.getCostumeById(_costume.id);
+    if (updated != null && mounted) {
+      setState(() {
+        _costume = updated;
+      });
+    }
+  }
+
+  Future<void> _showEditCostumeSheet() async {
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (BuildContext sheetCtx) {
+        return AddCostumeSheet(
+          repository: _repository,
+          initialCostume: _costume,
+          onSaved: () async {
+            await _reloadCostume();
+          },
+          onDeleted: () {
+            if (mounted) {
+              Navigator.of(context).pop();
+            }
+          },
+        );
+      },
+    );
   }
 
   String _formatCurrency(double amount) {
@@ -96,7 +129,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final statusData = _getStatusBadgeData(widget.costume.status);
+    final statusData = _getStatusBadgeData(_costume.status);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -105,7 +138,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
         elevation: 0,
         centerTitle: true,
         title: Text(
-          widget.costume.name,
+          _costume.name,
           style: const TextStyle(
             color: AppColors.textDark,
             fontWeight: FontWeight.bold,
@@ -117,6 +150,16 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
           onPressed: () => Navigator.maybePop(context),
           child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
         ),
+        actions: [
+          CupertinoButton(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            onPressed: _showEditCostumeSheet,
+            child: const Text(
+              'Ubah',
+              style: AppTypography.actionButton,
+            ),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20.0),
@@ -141,8 +184,8 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(28.0),
-                child: widget.costume.coverPhoto != null && widget.costume.coverPhoto!.isNotEmpty
-                    ? _buildCoverPhoto(widget.costume.coverPhoto!)
+                child: _costume.coverPhoto != null && _costume.coverPhoto!.isNotEmpty
+                    ? _buildCoverPhoto(_costume.coverPhoto!)
                     : const Center(
                         child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
                       ),
@@ -170,7 +213,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              widget.costume.name,
+                              _costume.name,
                               style: const TextStyle(
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
@@ -179,7 +222,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              widget.costume.animeSeries,
+                              _costume.animeSeries,
                               style: const TextStyle(
                                 fontSize: 14,
                                 color: AppColors.textMuted,
@@ -212,15 +255,15 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      _buildPillAttribute('Ukuran', widget.costume.size),
+                      _buildPillAttribute('Ukuran', _costume.size),
                       _buildPillAttribute(
                         'Tarif Sewa',
-                        '${_formatCurrency(widget.costume.rentPrice3Days)} / 3 hari',
+                        '${_formatCurrency(_costume.rentPrice3Days)} / 3 hari',
                         highlight: true,
                       ),
                     ],
                   ),
-                  if (widget.costume.notes != null && widget.costume.notes!.isNotEmpty) ...[
+                  if (_costume.notes != null && _costume.notes!.isNotEmpty) ...[
                     const SizedBox(height: 16),
                     const Text(
                       'Catatan',
@@ -232,7 +275,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      widget.costume.notes!,
+                      _costume.notes!,
                       style: const TextStyle(fontSize: 14, color: AppColors.textDark),
                     ),
                   ],
@@ -279,7 +322,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
 
             if (_isLoading)
               const Center(child: CupertinoActivityIndicator(radius: 14))
-            else if (_accessories.isEmpty && widget.costume.includedAccessories.isEmpty)
+            else if (_accessories.isEmpty && _costume.includedAccessories.isEmpty)
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(16),
@@ -302,7 +345,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                     accessory: acc,
                   )),
               // Legacy strings list in includedAccessories
-              ...widget.costume.includedAccessories
+              ..._costume.includedAccessories
                   .where((accStr) => !_accessories.any((a) => a.name.toLowerCase() == accStr.toLowerCase()))
                   .map((accStr) => _buildAccessoryRow(
                         accStr,
@@ -492,7 +535,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                     name: value,
                     type: 'Aksesori & Properti',
                     conditionStatus: selectedCondition,
-                    relatedCostumeId: widget.costume.id,
+                    relatedCostumeId: _costume.id,
                   );
                   await _repository.addAccessory(acc);
                   await _loadAccessories();

@@ -9,7 +9,14 @@ abstract class ICostumeRepository {
   Future<int> insertCostume(Costume costume);
   Future<Costume?> getCostumeById(String id);
   Future<List<Costume>> getAllCostumes();
-  Future<List<Costume>> searchCostumes({String? query, CostumeStatus? status, String? size});
+  Future<List<Costume>> searchCostumes({
+    String? query,
+    CostumeStatus? status,
+    String? size,
+    String? series,
+    String? sortBy,
+  });
+  Future<List<String>> getDistinctAnimeSeries();
   Future<int> updateCostume(Costume costume);
   Future<int> deleteCostume(String id);
   Future<int> addAccessory(Accessory accessory);
@@ -82,6 +89,8 @@ class CostumeRepository implements ICostumeRepository {
     String? query,
     CostumeStatus? status,
     String? size,
+    String? series,
+    String? sortBy,
   }) async {
     final database = await _db;
     final List<String> whereClauses = [];
@@ -99,9 +108,33 @@ class CostumeRepository implements ICostumeRepository {
       whereArgs.add(status.name);
     }
 
-    if (size != null && size.isNotEmpty) {
+    if (size != null && size.isNotEmpty && size != 'All') {
       whereClauses.add('size = ?');
       whereArgs.add(size);
+    }
+
+    if (series != null && series.trim().isNotEmpty && series != 'Semua') {
+      whereClauses.add('anime_series = ?');
+      whereArgs.add(series.trim());
+    }
+
+    String orderBy = 'name ASC';
+    if (sortBy != null) {
+      switch (sortBy) {
+        case 'name_desc':
+          orderBy = 'name DESC';
+          break;
+        case 'price_asc':
+          orderBy = 'rent_price_3days ASC';
+          break;
+        case 'price_desc':
+          orderBy = 'rent_price_3days DESC';
+          break;
+        case 'name_asc':
+        default:
+          orderBy = 'name ASC';
+          break;
+      }
     }
 
     final where = whereClauses.isNotEmpty ? whereClauses.join(' AND ') : null;
@@ -109,10 +142,23 @@ class CostumeRepository implements ICostumeRepository {
       AppTables.costumes,
       where: where,
       whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
-      orderBy: 'name ASC',
+      orderBy: orderBy,
     );
 
     return results.map((m) => Costume.fromSqlite(m)).toList();
+  }
+
+  @override
+  Future<List<String>> getDistinctAnimeSeries() async {
+    final database = await _db;
+    final results = await database.rawQuery(
+      'SELECT DISTINCT anime_series FROM ${AppTables.costumes} WHERE anime_series IS NOT NULL AND TRIM(anime_series) != "" AND anime_series != "-" ORDER BY anime_series ASC',
+    );
+    return results
+        .map((r) => r['anime_series'] as String?)
+        .where((s) => s != null && s.isNotEmpty)
+        .cast<String>()
+        .toList();
   }
 
   @override
@@ -132,6 +178,11 @@ class CostumeRepository implements ICostumeRepository {
   @override
   Future<int> deleteCostume(String id) async {
     final database = await _db;
+    await database.delete(
+      AppTables.accessories,
+      where: 'related_costume_id = ?',
+      whereArgs: [id],
+    );
     final result = await database.delete(
       AppTables.costumes,
       where: 'id = ?',

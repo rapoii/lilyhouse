@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilyhouse/core/theme/app_theme.dart';
@@ -6,6 +7,7 @@ import 'package:lilyhouse/features/costumes/domain/accessory.dart';
 import 'package:lilyhouse/features/costumes/data/costume_repository.dart';
 import 'package:lilyhouse/features/costumes/presentation/costume_list_screen.dart';
 import 'package:lilyhouse/features/costumes/presentation/costume_detail_screen.dart';
+import 'package:lilyhouse/features/costumes/presentation/add_costume_sheet.dart';
 
 class MockCostumeRepository implements ICostumeRepository {
   final List<Costume> _costumes = [];
@@ -40,7 +42,13 @@ class MockCostumeRepository implements ICostumeRepository {
   }
 
   @override
-  Future<List<Costume>> searchCostumes({String? query, CostumeStatus? status, String? size}) async {
+  Future<List<Costume>> searchCostumes({
+    String? query,
+    CostumeStatus? status,
+    String? size,
+    String? series,
+    String? sortBy,
+  }) async {
     var result = List<Costume>.from(_costumes);
     if (query != null && query.trim().isNotEmpty) {
       final q = query.trim().toLowerCase();
@@ -49,11 +57,27 @@ class MockCostumeRepository implements ICostumeRepository {
     if (status != null) {
       result = result.where((c) => c.status == status).toList();
     }
-    if (size != null && size.isNotEmpty) {
+    if (size != null && size.isNotEmpty && size != 'All') {
       result = result.where((c) => c.size == size).toList();
     }
-    result.sort((a, b) => a.name.compareTo(b.name));
+    if (series != null && series.trim().isNotEmpty && series != 'Semua') {
+      result = result.where((c) => c.animeSeries == series.trim()).toList();
+    }
+    if (sortBy == 'price_asc') {
+      result.sort((a, b) => a.rentPrice3Days.compareTo(b.rentPrice3Days));
+    } else if (sortBy == 'price_desc') {
+      result.sort((a, b) => b.rentPrice3Days.compareTo(a.rentPrice3Days));
+    } else if (sortBy == 'name_desc') {
+      result.sort((a, b) => b.name.compareTo(a.name));
+    } else {
+      result.sort((a, b) => a.name.compareTo(b.name));
+    }
     return result;
+  }
+
+  @override
+  Future<List<String>> getDistinctAnimeSeries() async {
+    return _costumes.map((c) => c.animeSeries).where((s) => s.isNotEmpty && s != '-').toSet().toList()..sort();
   }
 
   @override
@@ -181,5 +205,56 @@ void main() {
     expect(find.text('Chainsaw Man'), findsWidgets);
     expect(find.text('Tie & Badge'), findsOneWidget);
     expect(find.text('Disewa'), findsWidgets);
+    expect(find.text('Ubah'), findsOneWidget);
+  });
+
+  testWidgets('AddCostumeSheet in edit mode loads existing data and updates', (tester) async {
+    final costume = await repository.getCostumeById('cos-1');
+    expect(costume, isNotNull);
+
+    bool savedCalled = false;
+    bool deletedCalled = false;
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: Scaffold(
+          body: AddCostumeSheet(
+            repository: repository,
+            initialCostume: costume,
+            onSaved: () => savedCalled = true,
+            onDeleted: () => deletedCalled = true,
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('Ubah Kostum'), findsOneWidget);
+    expect(find.text('Hatsune Miku'), findsOneWidget);
+    expect(find.text('Vocaloid'), findsOneWidget);
+
+    // Scroll until 'Hapus Kostum' is visible
+    final deleteFinder = find.text('Hapus Kostum');
+    await tester.scrollUntilVisible(
+      deleteFinder,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(deleteFinder, findsOneWidget);
+
+    // Change name
+    final nameField = find.widgetWithText(CupertinoTextField, 'Hatsune Miku');
+    await tester.enterText(nameField, 'Hatsune Miku NT');
+    await tester.pump();
+
+    // Tap Simpan
+    final saveButton = find.widgetWithText(CupertinoButton, 'Simpan');
+    await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+
+    expect(savedCalled, isTrue);
+    final updated = await repository.getCostumeById('cos-1');
+    expect(updated?.name, 'Hatsune Miku NT');
   });
 }
