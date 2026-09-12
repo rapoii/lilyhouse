@@ -104,6 +104,12 @@ class MockInstallmentRepository implements IInstallmentRepository {
   @override
   Future<List<Installment>> getInstallmentsByStatus(InstallmentStatus status) async => installments;
   @override
+  Future<List<Installment>> searchInstallments({
+    String? query,
+    InstallmentStatus? status,
+    String sortBy = 'due_date_asc',
+  }) async => installments;
+  @override
   Future<int> updateInstallment(Installment installment) async => 1;
   @override
   Future<int> deleteInstallment(String id) async => 1;

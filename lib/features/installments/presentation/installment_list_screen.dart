@@ -2,7 +2,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
-import '../../../core/widgets/apple_sliding_segmented_control.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/header_action_button.dart';
 import '../../../core/widgets/ios_toast.dart';
@@ -13,6 +12,7 @@ import '../domain/installment.dart';
 import '../domain/installment_log.dart';
 import 'widgets/installment_card.dart';
 import 'installment_detail_screen.dart';
+import 'installment_filter_sheet.dart';
 
 class InstallmentListScreen extends StatefulWidget {
   final IInstallmentRepository repository;
@@ -27,9 +27,11 @@ class InstallmentListScreen extends StatefulWidget {
 }
 
 class _InstallmentListScreenState extends State<InstallmentListScreen> {
+  final TextEditingController _searchController = TextEditingController();
   List<Installment> _installments = [];
   bool _isLoading = true;
-  String _selectedFilter = 'all'; // all, ongoing, paidOff
+  InstallmentStatus? _selectedStatus;
+  String _selectedSortBy = 'due_date_asc';
 
   static const _months = [
     '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
@@ -43,22 +45,105 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
     _loadInstallments();
   }
 
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
   Future<void> _loadInstallments() async {
     setState(() => _isLoading = true);
-    List<Installment> items;
-    if (_selectedFilter == 'ongoing') {
-      items = await widget.repository.getInstallmentsByStatus(InstallmentStatus.ongoing);
-    } else if (_selectedFilter == 'paidOff') {
-      items = await widget.repository.getInstallmentsByStatus(InstallmentStatus.paidOff);
-    } else {
-      items = await widget.repository.getAllInstallments();
-    }
+    final items = await widget.repository.searchInstallments(
+      query: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
+      status: _selectedStatus,
+      sortBy: _selectedSortBy,
+    );
     if (mounted) {
       setState(() {
         _installments = items;
         _isLoading = false;
       });
     }
+  }
+
+  void _onSearchChanged(String _) {
+    _loadInstallments();
+  }
+
+  String _getSortLabel(String sortBy) {
+    switch (sortBy) {
+      case 'due_date_desc':
+        return 'Jatuh Tempo Terjauh';
+      case 'balance_desc':
+        return 'Sisa Terbanyak';
+      case 'cost_desc':
+        return 'Total Biaya Tertinggi';
+      case 'name_asc':
+        return 'Nama (A-Z)';
+      case 'due_date_asc':
+      default:
+        return 'Jatuh Tempo Terdekat';
+    }
+  }
+
+  Widget _buildFilterButton() {
+    final bool hasActiveFilter = _selectedStatus != null || _selectedSortBy != 'due_date_asc';
+    return CupertinoButton(
+      padding: EdgeInsets.zero,
+      minimumSize: Size.zero,
+      onPressed: _showFilterSheet,
+      child: Container(
+        height: 38,
+        width: 38,
+        decoration: BoxDecoration(
+          color: hasActiveFilter ? AppColors.softPinkBg : const Color(0xFFE3E3E8),
+          borderRadius: BorderRadius.circular(10.0),
+          border: hasActiveFilter ? Border.all(color: AppColors.primaryPink.withValues(alpha: 0.5), width: 1.2) : null,
+        ),
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Icon(
+              CupertinoIcons.slider_horizontal_3,
+              size: 19,
+              color: hasActiveFilter ? AppColors.primaryPink : const Color(0xFF555558),
+            ),
+            if (hasActiveFilter)
+              Positioned(
+                top: 7,
+                right: 7,
+                child: Container(
+                  width: 7,
+                  height: 7,
+                  decoration: const BoxDecoration(
+                    color: AppColors.primaryPink,
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _showFilterSheet() async {
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) {
+        return InstallmentFilterSheet(
+          initialStatus: _selectedStatus,
+          initialSortBy: _selectedSortBy,
+          onApply: ({required status, required sortBy}) {
+            setState(() {
+              _selectedStatus = status;
+              _selectedSortBy = sortBy;
+            });
+            _loadInstallments();
+          },
+        );
+      },
+    );
   }
 
   void _showFormAlert(BuildContext ctx, String title, String message) {
@@ -385,22 +470,132 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
       ),
       body: Column(
         children: [
-          // iOS Apple Sliding Segmented Control (Draggable + Tap)
+          // True iOS HIG Search Field + Filter Button
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 10.0),
-            child: AppleSlidingSegmentedControl<String>(
-              groupValue: _selectedFilter,
-              height: 36.0,
-              fontSize: 13.0,
-              items: const [
-                SegmentItem(value: 'all', label: 'Semua'),
-                SegmentItem(value: 'ongoing', label: 'Berjalan'),
-                SegmentItem(value: 'paidOff', label: 'Lunas'),
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 38,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE3E3E8), // iOS systemGray5/6
+                          borderRadius: BorderRadius.circular(10.0), // Standard Apple iOS search field radius
+                        ),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: _onSearchChanged,
+                          style: const TextStyle(fontSize: 15, color: Colors.black87),
+                          decoration: InputDecoration(
+                            hintText: 'Cari cicilan atau nama toko',
+                            hintStyle: const TextStyle(color: Color(0xFF8E8E93), fontSize: 15),
+                            prefixIcon: const Icon(CupertinoIcons.search, color: Color(0xFF8E8E93), size: 18),
+                            suffixIcon: _searchController.text.isNotEmpty
+                                ? CupertinoButton(
+                                    padding: EdgeInsets.zero,
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      _loadInstallments();
+                                    },
+                                    child: const Icon(CupertinoIcons.clear_circled_solid, color: Color(0xFF8E8E93), size: 18),
+                                  )
+                                : null,
+                            border: InputBorder.none,
+                            contentPadding: const EdgeInsets.symmetric(vertical: 9),
+                            isDense: true,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    _buildFilterButton(),
+                  ],
+                ),
+                if (_selectedStatus != null || _selectedSortBy != 'due_date_asc') ...[
+                  const SizedBox(height: 10),
+                  SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: [
+                        if (_selectedStatus != null)
+                          Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFFE8F8F0) : const Color(0xFFFFF4E5),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(
+                                color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFFA3E6C4) : const Color(0xFFFFD199),
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _selectedStatus == InstallmentStatus.paidOff ? CupertinoIcons.checkmark_seal_fill : CupertinoIcons.clock_fill,
+                                  size: 12,
+                                  color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : const Color(0xFFD97706),
+                                ),
+                                const SizedBox(width: 5),
+                                Text(
+                                  _selectedStatus == InstallmentStatus.paidOff ? 'Sudah Lunas' : 'Sedang Berjalan',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : const Color(0xFFD97706),
+                                  ),
+                                ),
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() => _selectedStatus = null);
+                                    _loadInstallments();
+                                  },
+                                  child: Icon(
+                                    CupertinoIcons.clear_circled_solid,
+                                    size: 14,
+                                    color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : const Color(0xFFD97706),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        if (_selectedSortBy != 'due_date_asc')
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF2F2F7),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: const Color(0xFFD1D1D6)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(CupertinoIcons.sort_down, size: 12, color: Color(0xFF555558)),
+                                const SizedBox(width: 5),
+                                Text(
+                                  _getSortLabel(_selectedSortBy),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF555558)),
+                                ),
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  onTap: () {
+                                    setState(() => _selectedSortBy = 'due_date_asc');
+                                    _loadInstallments();
+                                  },
+                                  child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF8E8E93)),
+                                ),
+                              ],
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
               ],
-              onValueChanged: (val) {
-                setState(() => _selectedFilter = val);
-                _loadInstallments();
-              },
             ),
           ),
           // Content

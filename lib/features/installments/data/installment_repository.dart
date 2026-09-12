@@ -16,6 +16,45 @@ abstract class IInstallmentRepository {
   Future<int> addPaymentLog(InstallmentLog log);
   Future<List<InstallmentLog>> getLogsForInstallment(String installmentId);
   Future<int> deletePaymentLog(String logId, String installmentId);
+
+  Future<List<Installment>> searchInstallments({
+    String? query,
+    InstallmentStatus? status,
+    String sortBy = 'due_date_asc',
+  }) async {
+    List<Installment> list = status != null
+        ? await getInstallmentsByStatus(status)
+        : await getAllInstallments();
+    if (query != null && query.trim().isNotEmpty) {
+      final q = query.trim().toLowerCase();
+      list = list.where((i) =>
+        i.itemName.toLowerCase().contains(q) ||
+        (i.storeName?.toLowerCase().contains(q) ?? false)
+      ).toList();
+    }
+    list.sort((a, b) {
+      switch (sortBy) {
+        case 'due_date_desc':
+          if (a.dueDate == null && b.dueDate == null) return a.itemName.compareTo(b.itemName);
+          if (a.dueDate == null) return 1;
+          if (b.dueDate == null) return -1;
+          return b.dueDate!.compareTo(a.dueDate!);
+        case 'balance_desc':
+          return b.remainingBalance.compareTo(a.remainingBalance);
+        case 'cost_desc':
+          return b.totalCost.compareTo(a.totalCost);
+        case 'name_asc':
+          return a.itemName.toLowerCase().compareTo(b.itemName.toLowerCase());
+        case 'due_date_asc':
+        default:
+          if (a.dueDate == null && b.dueDate == null) return a.itemName.compareTo(b.itemName);
+          if (a.dueDate == null) return 1;
+          if (b.dueDate == null) return -1;
+          return a.dueDate!.compareTo(b.dueDate!);
+      }
+    });
+    return list;
+  }
 }
 
 class InstallmentRepository implements IInstallmentRepository {
@@ -87,6 +126,59 @@ class InstallmentRepository implements IInstallmentRepository {
       whereArgs: [statusStr],
       orderBy: 'due_date ASC, item_name ASC',
     );
+    return results.map((m) => Installment.fromSqlite(m)).toList();
+  }
+
+  @override
+  Future<List<Installment>> searchInstallments({
+    String? query,
+    InstallmentStatus? status,
+    String sortBy = 'due_date_asc',
+  }) async {
+    final database = await _db;
+    final List<String> whereClauses = [];
+    final List<dynamic> whereArgs = [];
+
+    if (query != null && query.trim().isNotEmpty) {
+      whereClauses.add('(item_name LIKE ? OR store_name LIKE ?)');
+      final term = '%${query.trim()}%';
+      whereArgs.add(term);
+      whereArgs.add(term);
+    }
+
+    if (status != null) {
+      whereClauses.add('status = ?');
+      whereArgs.add(status == InstallmentStatus.paidOff ? 'paid_off' : 'ongoing');
+    }
+
+    String orderBy = 'CASE WHEN due_date IS NULL OR due_date = "" THEN 1 ELSE 0 END, due_date ASC, item_name ASC';
+    switch (sortBy) {
+      case 'due_date_desc':
+        orderBy = 'CASE WHEN due_date IS NULL OR due_date = "" THEN 1 ELSE 0 END, due_date DESC, item_name ASC';
+        break;
+      case 'balance_desc':
+        orderBy = 'remaining_balance DESC, item_name ASC';
+        break;
+      case 'cost_desc':
+        orderBy = 'total_cost DESC, item_name ASC';
+        break;
+      case 'name_asc':
+        orderBy = 'item_name ASC';
+        break;
+      case 'due_date_asc':
+      default:
+        orderBy = 'CASE WHEN due_date IS NULL OR due_date = "" THEN 1 ELSE 0 END, due_date ASC, item_name ASC';
+        break;
+    }
+
+    final where = whereClauses.isNotEmpty ? whereClauses.join(' AND ') : null;
+    final results = await database.query(
+      AppTables.installments,
+      where: where,
+      whereArgs: whereArgs.isNotEmpty ? whereArgs : null,
+      orderBy: orderBy,
+    );
+
     return results.map((m) => Installment.fromSqlite(m)).toList();
   }
 

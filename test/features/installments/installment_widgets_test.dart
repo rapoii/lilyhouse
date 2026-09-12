@@ -46,6 +46,25 @@ class MockInstallmentRepository implements IInstallmentRepository {
   }
 
   @override
+  Future<List<Installment>> searchInstallments({
+    String? query,
+    InstallmentStatus? status,
+    String sortBy = 'due_date_asc',
+  }) async {
+    List<Installment> list = status != null
+        ? _installments.where((i) => i.status == status).toList()
+        : List.from(_installments);
+    if (query != null && query.trim().isNotEmpty) {
+      final q = query.trim().toLowerCase();
+      list = list.where((i) =>
+        i.itemName.toLowerCase().contains(q) ||
+        (i.storeName?.toLowerCase().contains(q) ?? false)
+      ).toList();
+    }
+    return list;
+  }
+
+  @override
   Future<int> updateInstallment(Installment installment) async {
     final idx = _installments.indexWhere((i) => i.id == installment.id);
     if (idx >= 0) {

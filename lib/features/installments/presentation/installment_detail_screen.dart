@@ -194,7 +194,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           Container(
             decoration: BoxDecoration(
               color: AppColors.cardBg,
-              borderRadius: BorderRadius.circular(24),
+              borderRadius: BorderRadius.circular(12),
               border: Border.all(color: AppColors.borderSubtle),
             ),
             padding: const EdgeInsets.all(20),
@@ -402,7 +402,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                 padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
                   color: AppColors.cardBg,
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: AppColors.borderSubtle),
                 ),
                 child: Row(

@@ -25,7 +25,7 @@ android {
         // is added automatically by Flutter. (https://developer.android.com/studio/build/configure-apk-splits#configure-APK-versions)
         // You can force using the value of versionCode by specifying the `-P force-version-code-ignoring-abi=true`
         // flag during build.
-        val baseCode = if (flutter.versionCode > 1) flutter.versionCode else 96
+        val baseCode = if (flutter.versionCode > 1) flutter.versionCode else 97
         versionCode = baseCode
         versionName = flutter.versionName
     }
