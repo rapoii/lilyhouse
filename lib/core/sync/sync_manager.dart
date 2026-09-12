@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter/foundation.dart';
 import '../database/db_helper.dart';
 import 'sync_state_notifier.dart';
 
@@ -8,6 +9,9 @@ import 'sync_state_notifier.dart';
 class SyncManager {
   static final SyncManager instance = SyncManager._internal();
   SyncManager._internal();
+
+  /// Reactive notifier incremented whenever cloud sync modifies local data.
+  final ValueNotifier<int> dataVersion = ValueNotifier<int>(0);
 
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   Timer? _debounceTimer;
@@ -19,6 +23,11 @@ class SyncManager {
 
   bool get isOnline => _isOnline;
   bool get isSyncing => _isSyncing;
+
+  /// Notifies listeners that local SQLite tables have been refreshed from cloud.
+  void notifyDataChanged() {
+    dataVersion.value++;
+  }
 
   /// Initializes connectivity listener and hooks database queue changes.
   void initialize({

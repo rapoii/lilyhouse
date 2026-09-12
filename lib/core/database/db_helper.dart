@@ -266,6 +266,77 @@ class DatabaseHelper {
     return out;
   }
 
+  /// Merges latest cloud data into local tables for 2-way sync.
+  /// Preserves un-synced local edits (items currently in sync_queue).
+  /// Replaces or inserts items from cloud if they are not pending locally.
+  Future<Map<String, int>> mergeFromCloud(Map<String, dynamic> cloudData) async {
+    final db = await database;
+    final counts = <String, int>{};
+    const tables = [
+      AppTables.costumes,
+      AppTables.accessories,
+      AppTables.customers,
+      AppTables.rentals,
+      AppTables.installments,
+      AppTables.installmentLogs,
+    ];
+
+    // Fetch all currently pending record IDs in sync_queue
+    final pendingQueue = await db.query(AppTables.syncQueue, columns: ['table_name', 'record_id']);
+    final pendingSet = <String>{};
+    for (final q in pendingQueue) {
+      final t = q['table_name'] as String? ?? '';
+      final r = q['record_id'] as String? ?? '';
+      if (t.isNotEmpty && r.isNotEmpty) {
+        pendingSet.add('$t:$r');
+      }
+    }
+
+    await db.transaction((txn) async {
+      for (final table in tables) {
+        final raw = cloudData[table];
+        final List list = raw is List ? raw : [];
+        var merged = 0;
+        final cloudIds = <String>{};
+
+        for (final item in list) {
+          if (item is! Map) continue;
+          final row = <String, dynamic>{};
+          item.forEach((k, v) => row[k.toString()] = v);
+          final id = row['id']?.toString() ?? '';
+          if (id.isEmpty) continue;
+          cloudIds.add(id);
+
+          // If this record has an unpushed local edit in sync_queue, keep local version!
+          if (pendingSet.contains('$table:$id')) {
+            continue;
+          }
+
+          row['id'] = id;
+          await txn.insert(
+            table,
+            _normalizeRestoreRow(table, row),
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+          merged++;
+        }
+
+        // Clean up items deleted from cloud (only if not pending in sync_queue)
+        final localRows = await txn.query(table, columns: ['id']);
+        for (final local in localRows) {
+          final localId = local['id']?.toString() ?? '';
+          if (localId.isNotEmpty && !cloudIds.contains(localId) && !pendingSet.contains('$table:$localId')) {
+            await txn.delete(table, where: 'id = ?', whereArgs: [localId]);
+          }
+        }
+
+        counts[table] = merged;
+      }
+    });
+
+    return counts;
+  }
+
   /// Replaces local tables with cloud data (fresh-install restore path).
   /// Returns per-table inserted counts. Runs in one transaction.
   Future<Map<String, int>> restoreAll(Map<String, dynamic> cloudData) async {

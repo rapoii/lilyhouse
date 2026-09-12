@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -86,6 +87,13 @@ void main() {
       );
 
       final mockClient = MockClient((request) async {
+        if (request.method == 'GET') {
+          return http.Response(
+            '{"status": "success", "data": {"costumes": []}}',
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
         return http.Response(
           '{"status": "success", "processed_ids": ["sync-1"], "errors": []}',
           200,
@@ -157,6 +165,59 @@ void main() {
       expect(finalState.status, SyncStatus.error);
       expect(finalState.errorMessage, contains('500'));
       expect(finalState.pendingCount, 1);
+    });
+
+    test('Two-way sync downloads remote items and updates local SQLite when queue is empty', () async {
+      final mockClient = MockClient((request) async {
+        if (request.method == 'GET' && request.url.queryParameters['action'] == 'fetch_all') {
+          return http.Response(
+            jsonEncode({
+              'status': 'success',
+              'data': {
+                'costumes': [
+                  {
+                    'id': 'cloud-cos-1',
+                    'name': 'Cloud Raiden Shogun',
+                    'anime_series': 'Genshin Impact',
+                    'size': 'M',
+                    'rent_price_3days': 180000,
+                    'status': 'available',
+                  }
+                ]
+              }
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+        return http.Response('{"status": "success", "processed_ids": []}', 200);
+      });
+
+      final syncService = SyncService(
+        endpointUrl: 'https://example.com/sync',
+        dbHelper: dbHelper,
+        httpClient: mockClient,
+      );
+
+      final container = ProviderContainer(
+        overrides: [
+          syncServiceProvider.overrideWithValue(syncService),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      final notifier = container.read(syncStateProvider.notifier);
+      final result = await notifier.syncNow();
+
+      expect(result.isSuccess, isTrue);
+      final finalState = container.read(syncStateProvider);
+      expect(finalState.status, SyncStatus.success);
+
+      // Verify item was inserted into local SQLite database!
+      final db = await dbHelper.database;
+      final localRows = await db.query(AppTables.costumes, where: 'id = ?', whereArgs: ['cloud-cos-1']);
+      expect(localRows, hasLength(1));
+      expect(localRows.first['name'], 'Cloud Raiden Shogun');
     });
   });
 }

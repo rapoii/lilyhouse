@@ -254,6 +254,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(savedCalled, isTrue);
+    expect(deletedCalled, isFalse);
     final updated = await repository.getCostumeById('cos-1');
     expect(updated?.name, 'Hatsune Miku NT');
   });

@@ -227,6 +227,92 @@ class SyncService {
     }
   }
 
+  /// Pulls all cloud tables (GAS fetch_all) and merges them into local SQLite.
+  /// Skips overwriting records that are currently pending in sync_queue.
+  Future<SyncResult> pullFromCloud() async {
+    try {
+      if (endpointUrl.isEmpty) {
+        return const SyncResult(
+          isSuccess: false,
+          syncedCount: 0,
+          errorMessage: 'URL endpoint sinkronisasi belum diatur.',
+        );
+      }
+
+      final uri = Uri.parse(endpointUrl).replace(queryParameters: {'action': 'fetch_all'});
+      final response = await _client.get(uri);
+
+      if (response.statusCode != 200) {
+        return SyncResult(
+          isSuccess: false,
+          syncedCount: 0,
+          errorMessage: 'Server merespons dengan HTTP ${response.statusCode}',
+        );
+      }
+
+      final Map<String, dynamic> responseData =
+          jsonDecode(response.body) as Map<String, dynamic>;
+      if (responseData['status'] != 'success') {
+        return SyncResult(
+          isSuccess: false,
+          syncedCount: 0,
+          errorMessage: responseData['message']?.toString() ?? 'Gagal mengambil data cloud',
+        );
+      }
+
+      final rawData = responseData['data'];
+      if (rawData is! Map) {
+        return const SyncResult(
+          isSuccess: false,
+          syncedCount: 0,
+          errorMessage: 'Format data cloud tidak valid',
+        );
+      }
+
+      final cloudData = <String, dynamic>{};
+      rawData.forEach((k, v) => cloudData[k.toString()] = v);
+
+      final counts = await dbHelper.mergeFromCloud(cloudData);
+      final totalMerged = counts.values.fold<int>(0, (sum, c) => sum + c);
+
+      return SyncResult(
+        isSuccess: true,
+        syncedCount: totalMerged,
+      );
+    } catch (e) {
+      return SyncResult(
+        isSuccess: false,
+        syncedCount: 0,
+        errorMessage: e.toString(),
+      );
+    }
+  }
+
+  /// Full 2-Way Sync:
+  /// 1. Push: Uploads pending local offline changes to Google Sheets/Drive.
+  /// 2. Pull: Downloads latest data from Google Sheets and merges into local SQLite.
+  Future<SyncResult> syncTwoWay({bool uploadLocalMedia = true}) async {
+    // 1. Push
+    final pushResult = await syncPending(uploadLocalMedia: uploadLocalMedia);
+    if (!pushResult.isSuccess &&
+        pushResult.errorMessage != null &&
+        !pushResult.errorMessage!.contains('belum diatur')) {
+      return pushResult;
+    }
+
+    // 2. Pull
+    final pullResult = await pullFromCloud();
+    if (!pullResult.isSuccess) {
+      return pullResult;
+    }
+
+    final totalEffect = pushResult.syncedCount + pullResult.syncedCount;
+    return SyncResult(
+      isSuccess: true,
+      syncedCount: totalEffect,
+    );
+  }
+
   /// Downloads all cloud tables (GAS fetch_all) and replaces local tables.
   /// Returns per-table restored counts. Overwrites local rows — intended for
   /// fresh installs after uninstall. Sync queue is cleared on success.

@@ -77,7 +77,11 @@ void main() {
             headers: {'content-type': 'application/json'},
           );
         }
-        return http.Response('{"status": "success"}', 200);
+        return http.Response(
+          '{"status": "success", "data": {"costumes": []}}',
+          200,
+          headers: {'content-type': 'application/json'},
+        );
       });
 
       syncService = SyncService(

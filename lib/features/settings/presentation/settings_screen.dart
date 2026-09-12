@@ -441,7 +441,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.64',
+                    'Versi 1.0.65',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -897,7 +897,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.64', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.65', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),

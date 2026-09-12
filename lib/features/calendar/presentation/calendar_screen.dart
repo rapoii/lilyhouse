@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
+import '../../../core/sync/sync_manager.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
@@ -56,6 +57,19 @@ class _CalendarScreenState extends State<CalendarScreen> {
     _focusedDay = DateTime(initial.year, initial.month, initial.day);
     _selectedDay = _focusedDay;
     _loadData();
+    SyncManager.instance.dataVersion.addListener(_onDataVersionChanged);
+  }
+
+  @override
+  void dispose() {
+    SyncManager.instance.dataVersion.removeListener(_onDataVersionChanged);
+    super.dispose();
+  }
+
+  void _onDataVersionChanged() {
+    if (mounted) {
+      _loadData();
+    }
   }
 
   Future<void> _loadData() async {

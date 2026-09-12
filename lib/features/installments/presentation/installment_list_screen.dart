@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../core/sync/sync_manager.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
@@ -44,12 +45,20 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
   void initState() {
     super.initState();
     _loadInstallments();
+    SyncManager.instance.dataVersion.addListener(_onDataVersionChanged);
   }
 
   @override
   void dispose() {
+    SyncManager.instance.dataVersion.removeListener(_onDataVersionChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onDataVersionChanged() {
+    if (mounted) {
+      _loadInstallments();
+    }
   }
 
   Future<void> _loadInstallments() async {

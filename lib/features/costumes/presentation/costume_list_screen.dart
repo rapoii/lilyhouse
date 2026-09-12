@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import '../../../core/sync/sync_manager.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/header_action_button.dart';
@@ -38,12 +39,20 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
     super.initState();
     _repository = widget.repository ?? CostumeRepository();
     _fetchCostumes();
+    SyncManager.instance.dataVersion.addListener(_onDataVersionChanged);
   }
 
   @override
   void dispose() {
+    SyncManager.instance.dataVersion.removeListener(_onDataVersionChanged);
     _searchController.dispose();
     super.dispose();
+  }
+
+  void _onDataVersionChanged() {
+    if (mounted) {
+      _fetchCostumes();
+    }
   }
 
   Future<void> _fetchCostumes() async {

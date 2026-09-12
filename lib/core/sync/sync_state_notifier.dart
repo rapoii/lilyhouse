@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'sync_manager.dart';
 import 'sync_service.dart';
 
 enum SyncStatus {
@@ -89,7 +90,7 @@ class SyncStateNotifier extends StateNotifier<SyncState> {
       errorMessage: null,
     );
 
-    final result = await _syncService.syncPending();
+    final result = await _syncService.syncTwoWay();
 
     final remainingItems = await _syncService.dbHelper.getPendingSyncItems();
 
@@ -100,6 +101,9 @@ class SyncStateNotifier extends StateNotifier<SyncState> {
         lastSyncedAt: DateTime.now(),
         errorMessage: null,
       );
+      try {
+        SyncManager.instance.notifyDataChanged();
+      } catch (_) {}
     } else {
       state = state.copyWith(
         status: silent ? SyncStatus.idle : SyncStatus.error,
@@ -135,6 +139,9 @@ class SyncStateNotifier extends StateNotifier<SyncState> {
         lastSyncedAt: DateTime.now(),
         errorMessage: null,
       );
+      try {
+        SyncManager.instance.notifyDataChanged();
+      } catch (_) {}
     } else {
       final remainingItems =
           await _syncService.dbHelper.getPendingSyncItems();
