@@ -79,6 +79,7 @@ class InstallmentRepository implements IInstallmentRepository {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    DatabaseHelper.instance.onQueueChanged?.call();
   }
 
   @override

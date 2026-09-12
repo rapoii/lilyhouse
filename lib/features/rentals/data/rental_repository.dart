@@ -51,6 +51,7 @@ class RentalRepository implements IRentalRepository {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    DatabaseHelper.instance.onQueueChanged?.call();
   }
 
   // --- Customer Operations ---

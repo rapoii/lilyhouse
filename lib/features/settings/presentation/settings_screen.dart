@@ -127,7 +127,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             width: 64,
                             height: 64,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF34C759).withOpacity(0.12),
+                              color: const Color(0xFF34C759).withValues(alpha: 0.12),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(
@@ -441,7 +441,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.63',
+                    'Versi 1.0.64',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -657,37 +657,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     Color statusColor;
     IconData statusIcon;
 
-    switch (syncState.status) {
-      case SyncStatus.idle:
-        if (syncState.lastSyncedAt == null && syncState.pendingCount == 0) {
-          statusBadge = 'Siap';
+    if (!syncState.isOnline) {
+      statusBadge = 'Offline';
+      statusColor = const Color(0xFFFF9500);
+      statusIcon = CupertinoIcons.wifi_slash;
+    } else {
+      switch (syncState.status) {
+        case SyncStatus.idle:
+          if (syncState.lastSyncedAt == null && syncState.pendingCount == 0) {
+            statusBadge = 'Online';
+            statusColor = AppColors.primaryPink;
+            statusIcon = CupertinoIcons.cloud;
+          } else if (syncState.pendingCount > 0) {
+            statusBadge = 'Antrean (${syncState.pendingCount})';
+            statusColor = const Color(0xFFFF9500);
+            statusIcon = CupertinoIcons.cloud_fill;
+          } else {
+            statusBadge = 'Tersinkron';
+            statusColor = const Color(0xFF34C759);
+            statusIcon = CupertinoIcons.checkmark_alt_circle_fill;
+          }
+          break;
+        case SyncStatus.syncing:
+          statusBadge = 'Menyinkronkan...';
           statusColor = AppColors.primaryPink;
-          statusIcon = CupertinoIcons.cloud;
-        } else if (syncState.pendingCount > 0) {
-          statusBadge = 'Offline';
-          statusColor = const Color(0xFFFF9500);
-          statusIcon = CupertinoIcons.cloud_fill;
-        } else {
+          statusIcon = CupertinoIcons.arrow_2_circlepath;
+          break;
+        case SyncStatus.success:
           statusBadge = 'Tersinkron';
           statusColor = const Color(0xFF34C759);
-          statusIcon = CupertinoIcons.cloud_fill;
-        }
-        break;
-      case SyncStatus.syncing:
-        statusBadge = 'Menyinkronkan...';
-        statusColor = AppColors.primaryPink;
-        statusIcon = CupertinoIcons.arrow_2_circlepath;
-        break;
-      case SyncStatus.success:
-        statusBadge = 'Tersinkron';
-        statusColor = const Color(0xFF34C759);
-        statusIcon = CupertinoIcons.checkmark_alt_circle_fill;
-        break;
-      case SyncStatus.error:
-        statusBadge = 'Gagal';
-        statusColor = const Color(0xFFFF3B30);
-        statusIcon = CupertinoIcons.exclamationmark_circle_fill;
-        break;
+          statusIcon = CupertinoIcons.checkmark_alt_circle_fill;
+          break;
+        case SyncStatus.error:
+          statusBadge = 'Gagal';
+          statusColor = const Color(0xFFFF3B30);
+          statusIcon = CupertinoIcons.exclamationmark_circle_fill;
+          break;
+      }
     }
 
     final formattedLastSync = syncState.lastSyncedAt != null
@@ -732,7 +738,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 additionalInfo: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.12),
+                    color: statusColor.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -891,7 +897,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.63', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.64', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),

@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../database/db_helper.dart';
+import '../database/tables.dart';
 
 class SyncResult {
   final bool isSuccess;
@@ -64,7 +66,9 @@ class SyncService {
 
   /// Reads pending items in sync_queue, posts them in batch to Google Apps Script,
   /// and removes successfully processed records from the local sync queue.
-  Future<SyncResult> syncPending() async {
+  /// If [uploadLocalMedia] is true, checks for local image paths in payload and
+  /// automatically uploads them to Google Drive via uploadMedia before sync.
+  Future<SyncResult> syncPending({bool uploadLocalMedia = true}) async {
     try {
       await dbHelper.enqueueAllUnsyncedRecords();
       final pendingItems = await dbHelper.getPendingSyncItems();
@@ -83,15 +87,83 @@ class SyncService {
         );
       }
 
-      final itemsPayload = pendingItems.map((item) {
-        return {
+      final itemsPayload = <Map<String, dynamic>>[];
+      for (final item in pendingItems) {
+        var payloadStr = item['payload'] as String? ?? '{}';
+        if (uploadLocalMedia) {
+          try {
+            final payloadMap = jsonDecode(payloadStr) as Map<String, dynamic>;
+            bool modified = false;
+            final photoFields = [
+              'cover_photo',
+              'photo_url',
+              'proof_photo_url',
+              'ktp_photo_url',
+              'selfie_ktp_url',
+            ];
+            for (final field in photoFields) {
+              final val = payloadMap[field];
+              if (val is String &&
+                  val.isNotEmpty &&
+                  !val.startsWith('http://') &&
+                  !val.startsWith('https://')) {
+                final cleanPath =
+                    val.startsWith('file://') ? val.replaceFirst('file://', '') : val;
+                final file = File(cleanPath);
+                if (file.existsSync()) {
+                  try {
+                    final bytes = await file.readAsBytes();
+                    final base64Data = base64Encode(bytes);
+                    final tableName = item['table_name'] as String;
+                    final recordId = item['record_id'] as String;
+                    final fileName = '${tableName}_${recordId}_$field.jpg';
+                    final driveUrl = await uploadMedia(
+                      fileName: fileName,
+                      base64Data: base64Data,
+                    );
+                    if (driveUrl != null && driveUrl.isNotEmpty) {
+                      payloadMap[field] = driveUrl;
+                      modified = true;
+                      try {
+                        final db = await dbHelper.database;
+                        await db.update(
+                          tableName,
+                          {field: driveUrl},
+                          where: 'id = ?',
+                          whereArgs: [recordId],
+                        );
+                      } catch (_) {}
+                    }
+                  } catch (_) {
+                    // Continue even if one media fails to upload
+                  }
+                }
+              }
+            }
+
+            if (modified) {
+              payloadStr = jsonEncode(payloadMap);
+              try {
+                final db = await dbHelper.database;
+                await db.update(
+                  AppTables.syncQueue,
+                  {'payload': payloadStr},
+                  where: 'id = ?',
+                  whereArgs: [item['id']],
+                );
+              } catch (_) {}
+            }
+          } catch (_) {}
+        }
+
+        itemsPayload.add({
           'id': item['id'],
           'table_name': item['table_name'],
           'record_id': item['record_id'],
           'action': item['action'],
-          'payload': item['payload'],
-        };
-      }).toList();
+          'payload': payloadStr,
+        });
+      }
 
       final requestBody = jsonEncode({
         'action': 'sync_batch',

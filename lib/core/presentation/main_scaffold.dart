@@ -4,6 +4,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../core/sync/sync_manager.dart';
 import '../../core/sync/sync_state_notifier.dart';
 import '../../core/theme/app_colors.dart';
 import '../../features/calendar/presentation/calendar_screen.dart';
@@ -72,11 +73,23 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     super.initState();
     _currentIndex = widget.initialIndex;
     _pageController = PageController(initialPage: widget.initialIndex);
+    if (!widget.isTestMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          SyncManager.instance.initialize(
+            notifier: ref.read(syncStateProvider.notifier),
+          );
+        }
+      });
+    }
   }
 
   @override
   void dispose() {
     _pageController.dispose();
+    if (!widget.isTestMode) {
+      SyncManager.instance.dispose();
+    }
     super.dispose();
   }
 

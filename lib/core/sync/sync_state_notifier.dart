@@ -13,12 +13,14 @@ class SyncState {
   final int pendingCount;
   final DateTime? lastSyncedAt;
   final String? errorMessage;
+  final bool isOnline;
 
   const SyncState({
     this.status = SyncStatus.idle,
     this.pendingCount = 0,
     this.lastSyncedAt,
     this.errorMessage,
+    this.isOnline = true,
   });
 
   SyncState copyWith({
@@ -26,12 +28,14 @@ class SyncState {
     int? pendingCount,
     DateTime? lastSyncedAt,
     String? errorMessage,
+    bool? isOnline,
   }) {
     return SyncState(
       status: status ?? this.status,
       pendingCount: pendingCount ?? this.pendingCount,
       lastSyncedAt: lastSyncedAt ?? this.lastSyncedAt,
       errorMessage: errorMessage,
+      isOnline: isOnline ?? this.isOnline,
     );
   }
 }
@@ -64,8 +68,14 @@ class SyncStateNotifier extends StateNotifier<SyncState> {
     }
   }
 
-  /// Triggers immediate synchronization of pending queue items
-  Future<SyncResult> syncNow() async {
+  /// Updates current network reachability
+  void updateOnlineStatus(bool online) {
+    state = state.copyWith(isOnline: online);
+  }
+
+  /// Triggers immediate or background synchronization of pending queue items.
+  /// If [silent] is true, errors revert to [SyncStatus.idle] without surfacing noise.
+  Future<SyncResult> syncNow({bool silent = false}) async {
     if (state.status == SyncStatus.syncing) {
       return const SyncResult(
         isSuccess: false,
@@ -92,9 +102,9 @@ class SyncStateNotifier extends StateNotifier<SyncState> {
       );
     } else {
       state = state.copyWith(
-        status: SyncStatus.error,
+        status: silent ? SyncStatus.idle : SyncStatus.error,
         pendingCount: remainingItems.length,
-        errorMessage: result.errorMessage,
+        errorMessage: silent ? null : result.errorMessage,
       );
     }
 

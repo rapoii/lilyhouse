@@ -47,6 +47,7 @@ class CostumeRepository implements ICostumeRepository {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    DatabaseHelper.instance.onQueueChanged?.call();
   }
 
   @override

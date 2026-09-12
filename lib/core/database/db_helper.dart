@@ -13,6 +13,9 @@ class DatabaseHelper {
 
   Database? _database;
 
+  /// Callback triggered whenever items are enqueued or changed in sync_queue.
+  void Function()? onQueueChanged;
+
   Future<Database> get database async {
     if (_database != null) return _database!;
     _database = await _initDatabase();
@@ -61,7 +64,7 @@ class DatabaseHelper {
     required String payload,
   }) async {
     final db = await database;
-    return await db.insert(
+    final result = await db.insert(
       AppTables.syncQueue,
       {
         'id': id,
@@ -73,6 +76,8 @@ class DatabaseHelper {
       },
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
+    onQueueChanged?.call();
+    return result;
   }
 
   Future<List<Map<String, dynamic>>> getPendingSyncItems() async {
