@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/ios_toast.dart';
 import '../data/installment_repository.dart';
 import '../domain/installment.dart';
 import '../domain/installment_log.dart';
+import 'widgets/add_payment_sheet.dart';
 
 class InstallmentDetailScreen extends StatefulWidget {
   final String installmentId;
@@ -54,96 +57,43 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
     return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
   }
 
-  void _showAddPaymentDialog() {
-    final amountController = TextEditingController();
-    final notesController = TextEditingController();
-    DateTime selectedDate = DateTime.now();
-
-    showCupertinoDialog(
+  Future<void> _showAddPaymentSheet() async {
+    final inst = _installment;
+    if (inst == null) return;
+    await showCupertinoModalPopup<void>(
       context: context,
-      builder: (dialogCtx) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return CupertinoAlertDialog(
-              title: const Text('Catat Pembayaran Cicilan'),
-              content: Padding(
-                padding: const EdgeInsets.only(top: 12),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CupertinoTextField(
-                      key: const Key('detail_payment_amount_input'),
-                      controller: amountController,
-                      keyboardType: TextInputType.number,
-                      placeholder: 'Jumlah Bayar (Rp) *',
-                      prefix: const Padding(
-                        padding: EdgeInsets.only(left: 8),
-                        child: Text('Rp ', style: TextStyle(color: Color(0xFF8E8E93))),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    CupertinoTextField(
-                      key: const Key('detail_payment_notes_input'),
-                      controller: notesController,
-                      placeholder: 'Catatan (misal: Cicilan ke-2)',
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                CupertinoDialogAction(
-                  textStyle: const TextStyle(
-                    inherit: false,
-                    fontFamily: '.SF Pro Text',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryPink,
-                  ),
-                  onPressed: () => Navigator.pop(dialogCtx),
-                  child: const Text('Batal'),
-                ),
-                CupertinoDialogAction(
-                  textStyle: const TextStyle(
-                    inherit: false,
-                    fontFamily: '.SF Pro Text',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryPink,
-                  ),
-                  onPressed: () async {
-                    final amount = double.tryParse(amountController.text.trim()) ?? 0.0;
-                    if (amount <= 0) return;
+      builder: (ctx) => AddPaymentSheet(
+        installment: inst,
+        repository: widget.repository,
+        onSaved: _fetchDetails,
+      ),
+    );
+  }
 
-                    final log = InstallmentLog(
-                      id: 'log_${DateTime.now().millisecondsSinceEpoch}',
-                      installmentId: widget.installmentId,
-                      paymentDate: selectedDate,
-                      amountPaid: amount,
-                      notes: notesController.text.trim().isEmpty ? null : notesController.text.trim(),
-                    );
-
-                    await widget.repository.addPaymentLog(log);
-                    if (!dialogCtx.mounted) return;
-                    Navigator.pop(dialogCtx);
-                    _fetchDetails();
-                  },
-                  child: const Text('Simpan'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+  void _confirmDeleteInstallment(Installment inst) {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Hapus Cicilan?'),
+        content: Text('Apakah Anda yakin ingin menghapus data cicilan "${inst.itemName}" beserta riwayat pembayarannya?'),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(color: AppColors.textDark)),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await widget.repository.deleteInstallment(inst.id);
+              if (!mounted) return;
+              Navigator.pop(context);
+              IosToast.show(context, 'Cicilan "${inst.itemName}" berhasil dihapus', icon: CupertinoIcons.trash);
+            },
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
     );
   }
 
@@ -186,6 +136,13 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           onPressed: () => Navigator.maybePop(context),
           child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
         ),
+        actions: [
+          CupertinoButton(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            onPressed: () => _confirmDeleteInstallment(inst),
+            child: const Icon(CupertinoIcons.trash, color: AppColors.dangerRose, size: 20),
+          ),
+        ],
       ),
       body: ListView(
         padding: const EdgeInsets.all(20.0),
@@ -359,7 +316,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                 color: AppColors.primaryPink,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 borderRadius: BorderRadius.circular(12),
-                onPressed: _showAddPaymentDialog,
+                onPressed: _showAddPaymentSheet,
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [

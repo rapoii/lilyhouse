@@ -262,7 +262,7 @@ void main() {
       // Tap Simpan
       await tester.tap(find.text('Simpan'));
       await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pump(const Duration(seconds: 3));
 
       // Verify installment is now paid off (100% / Lunas)
       final updated = await repository.getInstallmentById('inst_ui_1');

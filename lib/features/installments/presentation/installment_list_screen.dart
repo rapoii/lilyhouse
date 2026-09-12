@@ -13,6 +13,7 @@ import '../domain/installment_log.dart';
 import 'widgets/installment_card.dart';
 import 'installment_detail_screen.dart';
 import 'installment_filter_sheet.dart';
+import 'widgets/add_payment_sheet.dart';
 
 class InstallmentListScreen extends StatefulWidget {
   final IInstallmentRepository repository;
@@ -721,97 +722,19 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
     return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
   }
 
-  void _showAddPaymentDialog() {
-    final amountController = TextEditingController();
-    final notesController = TextEditingController();
-    DateTime selectedDate = DateTime.now();
-
-    showCupertinoDialog(
+  Future<void> _showAddPaymentSheet() async {
+    final inst = _installment;
+    if (inst == null) return;
+    await showCupertinoModalPopup<void>(
       context: context,
-      builder: (dialogCtx) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return CupertinoAlertDialog(
-              title: const Text('Catat Pembayaran Cicilan'),
-              content: Padding(
-                padding: const EdgeInsets.only(top: 12.0),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CupertinoTextField(
-                      key: const Key('payment_amount_input'),
-                      controller: amountController,
-                      keyboardType: TextInputType.number,
-                      placeholder: 'Jumlah Bayar (Rp) *',
-                      prefix: const Padding(
-                        padding: EdgeInsets.only(left: 8.0),
-                        child: Text('Rp ', style: TextStyle(color: CupertinoColors.secondaryLabel)),
-                      ),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    CupertinoTextField(
-                      key: const Key('payment_notes_input'),
-                      controller: notesController,
-                      placeholder: 'Catatan (misal: Cicilan ke-2)',
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.background,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                CupertinoDialogAction(
-                  textStyle: const TextStyle(
-                    inherit: false,
-                    fontFamily: '.SF Pro Text',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryPink,
-                  ),
-                  onPressed: () => Navigator.pop(dialogCtx),
-                  child: const Text('Batal'),
-                ),
-                CupertinoDialogAction(
-                  textStyle: const TextStyle(
-                    inherit: false,
-                    fontFamily: '.SF Pro Text',
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryPink,
-                  ),
-                  onPressed: () async {
-                    final amount = double.tryParse(amountController.text.trim()) ?? 0.0;
-                    if (amount <= 0) return;
-
-                    final log = InstallmentLog(
-                      id: 'log_${DateTime.now().millisecondsSinceEpoch}',
-                      installmentId: widget.installmentId,
-                      paymentDate: selectedDate,
-                      amountPaid: amount,
-                      notes: notesController.text.trim().isEmpty ? null : notesController.text.trim(),
-                    );
-
-                    await widget.repository.addPaymentLog(log);
-                    widget.onDataChanged();
-                    if (!dialogCtx.mounted) return;
-                    Navigator.pop(dialogCtx);
-                    _fetchDetails();
-                  },
-                  child: const Text('Simpan'),
-                ),
-              ],
-            );
-          },
-        );
-      },
+      builder: (ctx) => AddPaymentSheet(
+        installment: inst,
+        repository: widget.repository,
+        onSaved: () {
+          widget.onDataChanged();
+          _fetchDetails();
+        },
+      ),
     );
   }
 
@@ -967,7 +890,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                 child: CupertinoButton.filled(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   borderRadius: BorderRadius.circular(10),
-                  onPressed: _showAddPaymentDialog,
+                  onPressed: _showAddPaymentSheet,
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
