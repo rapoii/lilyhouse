@@ -6,6 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
+import '../../../core/widgets/header_action_button.dart';
 import '../../costumes/data/costume_repository.dart';
 import '../../costumes/domain/costume.dart';
 import '../../rentals/data/form_parser.dart';
@@ -174,10 +175,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _openSmartPasteDialog() {
-    showModalBottomSheet(
+    showCupertinoModalPopup<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => _SmartPasteModal(
         repository: _repository,
         costumeRepository: _costumeRepository,
@@ -190,13 +189,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _openManualBookingDialog() {
-    showModalBottomSheet(
+    showCupertinoModalPopup<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) => ManualBookingModal(
         rentalRepository: _repository,
-        costumeRepository: CostumeRepository(),
+        costumeRepository: _costumeRepository,
         initialDate: _selectedDay,
         onBookingAdded: () {
           _loadData();
@@ -221,39 +218,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
         centerTitle: false,
         actions: [
           // Single Tambah button — opens entry method chooser (Smart Paste / Manual)
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: CupertinoButton(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              key: const Key('add_booking_button'),
-              onPressed: _openBookingEntrySheet,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF1F4), // very light pink fill (Apple tertiary fill)
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      CupertinoIcons.add,
-                      size: 15,
-                      color: AppColors.primaryPink,
-                    ),
-                    SizedBox(width: 5),
-                    Text(
-                      'Tambah',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryPink,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          HeaderActionButton(
+            buttonKey: const Key('add_booking_button'),
+            label: 'Tambah',
+            icon: CupertinoIcons.add,
+            onPressed: _openBookingEntrySheet,
           ),
         ],
       ),
@@ -310,12 +279,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           fontSize: 16,
                         ),
                         leftChevronIcon: Icon(
-                          Icons.chevron_left_rounded,
+                          CupertinoIcons.chevron_left,
                           color: AppColors.primaryPink,
+                          size: 18,
                         ),
                         rightChevronIcon: Icon(
-                          Icons.chevron_right_rounded,
+                          CupertinoIcons.chevron_right,
                           color: AppColors.primaryPink,
+                          size: 18,
                         ),
                       ),
                       calendarStyle: CalendarStyle(
@@ -589,16 +560,16 @@ class _RentalSlotCard extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: AppColors.cardBg,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: hasConflict ? AppColors.dangerRose : AppColors.borderSubtle,
-            width: hasConflict ? 1.5 : 1,
+            width: hasConflict ? 1.5 : 0.5,
           ),
           boxShadow: [
             BoxShadow(
               color: Colors.black.withValues(alpha: 0.03),
               blurRadius: 8,
-              offset: const Offset(0, 2),
+              offset: const Offset(0, 1),
             ),
           ],
         ),
@@ -616,7 +587,7 @@ class _RentalSlotCard extends StatelessWidget {
                 child: const Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(Icons.warning_amber_rounded, size: 14, color: AppColors.dangerRose),
+                    Icon(CupertinoIcons.exclamationmark_triangle_fill, size: 14, color: AppColors.dangerRose),
                     SizedBox(width: 4),
                     Text(
                       'Konflik Terdeteksi!',
@@ -648,7 +619,7 @@ class _RentalSlotCard extends StatelessWidget {
           const SizedBox(height: 6),
           Row(
             children: [
-              const Icon(Icons.person_outline_rounded, size: 14, color: AppColors.textMuted),
+              const Icon(CupertinoIcons.person, size: 14, color: AppColors.textMuted),
               const SizedBox(width: 4),
               Text(
                 customer?.fullName ?? rental.customerId,
@@ -659,7 +630,7 @@ class _RentalSlotCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Icon(Icons.calendar_today_rounded, size: 12, color: AppColors.textMuted),
+              const Icon(CupertinoIcons.calendar, size: 12, color: AppColors.textMuted),
               const SizedBox(width: 4),
               Text(
                 dateRangeText,
@@ -878,10 +849,8 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
     final outerCtx = widget.parentContext;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!outerCtx.mounted) return;
-      showModalBottomSheet<void>(
+      showCupertinoModalPopup<void>(
         context: outerCtx,
-        isScrollControlled: true,
-        backgroundColor: Colors.transparent,
         builder: (ctx) => ManualBookingModal(
           rentalRepository: widget.repository,
           costumeRepository: widget.costumeRepository,
@@ -901,212 +870,202 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return Container(
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.of(context).size.height * 0.88,
-      ),
-      margin: EdgeInsets.only(bottom: bottomInset),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-      ),
-      padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Center(
-            child: Container(
-              width: 36,
-              height: 5,
-              decoration: BoxDecoration(
-                color: const Color(0xFFD1D1D6),
-                borderRadius: BorderRadius.circular(2.5),
-              ),
+    return DraggableSheetContainer(
+      backgroundColor: AppColors.background,
+      onDismissed: () => Navigator.of(context).pop(),
+      builder: (sheetCtx) => DefaultTextStyle(
+        style: const TextStyle(
+          decoration: TextDecoration.none,
+          fontFamily: '.SF Pro Text',
+          color: AppColors.textDark,
+        ),
+        child: CupertinoPageScaffold(
+          backgroundColor: AppColors.background,
+          navigationBar: CupertinoNavigationBar(
+            backgroundColor: AppColors.background,
+            border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
+            leading: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => Navigator.of(sheetCtx).pop(),
+              child: const Text('Batal', style: AppTypography.actionButton),
             ),
+            middle: const Text('Smart Rent Form Parser', style: AppTypography.navTitle),
           ),
-          const SizedBox(height: 14),
-          const Row(
-            children: [
-              Icon(CupertinoIcons.sparkles, size: 20, color: AppColors.primaryPink),
-              SizedBox(width: 8),
-              Text(
-                'Smart Rent Form Parser',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textDark,
+          child: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset + 32),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                const Text(
+                  'Paste pesan WhatsApp format sewa di bawah untuk otomatisasi data booking & cek tabrakan jadwal.',
+                  style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93), height: 1.3),
                 ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Paste teks chat/format WhatsApp sewa di bawah untuk otomatisasi data booking & cek tabrakan jadwal.',
-            style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
-          ),
-          const SizedBox(height: 12),
-          // Input field
-          Container(
-            height: 110,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFFE5E5EA), width: 0.5),
-            ),
-            child: TextField(
-              key: const Key('smart_paste_input'),
-              controller: _textController,
-              maxLines: null,
-              expands: true,
-              style: const TextStyle(fontSize: 13, color: AppColors.textDark),
-              decoration: const InputDecoration(
-                hintText: 'Paste pesan form rent WhatsApp di sini...',
-                hintStyle: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
-                contentPadding: EdgeInsets.all(12),
-                border: InputBorder.none,
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          CupertinoButton.filled(
-            key: const Key('smart_paste_parse_btn'),
-            onPressed: _handleParse,
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            borderRadius: BorderRadius.circular(10),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(CupertinoIcons.search, size: 16, color: Colors.white),
-                SizedBox(width: 6),
-                Text(
-                  'Periksa & Deteksi Konflik',
-                  style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                const SizedBox(height: 12),
+                // Input field
+                Container(
+                  height: 110,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: const Color(0xFFE5E5EA), width: 0.5),
+                  ),
+                  child: CupertinoTextField(
+                    key: const Key('smart_paste_input'),
+                    controller: _textController,
+                    maxLines: null,
+                    expands: true,
+                    style: const TextStyle(fontSize: 13, color: AppColors.textDark),
+                    placeholder: 'Paste pesan form rent WhatsApp di sini...',
+                    placeholderStyle: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                    padding: const EdgeInsets.all(12),
+                    decoration: null,
+                  ),
                 ),
-              ],
-            ),
-          ),
+                const SizedBox(height: 12),
+                CupertinoButton(
+                  key: const Key('smart_paste_parse_btn'),
+                  color: AppColors.primaryPink,
+                  onPressed: _handleParse,
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  borderRadius: BorderRadius.circular(12),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(CupertinoIcons.search, size: 16, color: Colors.white),
+                      SizedBox(width: 6),
+                      Text(
+                        'Periksa & Deteksi Konflik',
+                        style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
+                      ),
+                    ],
+                  ),
+                ),
 
-          // Parsed preview card
-          if (_parsedData != null) ...[
-            const SizedBox(height: 14),
-            Flexible(
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    // Conflict status banner
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      decoration: BoxDecoration(
-                        color: _hasConflict
-                            ? AppColors.dangerRose.withValues(alpha: 0.12)
-                            : AppColors.successMint.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: _hasConflict ? AppColors.dangerRose : AppColors.successMint,
+                // Parsed preview card
+                if (_parsedData != null) ...[
+                  const SizedBox(height: 14),
+                  // Conflict status banner
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: _hasConflict
+                          ? AppColors.dangerRose.withValues(alpha: 0.12)
+                          : AppColors.successMint.withValues(alpha: 0.15),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _hasConflict ? AppColors.dangerRose : AppColors.successMint,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _hasConflict ? CupertinoIcons.exclamationmark_circle_fill : CupertinoIcons.checkmark_circle_fill,
+                          color: _hasConflict ? AppColors.dangerRose : const Color(0xFF289868),
+                          size: 20,
                         ),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            _hasConflict ? CupertinoIcons.exclamationmark_circle_fill : CupertinoIcons.checkmark_circle_fill,
-                            color: _hasConflict ? AppColors.dangerRose : const Color(0xFF289868),
-                            size: 20,
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              _hasConflict
-                                  ? 'Konflik Terdeteksi! (${_conflictingRentals.length} jadwal tabrakan)'
-                                  : 'Bebas Konflik! Kostum tersedia.',
-                              style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
-                                color: _hasConflict ? AppColors.dangerRose : const Color(0xFF289868),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    // Summary card
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppColors.cardBg,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.borderSubtle),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildDetailRow('Nama Penyewa', _parsedData!.fullName ?? '-'),
-                          _buildDetailRow('No HP', _parsedData!.normalizedPhone ?? _parsedData!.phone ?? '-'),
-                          _buildDetailRow('Alamat', _parsedData!.address ?? '-'),
-                          _buildDetailRow('No HP Ortu / Keluarga', _parsedData!.parentPhone ?? '-'),
-                          _buildDetailRow('Akun Sosmed', _parsedData!.socialMedia ?? '-'),
-                          _buildDetailRow('Kostum', _parsedData!.costumeName ?? '-'),
-                          _buildDetailRow(
-                            'Tanggal',
-                            _parsedData!.startDate != null
-                                ? '${DateFormat('d MMM yyyy').format(_parsedData!.startDate!)} - ${DateFormat('d MMM yyyy').format(_parsedData!.endDate!)} (${_parsedData!.rentalDurationDays ?? 3} hari)'
-                                : (_parsedData!.datesRaw ?? '-'),
-                          ),
-                          _buildDetailRow('Keperluan', _parsedData!.purpose ?? '-'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    // Reminder that 2 image fields still need manual upload.
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFFF3E0),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: const Color(0xFFFF9500).withValues(alpha: 0.4)),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(CupertinoIcons.camera_fill, size: 14, color: Color(0xFFFF9500)),
-                          SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              'Foto KTP & Selfie+KTP belum bisa di-paste. Akan diinput di langkah berikutnya.',
-                              style: TextStyle(fontSize: 11, color: Color(0xFF8E5A00)),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    CupertinoButton.filled(
-                      onPressed: _continueToManual,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      borderRadius: BorderRadius.circular(10),
-                      child: const Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(CupertinoIcons.arrow_right_circle_fill, size: 16, color: Colors.white),
-                          SizedBox(width: 6),
-                          Text(
-                            'Lanjut Input Manual (Lengkapi Foto)',
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _hasConflict
+                                ? 'Konflik Terdeteksi! (${_conflictingRentals.length} jadwal tabrakan)'
+                                : 'Bebas Konflik! Kostum tersedia.',
                             style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                              fontSize: 14,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: _hasConflict ? AppColors.dangerRose : const Color(0xFF289868),
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(height: 12),
+                  // Summary card
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFE5E5EA), width: 0.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildDetailRow('Nama Penyewa', _parsedData!.fullName ?? '-'),
+                        _buildDetailRow('No HP', _parsedData!.normalizedPhone ?? _parsedData!.phone ?? '-'),
+                        _buildDetailRow('Alamat', _parsedData!.address ?? '-'),
+                        _buildDetailRow('No HP Ortu / Keluarga', _parsedData!.parentPhone ?? '-'),
+                        _buildDetailRow('Akun Sosmed', _parsedData!.socialMedia ?? '-'),
+                        _buildDetailRow('Kostum', _parsedData!.costumeName ?? '-'),
+                        _buildDetailRow(
+                          'Tanggal',
+                          _parsedData!.startDate != null
+                              ? '${DateFormat('d MMM yyyy').format(_parsedData!.startDate!)} - ${DateFormat('d MMM yyyy').format(_parsedData!.endDate!)} (${_parsedData!.rentalDurationDays ?? 3} hari)'
+                              : (_parsedData!.datesRaw ?? '-'),
+                        ),
+                        _buildDetailRow('Keperluan', _parsedData!.purpose ?? '-'),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF3E0),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(color: const Color(0xFFFF9500).withValues(alpha: 0.4)),
+                    ),
+                    child: const Row(
+                      children: [
+                        Icon(CupertinoIcons.camera_fill, size: 14, color: Color(0xFFFF9500)),
+                        SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            'Foto KTP & Selfie+KTP belum bisa di-paste. Akan diinput di langkah berikutnya.',
+                            style: TextStyle(fontSize: 11, color: Color(0xFF8E5A00)),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  CupertinoButton(
+                    color: AppColors.primaryPink,
+                    onPressed: _continueToManual,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    borderRadius: BorderRadius.circular(12),
+                    child: const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(CupertinoIcons.arrow_right_circle_fill, size: 16, color: Colors.white),
+                        SizedBox(width: 6),
+                        Text(
+                          'Lanjut Input Manual (Lengkapi Foto)',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+                ],
               ),
             ),
-          ],
-        ],
+          ),
+        ),
       ),
     );
   }

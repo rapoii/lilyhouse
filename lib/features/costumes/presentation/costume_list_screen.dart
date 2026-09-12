@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/header_action_button.dart';
 import '../data/costume_repository.dart';
 import '../domain/costume.dart';
 import 'widgets/costume_card.dart';
@@ -194,39 +195,10 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
         ),
         centerTitle: false,
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 14.0),
-            child: CupertinoButton(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              minimumSize: Size.zero,
-              onPressed: _showAddCostumeSheet,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF1F4),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      CupertinoIcons.add,
-                      size: 15,
-                      color: AppColors.primaryPink,
-                    ),
-                    SizedBox(width: 5),
-                    Text(
-                      'Tambah',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryPink,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          HeaderActionButton(
+            label: 'Tambah',
+            icon: CupertinoIcons.add,
+            onPressed: _showAddCostumeSheet,
           ),
         ],
       ),

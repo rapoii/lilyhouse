@@ -4,6 +4,8 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/apple_sliding_segmented_control.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
+import '../../../core/widgets/header_action_button.dart';
+import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../data/installment_repository.dart';
@@ -59,6 +61,23 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
     }
   }
 
+  void _showFormAlert(BuildContext ctx, String title, String message) {
+    showCupertinoDialog<void>(
+      context: ctx,
+      builder: (alertCtx) => CupertinoAlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(alertCtx),
+            child: const Text('Oke', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showAddInstallmentDialog() {
     final nameController = TextEditingController();
     final storeController = TextEditingController();
@@ -103,7 +122,18 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                         final name = nameController.text.trim();
                         final cost = double.tryParse(costController.text.trim()) ?? 0.0;
                         final dp = double.tryParse(dpController.text.trim()) ?? 0.0;
-                        if (name.isEmpty || cost <= 0) return;
+                        if (name.isEmpty) {
+                          _showFormAlert(ctx, 'Nama Wajib Diisi', 'Mohon masukkan nama barang atau kostum.');
+                          return;
+                        }
+                        if (cost <= 0) {
+                          _showFormAlert(ctx, 'Total Harga Tidak Valid', 'Mohon masukkan total harga yang valid (lebih dari 0).');
+                          return;
+                        }
+                        if (dp > cost) {
+                          _showFormAlert(ctx, 'DP Melebihi Total', 'Jumlah DP awal tidak boleh melebihi total harga.');
+                          return;
+                        }
 
                         final id = 'inst_${DateTime.now().millisecondsSinceEpoch}';
                         final remaining = (cost - dp).clamp(0.0, cost);
@@ -133,6 +163,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                         if (!ctx.mounted) return;
                         Navigator.of(ctx).pop();
                         _loadInstallments();
+                        IosToast.show(context, 'Cicilan "$name" berhasil ditambahkan');
                       },
                       child: const Text('Simpan', style: AppTypography.actionButton),
                     ),
@@ -149,29 +180,51 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                           margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                           children: [
                             CupertinoListTile(
-                              key: const Key('installment_name_input'),
                               leading: const SquircleIcon(icon: CupertinoIcons.sparkles, color: AppColors.primaryPink),
-                              title: CupertinoTextField(
-                                controller: nameController,
-                                placeholder: 'Nama barang / kostum',
-                                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
-                                style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                decoration: null,
-                                textInputAction: TextInputAction.next,
+                              title: Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 90,
+                                    child: Text('Nama', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                                  ),
+                                  Expanded(
+                                    child: CupertinoTextField(
+                                      key: const Key('installment_name_input'),
+                                      controller: nameController,
+                                      textAlign: TextAlign.right,
+                                      placeholder: 'Nama barang / kostum',
+                                      placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                      style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      decoration: null,
+                                      textInputAction: TextInputAction.next,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             CupertinoListTile(
-                              key: const Key('installment_store_input'),
                               leading: const SquircleIcon(icon: CupertinoIcons.bag_fill, color: Color(0xFF5856D6)),
-                              title: CupertinoTextField(
-                                controller: storeController,
-                                placeholder: 'Nama toko / seller',
-                                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
-                                style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                decoration: null,
-                                textInputAction: TextInputAction.next,
+                              title: Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 90,
+                                    child: Text('Toko', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                                  ),
+                                  Expanded(
+                                    child: CupertinoTextField(
+                                      key: const Key('installment_store_input'),
+                                      controller: storeController,
+                                      textAlign: TextAlign.right,
+                                      placeholder: 'Nama toko / seller',
+                                      placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                      style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      decoration: null,
+                                      textInputAction: TextInputAction.next,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -182,29 +235,52 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                           margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                           children: [
                             CupertinoListTile(
-                              key: const Key('installment_cost_input'),
                               leading: const SquircleIcon(icon: CupertinoIcons.money_dollar_circle_fill, color: Color(0xFFFF9500)),
-                              title: CupertinoTextField(
-                                controller: costController,
-                                placeholder: 'Total harga (Rp)',
-                                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
-                                style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                                keyboardType: TextInputType.number,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                decoration: null,
+                              title: Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 90,
+                                    child: Text('Total', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                                  ),
+                                  Expanded(
+                                    child: CupertinoTextField(
+                                      key: const Key('installment_cost_input'),
+                                      controller: costController,
+                                      textAlign: TextAlign.right,
+                                      placeholder: 'Total harga (Rp)',
+                                      placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                      style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                                      keyboardType: TextInputType.number,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      decoration: null,
+                                      textInputAction: TextInputAction.next,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             CupertinoListTile(
-                              key: const Key('installment_dp_input'),
                               leading: const SquircleIcon(icon: CupertinoIcons.creditcard_fill, color: Color(0xFF34C759)),
-                              title: CupertinoTextField(
-                                controller: dpController,
-                                placeholder: 'DP awal (Rp)',
-                                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
-                                style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                                keyboardType: TextInputType.number,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                decoration: null,
+                              title: Row(
+                                children: [
+                                  const SizedBox(
+                                    width: 90,
+                                    child: Text('DP Awal', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                                  ),
+                                  Expanded(
+                                    child: CupertinoTextField(
+                                      key: const Key('installment_dp_input'),
+                                      controller: dpController,
+                                      textAlign: TextAlign.right,
+                                      placeholder: 'DP awal (Rp)',
+                                      placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                      style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                                      keyboardType: TextInputType.number,
+                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                      decoration: null,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
                             CupertinoListTile(
@@ -299,35 +375,11 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
           style: AppTypography.largeTitle,
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8.0),
-            child: CupertinoButton(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              key: const Key('add_installment_button'),
-              onPressed: _showAddInstallmentDialog,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFFF1F4),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(CupertinoIcons.add, size: 15, color: AppColors.primaryPink),
-                    SizedBox(width: 5),
-                    Text(
-                      'Tambah',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.primaryPink,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+          HeaderActionButton(
+            buttonKey: const Key('add_installment_button'),
+            label: 'Tambah',
+            icon: CupertinoIcons.add,
+            onPressed: _showAddInstallmentDialog,
           ),
         ],
       ),

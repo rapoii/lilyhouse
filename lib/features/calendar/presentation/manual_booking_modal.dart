@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
+import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../../costumes/data/costume_repository.dart';
@@ -347,22 +348,20 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   }
 
   void _showSuccessSnack() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Booking ${_selectedCostume!.name} tersimpan'),
-        backgroundColor: AppColors.successMint,
-        behavior: SnackBarBehavior.floating,
-      ),
+    IosToast.show(
+      context,
+      'Booking ${_selectedCostume!.name} tersimpan',
+      icon: CupertinoIcons.checkmark_circle_fill,
+      iconColor: AppColors.successMint,
     );
   }
 
   void _showErrorSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(msg),
-        backgroundColor: AppColors.dangerRose,
-        behavior: SnackBarBehavior.floating,
-      ),
+    IosToast.show(
+      context,
+      msg,
+      icon: CupertinoIcons.exclamationmark_circle_fill,
+      iconColor: AppColors.dangerRose,
     );
   }
 

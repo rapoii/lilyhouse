@@ -170,7 +170,22 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
-        title: const Text('Detail & Riwayat Cicilan'),
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          inst.itemName,
+          style: const TextStyle(
+            color: AppColors.textDark,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        leading: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () => Navigator.maybePop(context),
+          child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
+        ),
       ),
       body: ListView(
         padding: const EdgeInsets.all(20.0),
@@ -340,9 +355,10 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           else
             SizedBox(
               width: double.infinity,
-              child: CupertinoButton.filled(
+              child: CupertinoButton(
+                color: AppColors.primaryPink,
                 padding: const EdgeInsets.symmetric(vertical: 12),
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(12),
                 onPressed: _showAddPaymentDialog,
                 child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
@@ -400,7 +416,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                             color: AppColors.softPinkBg,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(Icons.check_circle_rounded, color: AppColors.primaryPink, size: 20),
+                          child: const Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.primaryPink, size: 20),
                         ),
                         const SizedBox(width: 12),
                         Column(
@@ -436,13 +452,15 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                             color: AppColors.textMuted,
                           ),
                         ),
-                        const SizedBox(width: 4),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline_rounded, size: 18, color: AppColors.dangerRose),
+                        const SizedBox(width: 8),
+                        CupertinoButton(
+                          padding: EdgeInsets.zero,
+                          minimumSize: Size.zero,
                           onPressed: () async {
                             await widget.repository.deletePaymentLog(log.id, widget.installmentId);
                             _fetchDetails();
                           },
+                          child: const Icon(CupertinoIcons.trash, size: 17, color: AppColors.dangerRose),
                         ),
                       ],
                     ),
