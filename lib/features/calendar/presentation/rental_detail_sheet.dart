@@ -231,6 +231,7 @@ class RentalDetailSheet extends StatelessWidget {
         child: CupertinoPageScaffold(
           backgroundColor: AppColors.background,
           navigationBar: CupertinoNavigationBar(
+            automaticallyImplyLeading: false,
             backgroundColor: AppColors.background,
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             middle: const Text('Detail Rental', style: AppTypography.navTitle),
