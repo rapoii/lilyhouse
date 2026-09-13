@@ -18,6 +18,7 @@ import '../../rentals/domain/rental.dart';
 import '../domain/booking_conflict_engine.dart';
 import 'entry_method_card.dart';
 import 'manual_booking_modal.dart';
+import 'rental_detail_sheet.dart';
 
 class CalendarScreen extends StatefulWidget {
   final IRentalRepository? rentalRepository;
@@ -484,76 +485,16 @@ class _RentalSlotCard extends StatelessWidget {
     this.onRentalUpdated,
   });
 
-  void _showRentalActionSheet(BuildContext context) {
-    final custName = customer?.fullName ?? 'Penyewa';
-    final custPhone = customer?.phone ?? '-';
-    final custAddr = customer?.address ?? '-';
-    final custSosmed = customer?.socialMedia ?? '-';
-    final costName = costume?.name ?? rental.costumeId;
-
+  void _showRentalDetailSheet(BuildContext context, bool hasConflict) {
     showCupertinoModalPopup<void>(
       context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(costName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        message: Text('Penyewa: $custName ($custPhone)\nAlamat: $custAddr\nSosmed: $custSosmed\nTotal Biaya: Rp ${rental.totalPrice.toInt()}'),
-        actions: [
-          if (rental.itemStatus != RentalItemStatus.rented &&
-              rental.itemStatus != RentalItemStatus.returned &&
-              rental.itemStatus != RentalItemStatus.completed)
-            CupertinoActionSheetAction(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                if (repository != null) {
-                  final updated = rental.copyWith(itemStatus: RentalItemStatus.rented);
-                  await repository!.updateRental(updated);
-                  onRentalUpdated?.call();
-                }
-              },
-              child: const Text('Tandai Sedang Disewa', style: TextStyle(color: Color(0xFF289868), fontSize: 16)),
-            ),
-          if (rental.itemStatus != RentalItemStatus.returned &&
-              rental.itemStatus != RentalItemStatus.completed)
-            CupertinoActionSheetAction(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                if (repository != null) {
-                  final updated = rental.copyWith(itemStatus: RentalItemStatus.returned);
-                  await repository!.updateRental(updated);
-                  onRentalUpdated?.call();
-                }
-              },
-              child: const Text('Tandai Sudah Dikembalikan', style: TextStyle(color: AppColors.primaryPink, fontSize: 16)),
-            ),
-          if (rental.paymentStatus != RentalPaymentStatus.paid)
-            CupertinoActionSheetAction(
-              onPressed: () async {
-                Navigator.pop(ctx);
-                if (repository != null) {
-                  final updated = rental.copyWith(paymentStatus: RentalPaymentStatus.paid);
-                  await repository!.updateRental(updated);
-                  onRentalUpdated?.call();
-                }
-              },
-              child: const Text('Tandai Pembayaran Lunas', style: TextStyle(color: Color(0xFF34C759), fontSize: 16)),
-            ),
-          if (rental.itemStatus != RentalItemStatus.cancelled)
-            CupertinoActionSheetAction(
-              isDestructiveAction: true,
-              onPressed: () async {
-                Navigator.pop(ctx);
-                if (repository != null) {
-                  final updated = rental.copyWith(itemStatus: RentalItemStatus.cancelled);
-                  await repository!.updateRental(updated);
-                  onRentalUpdated?.call();
-                }
-              },
-              child: const Text('Batalkan Booking'),
-            ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Tutup', style: TextStyle(fontWeight: FontWeight.w600)),
-        ),
+      builder: (ctx) => RentalDetailSheet(
+        rental: rental,
+        customer: customer,
+        costume: costume,
+        hasConflict: hasConflict,
+        repository: repository,
+        onRentalUpdated: onRentalUpdated,
       ),
     );
   }
@@ -568,7 +509,7 @@ class _RentalSlotCard extends StatelessWidget {
     final hasConflict = BookingConflictEngine.hasConflict(allRentals, rental);
 
     return GestureDetector(
-      onTap: () => _showRentalActionSheet(context),
+      onTap: () => _showRentalDetailSheet(context, hasConflict),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
