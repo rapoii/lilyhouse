@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/ios_toast.dart';
+import '../../../core/widgets/photo_source_picker_sheet.dart';
 import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../../costumes/data/costume_repository.dart';
@@ -181,37 +182,11 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   }
 
   void _showImagePickerActionSheet(bool isKtp) {
-    showCupertinoModalPopup<void>(
+    PhotoSourcePickerSheet.show(
       context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text(isKtp ? 'Pilih Foto KTP / KIA' : 'Pilih Foto Selfie + KTP'),
-        message: Text(
-          isKtp
-              ? 'Ambil foto langsung atau pilih dari galeri'
-              : 'Selfie sambil pegang kartu identitas',
-        ),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _pickImage(ImageSource.camera, isKtp);
-            },
-            child: const Text('Ambil dari Kamera'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _pickImage(ImageSource.gallery, isKtp);
-            },
-            child: const Text('Pilih dari Galeri Foto'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Batal'),
-        ),
-      ),
+      title: isKtp ? 'Foto KTP / KIA' : 'Foto Selfie + KTP',
+      onCamera: () => _pickImage(ImageSource.camera, isKtp),
+      onGallery: () => _pickImage(ImageSource.gallery, isKtp),
     );
   }
 

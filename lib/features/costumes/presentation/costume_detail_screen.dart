@@ -6,7 +6,10 @@ import '../data/costume_repository.dart';
 import '../domain/costume.dart';
 import '../domain/accessory.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/ios_toast.dart';
 import 'add_costume_sheet.dart';
+import 'widgets/add_accessory_sheet.dart';
+import 'widgets/change_accessory_condition_sheet.dart';
 
 class CostumeDetailScreen extends StatefulWidget {
   final Costume costume;
@@ -408,171 +411,51 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
   }
 
   void _showChangeConditionSheet(Accessory acc) {
-    showCupertinoModalPopup<void>(
+    ChangeAccessoryConditionSheet.show(
       context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text('Kondisi Aksesori: ${acc.name}'),
-        message: const Text('Pilih status kondisi aksesori saat ini:'),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await _repository.updateAccessory(acc.copyWith(conditionStatus: AccessoryCondition.good));
-              await _loadAccessories();
-            },
-            child: const Text('Baik', style: TextStyle(color: Color(0xFF1E824C), fontWeight: FontWeight.w600)),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await _repository.updateAccessory(acc.copyWith(conditionStatus: AccessoryCondition.minorDamage));
-              await _loadAccessories();
-            },
-            child: const Text('Rusak Ringan', style: TextStyle(color: Color(0xFFD97706), fontWeight: FontWeight.w600)),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await _repository.updateAccessory(acc.copyWith(conditionStatus: AccessoryCondition.needsRepair));
-              await _loadAccessories();
-            },
-            child: const Text('Perlu Servis', style: TextStyle(color: AppColors.dangerRose, fontWeight: FontWeight.w600)),
-          ),
-          CupertinoActionSheetAction(
-            isDestructiveAction: true,
-            onPressed: () async {
-              Navigator.pop(ctx);
-              await _repository.updateAccessory(acc.copyWith(conditionStatus: AccessoryCondition.lost));
-              await _loadAccessories();
-            },
-            child: const Text('Hilang'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Batal'),
-        ),
-      ),
+      accessory: acc,
+      onSelectCondition: (newCondition) async {
+        await _repository.updateAccessory(acc.copyWith(conditionStatus: newCondition));
+        await _loadAccessories();
+      },
     );
   }
 
   void _showAddAccessoryDialog() {
-    final controller = TextEditingController();
-    AccessoryCondition selectedCondition = AccessoryCondition.good;
-
-    showCupertinoDialog<void>(
+    AddAccessorySheet.show(
       context: context,
-      builder: (ctx) => StatefulBuilder(
-        builder: (context, setDialogState) => CupertinoAlertDialog(
-          title: const Text('Tambah Aksesori'),
-          content: Padding(
-            padding: const EdgeInsets.only(top: 12),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                CupertinoTextField(
-                  controller: controller,
-                  placeholder: 'Contoh: Wig Stylist, Senjata Prop, Tiara',
-                  autofocus: true,
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  padding: const EdgeInsets.all(10),
-                ),
-                const SizedBox(height: 12),
-                const Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Kondisi Aksesori:',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textMuted),
-                  ),
-                ),
-                const SizedBox(height: 6),
-                CupertinoSlidingSegmentedControl<AccessoryCondition>(
-                  groupValue: selectedCondition,
-                  children: const {
-                    AccessoryCondition.good: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      child: Text('Baik', style: TextStyle(fontSize: 11)),
-                    ),
-                    AccessoryCondition.minorDamage: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      child: Text('Ringan', style: TextStyle(fontSize: 11)),
-                    ),
-                    AccessoryCondition.needsRepair: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      child: Text('Servis', style: TextStyle(fontSize: 11)),
-                    ),
-                    AccessoryCondition.lost: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
-                      child: Text('Hilang', style: TextStyle(fontSize: 11)),
-                    ),
-                  },
-                  onValueChanged: (val) {
-                    if (val != null) {
-                      setDialogState(() => selectedCondition = val);
-                    }
-                  },
-                ),
-              ],
-            ),
-          ),
-          actions: [
-            CupertinoDialogAction(
-              onPressed: () => Navigator.pop(ctx),
-              isDestructiveAction: true,
-              child: const Text('Batal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
-            ),
-            CupertinoDialogAction(
-              isDefaultAction: true,
-              onPressed: () async {
-                final value = controller.text.trim();
-                if (value.isNotEmpty) {
-                  final acc = Accessory(
-                    id: 'acc_${DateTime.now().millisecondsSinceEpoch}',
-                    name: value,
-                    type: 'Aksesori & Properti',
-                    conditionStatus: selectedCondition,
-                    relatedCostumeId: _costume.id,
-                  );
-                  await _repository.addAccessory(acc);
-                  await _loadAccessories();
-                }
-                if (mounted && Navigator.canPop(ctx)) {
-                  Navigator.pop(ctx);
-                }
-              },
-              child: const Text('Tambah', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
-            ),
-          ],
-        ),
-      ),
+      costumeId: _costume.id,
+      onSaveAccessory: (acc) async {
+        await _repository.addAccessory(acc);
+        await _loadAccessories();
+      },
     );
   }
 
   void _confirmDeleteAccessory(String id, String name) {
-    showCupertinoModalPopup<void>(
+    showCupertinoDialog<void>(
       context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: Text('Hapus Aksesori "$name"?'),
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Hapus Aksesori?'),
+        content: Text('Apakah kamu yakin ingin menghapus "$name" dari kostum ini?'),
         actions: [
-          CupertinoActionSheetAction(
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
               Navigator.pop(ctx);
               await _repository.deleteAccessory(id);
               await _loadAccessories();
+              if (mounted) {
+                IosToast.show(context, 'Aksesori berhasil dihapus');
+              }
             },
-            child: const Text('Hapus Aksesori'),
+            child: const Text('Hapus'),
           ),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Batal'),
-        ),
       ),
     );
   }

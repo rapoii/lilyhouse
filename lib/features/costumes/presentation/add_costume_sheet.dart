@@ -4,11 +4,13 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
+import '../../../core/widgets/photo_source_picker_sheet.dart';
 import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../data/costume_repository.dart';
 import '../domain/accessory.dart';
 import '../domain/costume.dart';
+import 'widgets/add_accessory_sheet.dart';
 
 /// Authentic 10/10 Apple HIG Inset-Grouped Modal Sheet for adding costumes & accessories.
 class AddCostumeSheet extends StatefulWidget {
@@ -121,74 +123,20 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
   }
 
   void _showImagePickerActionSheet() {
-    showCupertinoModalPopup<void>(
+    PhotoSourcePickerSheet.show(
       context: context,
-      builder: (ctx) => CupertinoActionSheet(
-        title: const Text('Pilih Foto Kostum'),
-        message: const Text('Ambil foto langsung atau pilih dari galeri'),
-        actions: [
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _pickImage(ImageSource.camera);
-            },
-            child: const Text('Ambil dari Kamera'),
-          ),
-          CupertinoActionSheetAction(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _pickImage(ImageSource.gallery);
-            },
-            child: const Text('Pilih dari Galeri Foto'),
-          ),
-        ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Batal'),
-        ),
-      ),
+      title: 'Pilih Foto Kostum',
+      onCamera: () => _pickImage(ImageSource.camera),
+      onGallery: () => _pickImage(ImageSource.gallery),
     );
   }
 
   void _showAddAccessoryDialog() {
-    final controller = TextEditingController();
-    showCupertinoDialog<void>(
+    AddAccessorySheet.show(
       context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Aksesori Baru'),
-        content: Padding(
-          padding: const EdgeInsets.only(top: 12),
-          child: CupertinoTextField(
-            controller: controller,
-            placeholder: 'Contoh: Wig Stylist, Tiara, dll',
-            autofocus: true,
-            decoration: BoxDecoration(
-              color: AppColors.background,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            padding: const EdgeInsets.all(10),
-          ),
-        ),
-        actions: [
-          CupertinoDialogAction(
-            onPressed: () => Navigator.pop(ctx),
-            isDestructiveAction: true,
-            child: const Text('Batal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () {
-              final value = controller.text.trim();
-              if (value.isNotEmpty) {
-                setState(() => _accessories.add(value));
-              }
-              Navigator.pop(ctx);
-            },
-            child: const Text('Tambah', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
-          ),
-        ],
-      ),
+      onAddNameOnly: (name) {
+        setState(() => _accessories.add(name));
+      },
     );
   }
 

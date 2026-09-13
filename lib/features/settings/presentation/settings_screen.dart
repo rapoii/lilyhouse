@@ -338,16 +338,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   void _showClearCacheDialog() {
     HapticFeedback.selectionClick();
-    showCupertinoModalPopup<void>(
+    showCupertinoDialog<void>(
       context: context,
-      builder: (ctx) => CupertinoActionSheet(
+      builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Bersihkan Cache Gambar?'),
-        message: const Text(
+        content: const Text(
           'File cache thumbnail dan memori sementara akan dibersihkan. '
           'Data kostum, foto tersimpan, dan catatan booking tidak akan terhapus.',
         ),
         actions: [
-          CupertinoActionSheetAction(
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
+          CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
               Navigator.pop(ctx);
@@ -369,11 +373,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             child: const Text('Bersihkan Cache'),
           ),
         ],
-        cancelButton: CupertinoActionSheetAction(
-          isDefaultAction: true,
-          onPressed: () => Navigator.pop(ctx),
-          child: const Text('Batal'),
-        ),
       ),
     );
   }
@@ -441,7 +440,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.66',
+                    'Versi 1.0.67',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -897,7 +896,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.66', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.67', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),
