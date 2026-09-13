@@ -601,6 +601,46 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.68 (BUILD 103) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.person_badge_plus_fill,
+                        color: Color(0xFF007AFF),
+                      ),
+                      title: Text('Dokumen Identitas & Aksi Salin', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Preview foto KTP dan selfie jaminan dengan viewer zoom/pinch interaktif, serta tombol circular copy HIG.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.square_stack_3d_up_fill,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: Text('Standardisasi Modal Sheet HIG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Semua picker foto, kondisi aksesori, dan detail rental kini 100% menggunakan Inset Grouped card modern.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.arrow_2_circlepath_circle_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Full Two-Way Auto Sync', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Push pending queue dan Pull data cloud otomatis secara reaktif saat online tanpa tombol manual.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
                   header: const Text('VERSI 1.0.55 (BUILD 77)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -920,7 +960,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: Color(0xFFFF9500),
                 ),
                 title: const Text('Catatan Rilis', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                subtitle: const Text('Pembaruan fitur di build 77', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                subtitle: const Text('Pembaruan fitur di build 103', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showChangelogSheet,
               ),
