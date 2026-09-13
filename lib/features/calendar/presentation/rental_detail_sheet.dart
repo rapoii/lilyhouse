@@ -60,6 +60,235 @@ class RentalDetailSheet extends StatelessWidget {
     );
   }
 
+  Widget _buildThumbnailImage(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, _) => const Center(
+          child: Icon(CupertinoIcons.photo, size: 16, color: Color(0xFF8E8E93)),
+        ),
+      );
+    }
+    final cleanPath = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
+    final file = File(cleanPath);
+    if (file.existsSync()) {
+      return Image.file(
+        file,
+        fit: BoxFit.cover,
+        errorBuilder: (_, __, _) => const Center(
+          child: Icon(CupertinoIcons.photo, size: 16, color: Color(0xFF8E8E93)),
+        ),
+      );
+    }
+    return const Center(
+      child: Icon(CupertinoIcons.photo, size: 16, color: Color(0xFF8E8E93)),
+    );
+  }
+
+  Widget _buildFullPhotoView(String path) {
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return Image.network(
+        path,
+        fit: BoxFit.contain,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return const Center(
+            child: CupertinoActivityIndicator(color: Colors.white, radius: 14),
+          );
+        },
+        errorBuilder: (_, __, _) => const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(CupertinoIcons.exclamationmark_triangle, color: Colors.white54, size: 42),
+              SizedBox(height: 10),
+              Text('Gagal memuat gambar dari URL', style: TextStyle(color: Colors.white70, fontSize: 13)),
+            ],
+          ),
+        ),
+      );
+    }
+    final cleanPath = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
+    final file = File(cleanPath);
+    if (file.existsSync()) {
+      return Image.file(
+        file,
+        fit: BoxFit.contain,
+        errorBuilder: (_, __, _) => const Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(CupertinoIcons.exclamationmark_triangle, color: Colors.white54, size: 42),
+              SizedBox(height: 10),
+              Text('Format gambar tidak didukung', style: TextStyle(color: Colors.white70, fontSize: 13)),
+            ],
+          ),
+        ),
+      );
+    }
+    return const Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(CupertinoIcons.photo_on_rectangle, color: Colors.white54, size: 44),
+          SizedBox(height: 10),
+          Text(
+            'File lokal tidak ditemukan di penyimpanan perangkat ini.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.white70, fontSize: 13),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPhotoPreviewModal(
+    BuildContext context, {
+    required String title,
+    required String photoPath,
+  }) {
+    HapticFeedback.selectionClick();
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => DraggableSheetContainer(
+        initialHeightFraction: 0.88,
+        maxHeightFraction: 0.96,
+        backgroundColor: const Color(0xFF1C1C1E),
+        onDismissed: () => Navigator.of(ctx).pop(),
+        builder: (sheetCtx) => CupertinoPageScaffold(
+          backgroundColor: const Color(0xFF1C1C1E),
+          navigationBar: CupertinoNavigationBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: const Color(0xFF2C2C2E),
+            border: const Border(bottom: BorderSide(color: Color(0xFF38383A), width: 0.5)),
+            middle: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text(
+                'Tutup',
+                style: TextStyle(
+                  color: AppColors.primaryPink,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: InteractiveViewer(
+                      minScale: 0.8,
+                      maxScale: 5.0,
+                      child: _buildFullPhotoView(photoPath),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  color: const Color(0xFF2C2C2E),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(CupertinoIcons.zoom_in, size: 14, color: Color(0xFF8E8E93)),
+                      SizedBox(width: 6),
+                      Text(
+                        'Cubit layar untuk zoom & geser foto',
+                        style: TextStyle(
+                          color: Color(0xFF8E8E93),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDocumentTile({
+    required BuildContext context,
+    required String title,
+    required IconData icon,
+    required Color iconColor,
+    required String? photoPath,
+    required String emptyLabel,
+  }) {
+    final hasPhoto = photoPath != null && photoPath.trim().isNotEmpty;
+
+    return CupertinoListTile(
+      leading: SquircleIcon(
+        icon: icon,
+        color: iconColor,
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+      ),
+      subtitle: Text(
+        hasPhoto ? 'Tersimpan • Ketuk untuk melihat foto' : emptyLabel,
+        style: TextStyle(
+          fontSize: 12,
+          color: hasPhoto ? const Color(0xFF34C759) : const Color(0xFF8E8E93),
+          fontWeight: hasPhoto ? FontWeight.w500 : FontWeight.normal,
+        ),
+      ),
+      trailing: hasPhoto
+          ? Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 34,
+                  height: 34,
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFE5E5EA), width: 0.8),
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7.2),
+                    child: _buildThumbnailImage(photoPath),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                const Icon(
+                  CupertinoIcons.chevron_right,
+                  size: 14,
+                  color: Color(0xFFC7C7CC),
+                ),
+              ],
+            )
+          : const Text(
+              'Tidak ada',
+              style: TextStyle(
+                fontSize: 13,
+                color: Color(0xFF8E8E93),
+              ),
+            ),
+      onTap: hasPhoto
+          ? () => _showPhotoPreviewModal(context, title: title, photoPath: photoPath)
+          : () {
+              IosToast.show(context, '$title belum diunggah');
+            },
+    );
+  }
+
   Widget _buildItemStatusBadge(RentalItemStatus status) {
     Color bg;
     Color fg;
@@ -447,18 +676,36 @@ class RentalDetailSheet extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                       ),
                       subtitle: const Text('Nomor WhatsApp / HP', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                      onTap: (custPhone != '-')
+                          ? () {
+                              HapticFeedback.lightImpact();
+                              Clipboard.setData(ClipboardData(text: custPhone));
+                              IosToast.show(context, 'Nomor HP disalin ke clipboard 📋');
+                            }
+                          : null,
                       trailing: (custPhone != '-')
                           ? CupertinoButton(
-                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                              color: AppColors.softPinkBg,
-                              borderRadius: BorderRadius.circular(8),
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(32, 32),
                               onPressed: () {
+                                HapticFeedback.lightImpact();
                                 Clipboard.setData(ClipboardData(text: custPhone));
                                 IosToast.show(context, 'Nomor HP disalin ke clipboard 📋');
                               },
-                              child: const Text(
-                                'Salin',
-                                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPink),
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.softPinkBg,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    CupertinoIcons.doc_on_doc,
+                                    size: 15,
+                                    color: AppColors.primaryPink,
+                                  ),
+                                ),
                               ),
                             )
                           : null,
@@ -474,17 +721,33 @@ class RentalDetailSheet extends StatelessWidget {
                           style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                         ),
                         subtitle: const Text('Nomor HP Orang Tua', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        onTap: () {
+                          HapticFeedback.lightImpact();
+                          Clipboard.setData(ClipboardData(text: customer!.parentPhone!));
+                          IosToast.show(context, 'Nomor HP ortu disalin 📋');
+                        },
                         trailing: CupertinoButton(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          color: AppColors.softPinkBg,
-                          borderRadius: BorderRadius.circular(8),
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(32, 32),
                           onPressed: () {
+                            HapticFeedback.lightImpact();
                             Clipboard.setData(ClipboardData(text: customer!.parentPhone!));
                             IosToast.show(context, 'Nomor HP ortu disalin 📋');
                           },
-                          child: const Text(
-                            'Salin',
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPink),
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            decoration: const BoxDecoration(
+                              color: AppColors.softPinkBg,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Center(
+                              child: Icon(
+                                CupertinoIcons.doc_on_doc,
+                                size: 15,
+                                color: AppColors.primaryPink,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -513,7 +776,40 @@ class RentalDetailSheet extends StatelessWidget {
                   ],
                 ),
 
-                // 3. Billing & Payment Section
+                // 3. Identity & Verification Documents
+                CupertinoListSection.insetGrouped(
+                  header: const Text(
+                    'DOKUMEN IDENTITAS & JAMINAN',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF8E8E93),
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  children: [
+                    _buildDocumentTile(
+                      context: context,
+                      title: 'Foto KTP / Identitas',
+                      icon: CupertinoIcons.person_badge_plus_fill,
+                      iconColor: const Color(0xFF007AFF),
+                      photoPath: customer?.ktpPhotoUrl,
+                      emptyLabel: 'Belum ada foto KTP terunggah',
+                    ),
+                    _buildDocumentTile(
+                      context: context,
+                      title: 'Foto Selfie + Identitas',
+                      icon: CupertinoIcons.camera_viewfinder,
+                      iconColor: const Color(0xFFAF52DE),
+                      photoPath: customer?.selfieKtpUrl,
+                      emptyLabel: 'Belum ada foto selfie terunggah',
+                    ),
+                  ],
+                ),
+
+                // 4. Billing & Payment Section
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'RINCIAN BIAYA & PEMBAYARAN',

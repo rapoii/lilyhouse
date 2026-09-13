@@ -87,6 +87,8 @@ void main() {
     parentPhone: '08987654321',
     address: 'Jl. Merdeka No. 10, Jakarta',
     socialMedia: '@alyacosplay',
+    ktpPhotoUrl: 'https://example.com/ktp.jpg',
+    selfieKtpUrl: 'https://example.com/selfie.jpg',
   );
 
   final testCostume = const Costume(
@@ -171,6 +173,11 @@ void main() {
     expect(find.text('08123456789'), findsOneWidget);
     expect(find.text('@alyacosplay'), findsOneWidget);
     expect(find.text('Jl. Merdeka No. 10, Jakarta'), findsOneWidget);
+
+    // Verify Identity Documents Section
+    expect(find.text('DOKUMEN IDENTITAS & JAMINAN'), findsOneWidget);
+    expect(find.text('Foto KTP / Identitas'), findsOneWidget);
+    expect(find.text('Foto Selfie + Identitas'), findsOneWidget);
 
     // Verify Billing Section
     expect(find.text('RINCIAN BIAYA & PEMBAYARAN'), findsOneWidget);
