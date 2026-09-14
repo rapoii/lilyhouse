@@ -146,7 +146,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
         height: 38,
         width: 38,
         decoration: BoxDecoration(
-          color: hasActiveFilter ? AppColors.softPinkBg : const Color(0xFFE3E3E8),
+          color: hasActiveFilter ? AppColors.softPinkBg : AppColors.background,
           borderRadius: BorderRadius.circular(10.0),
           border: hasActiveFilter ? Border.all(color: AppColors.primaryPink.withValues(alpha: 0.5), width: 1.2) : null,
         ),
@@ -223,35 +223,16 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                 Row(
                   children: [
                     Expanded(
-                      child: Container(
-                        height: 38,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFE3E3E8), // iOS systemGray5/6
-                          borderRadius: BorderRadius.circular(10.0), // Standard Apple iOS search field radius
-                        ),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: _onSearchChanged,
-                          style: const TextStyle(fontSize: 15, color: Colors.black87),
-                          decoration: InputDecoration(
-                            hintText: 'Cari kostum atau seri anime',
-                            hintStyle: const TextStyle(color: Color(0xFF8E8E93), fontSize: 15),
-                            prefixIcon: const Icon(CupertinoIcons.search, color: Color(0xFF8E8E93), size: 18),
-                            suffixIcon: _searchController.text.isNotEmpty
-                                ? CupertinoButton(
-                                    padding: EdgeInsets.zero,
-                                    onPressed: () {
-                                      _searchController.clear();
-                                      _fetchCostumes();
-                                    },
-                                    child: const Icon(CupertinoIcons.clear_circled_solid, color: Color(0xFF8E8E93), size: 18),
-                                  )
-                                : null,
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 9),
-                            isDense: true,
-                          ),
-                        ),
+                      child: CupertinoSearchTextField(
+                        controller: _searchController,
+                        onChanged: _onSearchChanged,
+                        placeholder: 'Cari kostum atau seri anime',
+                        style: const TextStyle(fontSize: 15, color: Colors.black87),
+                        placeholderStyle: const TextStyle(color: Color(0xFF8E8E93), fontSize: 15),
+                        onSuffixTap: () {
+                          _searchController.clear();
+                          _fetchCostumes();
+                        },
                       ),
                     ),
                     const SizedBox(width: 8),
@@ -359,7 +340,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF2F2F7),
+                              color: AppColors.background,
                               borderRadius: BorderRadius.circular(14),
                               border: Border.all(color: const Color(0xFFD1D1D6)),
                             ),

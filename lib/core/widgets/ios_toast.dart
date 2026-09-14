@@ -28,8 +28,10 @@ class IosToast {
         left: 24,
         right: 24,
         child: Center(
-          child: Material(
-            color: Colors.transparent,
+          child: DefaultTextStyle(
+            style: const TextStyle(
+              decoration: TextDecoration.none,
+            ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               decoration: BoxDecoration(

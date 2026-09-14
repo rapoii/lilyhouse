@@ -124,8 +124,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Container(
-                            width: 64,
-                            height: 64,
+                            width: 72,
+                            height: 72,
                             decoration: BoxDecoration(
                               color: const Color(0xFF34C759).withValues(alpha: 0.12),
                               shape: BoxShape.circle,

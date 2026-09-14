@@ -175,7 +175,7 @@ void main() {
     expect(find.text('Makima Suit'), findsOneWidget);
 
     // Search
-    final searchField = find.byType(TextField);
+    final searchField = find.byType(CupertinoSearchTextField);
     await tester.enterText(searchField, 'Makima');
     await tester.pump();
     await tester.pump();
@@ -198,11 +198,15 @@ void main() {
       ),
     );
 
-    await tester.pump();
-    await tester.pump();
+    await tester.pumpAndSettle();
 
     expect(find.text('Makima Suit'), findsWidgets);
     expect(find.text('Chainsaw Man'), findsWidgets);
+
+    // Scroll down to see accessories section
+    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    await tester.pumpAndSettle();
+
     expect(find.text('Tie & Badge'), findsOneWidget);
     expect(find.text('Disewa'), findsWidgets);
     expect(find.text('Ubah'), findsOneWidget);

@@ -135,266 +135,235 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
   Widget build(BuildContext context) {
     final statusData = _getStatusBadgeData(_costume.status);
 
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        title: Text(
-          _costume.name,
-          style: const TextStyle(
-            color: AppColors.textDark,
-            fontWeight: FontWeight.bold,
-            fontSize: 18,
-          ),
+      navigationBar: CupertinoNavigationBar(
+        backgroundColor: AppColors.background,
+        border: const Border(
+          bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
         ),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.maybePop(context),
-          child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
-        ),
-        actions: [
-          CupertinoButton(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            onPressed: _showEditCostumeSheet,
-            child: const Text(
-              'Ubah',
-              style: AppTypography.actionButton,
-            ),
+          child: const Icon(
+            CupertinoIcons.chevron_back,
+            color: AppColors.textDark,
+            size: 24,
           ),
-        ],
+        ),
+        middle: Text(
+          _costume.name,
+          style: AppTypography.navTitle,
+          overflow: TextOverflow.ellipsis,
+        ),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: _showEditCostumeSheet,
+          child: const Text('Ubah', style: AppTypography.actionButton),
+        ),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      child: SafeArea(
+        top: false,
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 40),
           children: [
-            // Image Preview Header Card
-            Container(
-              width: double.infinity,
-              height: 220,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(28.0),
-                border: Border.all(color: AppColors.borderSubtle, width: 1.5),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppColors.pastelPink.withValues(alpha: 0.12),
-                    blurRadius: 16.0,
-                    offset: const Offset(0, 4),
+            // Hero cover photo — Apple card spec: radius 12, hairline 0.5, subtle shadow
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Container(
+                width: double.infinity,
+                height: 220,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: const Color(0xFFE5E5EA),
+                    width: 0.5,
                   ),
-                ],
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(28.0),
-                child: _costume.coverPhoto != null && _costume.coverPhoto!.isNotEmpty
-                    ? _buildCoverPhoto(_costume.coverPhoto!)
-                    : const Center(
-                        child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
-                      ),
-              ),
-            ),
-            const SizedBox(height: 20),
-
-            // Info Card
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20.0),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(24.0),
-                border: Border.all(color: AppColors.borderSubtle, width: 1.5),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              _costume.name,
-                              style: const TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textDark,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              _costume.animeSeries,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textMuted,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: statusData.$1,
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          statusData.$3,
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: statusData.$2,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(color: AppColors.borderSubtle),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      _buildPillAttribute('Ukuran', _costume.size),
-                      _buildPillAttribute(
-                        'Tarif Sewa',
-                        '${_formatCurrency(_costume.rentPrice3Days)} / 3 hari',
-                        highlight: true,
-                      ),
-                    ],
-                  ),
-                  if (_costume.notes != null && _costume.notes!.isNotEmpty) ...[
-                    const SizedBox(height: 16),
-                    const Text(
-                      'Catatan',
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textMuted,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      _costume.notes!,
-                      style: const TextStyle(fontSize: 14, color: AppColors.textDark),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 1),
                     ),
                   ],
-                ],
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: _costume.coverPhoto != null && _costume.coverPhoto!.isNotEmpty
+                      ? _buildCoverPhoto(_costume.coverPhoto!)
+                      : const Center(
+                          child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
+                        ),
+                ),
               ),
             ),
-            const SizedBox(height: 24),
 
-            // Accessories Section
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            // Section 1: INFORMASI KOSTUM (seiras INFORMASI BARANG di Detail Cicilan)
+            CupertinoListSection.insetGrouped(
+              backgroundColor: AppColors.background,
+              header: const Text('INFORMASI KOSTUM'),
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               children: [
-                const Text(
-                  'Aksesori & Properti',
-                  style: TextStyle(
-                    fontSize: 17,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textDark,
+                CupertinoListTile(
+                  leading: const SquircleIcon(
+                    icon: CupertinoIcons.sparkles,
+                    color: AppColors.primaryPink,
+                  ),
+                  title: const Text('Nama Kostum', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                  additionalInfo: Text(
+                    _costume.name,
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
                   ),
                 ),
-                CupertinoButton(
-                  padding: EdgeInsets.zero,
-                  minimumSize: Size.zero,
-                  onPressed: _showAddAccessoryDialog,
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(CupertinoIcons.plus_circle_fill, color: AppColors.primaryPink, size: 20),
-                      SizedBox(width: 4),
-                      Text(
-                        'Tambah',
-                        style: TextStyle(
-                          color: AppColors.primaryPink,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                        ),
+                CupertinoListTile(
+                  leading: const SquircleIcon(
+                    icon: CupertinoIcons.tv,
+                    color: Color(0xFF5856D6),
+                  ),
+                  title: const Text('Serial Anime', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                  additionalInfo: Text(
+                    _costume.animeSeries,
+                    style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                  ),
+                ),
+                CupertinoListTile(
+                  leading: SquircleIcon(
+                    icon: _costume.status == CostumeStatus.available
+                        ? CupertinoIcons.checkmark_seal_fill
+                        : CupertinoIcons.clock_fill,
+                    color: _costume.status == CostumeStatus.available
+                        ? const Color(0xFF34C759)
+                        : AppColors.primaryPink,
+                  ),
+                  title: const Text('Status', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                  trailing: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusData.$1,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      statusData.$3,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                        color: statusData.$2,
                       ),
-                    ],
+                    ),
+                  ),
+                ),
+                CupertinoListTile(
+                  leading: const SquircleIcon(
+                    icon: CupertinoIcons.textformat,
+                    color: Color(0xFF8E8E93),
+                  ),
+                  title: const Text('Ukuran', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                  additionalInfo: Text(
+                    _costume.size,
+                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
 
-            if (_isLoading)
-              const Center(child: CupertinoActivityIndicator(radius: 14))
-            else
-              CupertinoListSection.insetGrouped(
-                margin: EdgeInsets.zero,
-                backgroundColor: Colors.transparent,
-                children: [
-                  if (_accessories.isEmpty && _costume.includedAccessories.isEmpty)
-                    const CupertinoListTile(
-                      title: Text(
-                        'Belum ada aksesori yang dicatat untuk kostum ini.',
-                        style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+            // Section 2: TARIF & DETAIL (seiras RINGKASAN PEMBAYARAN di Detail Cicilan)
+            CupertinoListSection.insetGrouped(
+              backgroundColor: AppColors.background,
+              header: const Text('TARIF & DETAIL'),
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              children: [
+                CupertinoListTile(
+                  leading: const SquircleIcon(
+                    icon: CupertinoIcons.tag_fill,
+                    color: Color(0xFFFF9500),
+                  ),
+                  title: const Text('Tarif Sewa', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                  additionalInfo: Text(
+                    '${_formatCurrency(_costume.rentPrice3Days)} / 3 hari',
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.primaryPink,
+                    ),
+                  ),
+                ),
+                if (_costume.notes != null && _costume.notes!.isNotEmpty)
+                  CupertinoListTile(
+                    leading: const SquircleIcon(
+                      icon: CupertinoIcons.doc_text,
+                      color: Color(0xFF8E8E93),
+                    ),
+                    title: const Text('Catatan', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                    subtitle: Text(
+                      _costume.notes!,
+                      style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                    ),
+                  ),
+              ],
+            ),
+
+            // Section 3: AKSESORI & PROPERTI
+            CupertinoListSection.insetGrouped(
+              backgroundColor: AppColors.background,
+              header: const Text('AKSESORI & PROPERTI'),
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              children: [
+                if (_isLoading)
+                  const CupertinoListTile(
+                    title: Center(child: CupertinoActivityIndicator(radius: 12)),
+                  )
+                else if (_accessories.isEmpty && _costume.includedAccessories.isEmpty)
+                  CupertinoListTile(
+                    title: const Text(
+                      'Belum ada aksesori yang dicatat untuk kostum ini.',
+                      style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                    ),
+                    trailing: const Icon(
+                      CupertinoIcons.plus_circle_fill,
+                      color: AppColors.primaryPink,
+                      size: 22,
+                    ),
+                    onTap: _showAddAccessoryDialog,
+                  )
+                else ...[
+                  // Registered Accessory objects from DB
+                  ..._accessories.map((acc) => _buildAccessoryTile(
+                        acc.name,
+                        acc.type,
+                        acc.conditionStatus,
+                        accessory: acc,
+                      )),
+                  // Legacy strings list in includedAccessories
+                  ..._costume.includedAccessories
+                      .where((accStr) => !_accessories.any((a) => a.name.toLowerCase() == accStr.toLowerCase()))
+                      .map((accStr) => _buildAccessoryTile(
+                            accStr,
+                            'Kelengkapan Set',
+                            AccessoryCondition.good,
+                          )),
+                  CupertinoListTile(
+                    leading: const SquircleIcon(
+                      icon: CupertinoIcons.add,
+                      color: AppColors.primaryPink,
+                    ),
+                    title: const Text(
+                      'Tambah Aksesori',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryPink,
                       ),
-                    )
-                  else ...[
-                    // Registered Accessory objects from DB
-                    ..._accessories.map((acc) => _buildAccessoryTile(
-                          acc.name,
-                          acc.type,
-                          acc.conditionStatus,
-                          accessory: acc,
-                        )),
-                    // Legacy strings list in includedAccessories
-                    ..._costume.includedAccessories
-                        .where((accStr) => !_accessories.any((a) => a.name.toLowerCase() == accStr.toLowerCase()))
-                        .map((accStr) => _buildAccessoryTile(
-                              accStr,
-                              'Kelengkapan Set',
-                              AccessoryCondition.good,
-                            )),
-                  ],
+                    ),
+                    onTap: _showAddAccessoryDialog,
+                  ),
                 ],
-              ),
+              ],
+            ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildPillAttribute(String label, String value, {bool highlight = false}) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            color: AppColors.textMuted,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: highlight ? AppColors.softPinkBg : AppColors.background,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: highlight ? AppColors.primaryPink.withValues(alpha: 0.3) : AppColors.borderSubtle,
-            ),
-          ),
-          child: Text(
-            value,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: highlight ? AppColors.primaryPink : AppColors.textDark,
-            ),
-          ),
-        ),
-      ],
     );
   }
 

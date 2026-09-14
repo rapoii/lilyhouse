@@ -311,7 +311,7 @@ class RentalDetailSheet extends StatelessWidget {
         label = 'Dikirim';
         break;
       case RentalItemStatus.returned:
-        bg = const Color(0xFFE5E5EA);
+        bg = AppColors.softPinkBg.withValues(alpha: 0.5);
         fg = const Color(0xFF3A3A3C);
         label = 'Dikembalikan';
         break;
@@ -371,7 +371,7 @@ class RentalDetailSheet extends StatelessWidget {
         label = 'Belum Lunas';
         break;
       case RentalPaymentStatus.refunded:
-        bg = const Color(0xFFE5E5EA);
+        bg = AppColors.softPinkBg.withValues(alpha: 0.5);
         fg = const Color(0xFF3A3A3C);
         label = 'Dikembalikan';
         break;
@@ -490,7 +490,7 @@ class RentalDetailSheet extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: hasConflict ? AppColors.dangerRose : AppColors.borderSubtle,
                         width: hasConflict ? 1.5 : 0.5,

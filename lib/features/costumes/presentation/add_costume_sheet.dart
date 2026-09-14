@@ -314,7 +314,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
     }
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(16),
+      borderRadius: BorderRadius.circular(12),
       child: Stack(
         fit: StackFit.expand,
         children: [
@@ -397,7 +397,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                       width: double.infinity,
                       decoration: BoxDecoration(
                         color: CupertinoColors.white,
-                        borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: const Color(0xFFE5E5EA), width: 0.5),
                         boxShadow: [
                           BoxShadow(

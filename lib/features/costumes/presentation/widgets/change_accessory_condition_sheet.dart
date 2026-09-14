@@ -70,8 +70,15 @@ class ChangeAccessoryConditionSheet extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: AppColors.borderSubtle, width: 0.5),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 10,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
                     ),
                     child: Row(
                       children: [

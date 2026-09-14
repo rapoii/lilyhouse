@@ -129,48 +129,52 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
+      return const CupertinoPageScaffold(
         backgroundColor: AppColors.background,
-        body: Center(child: CupertinoActivityIndicator(radius: 14)),
+        child: Center(child: CupertinoActivityIndicator(radius: 14)),
       );
     }
 
     final inst = _installment;
     if (inst == null) {
-      return Scaffold(
+      return CupertinoPageScaffold(
         backgroundColor: AppColors.background,
-        appBar: AppBar(title: const Text('Detail Cicilan')),
-        body: const Center(child: Text('Data cicilan tidak ditemukan')),
+        navigationBar: CupertinoNavigationBar(
+          backgroundColor: AppColors.background,
+          middle: const Text('Detail Cicilan', style: AppTypography.navTitle),
+          leading: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => Navigator.maybePop(context),
+            child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
+          ),
+        ),
+        child: const Center(child: Text('Data cicilan tidak ditemukan')),
       );
     }
 
     final percent = (inst.progress * 100).toInt();
 
-    return Scaffold(
+    return CupertinoPageScaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
+      navigationBar: CupertinoNavigationBar(
         backgroundColor: AppColors.background,
-        elevation: 0,
-        centerTitle: true,
-        title: const Text(
-          'Detail Cicilan',
-          style: AppTypography.navTitle,
-        ),
+        border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.maybePop(context),
           child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
         ),
-        actions: [
-          CupertinoButton(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            onPressed: () => _confirmDeleteInstallment(inst),
-            child: const Icon(CupertinoIcons.trash, color: AppColors.dangerRose, size: 20),
-          ),
-        ],
+        middle: const Text('Detail Cicilan', style: AppTypography.navTitle),
+        trailing: CupertinoButton(
+          padding: EdgeInsets.zero,
+          onPressed: () => _confirmDeleteInstallment(inst),
+          child: const Icon(CupertinoIcons.trash, color: AppColors.dangerRose, size: 20),
+        ),
       ),
-      body: ListView(
-        physics: const BouncingScrollPhysics(),
+      child: SafeArea(
+        top: false,
+        child: ListView(
+          physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.only(bottom: 40),
         children: [
           // Section 1: INFORMASI BARANG
@@ -420,6 +424,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 }

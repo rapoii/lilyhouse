@@ -395,60 +395,36 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
                   // Rentals for day
                   if (selectedDayRentals.isEmpty)
-                    Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFE5E5EA), width: 0.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.03),
-                            blurRadius: 8,
-                            offset: const Offset(0, 1),
-                          ),
-                        ],
-                      ),
-                      child: const Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            CupertinoIcons.check_mark_circled,
-                            size: 36,
-                            color: AppColors.primaryPink,
-                          ),
-                          SizedBox(height: 10),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Text(
-                                'Tidak ada booking di tanggal ini',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppColors.textMuted,
-                                ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 40),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 72,
+                              height: 72,
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryPink.withValues(alpha: 0.12),
+                                shape: BoxShape.circle,
                               ),
-                              SizedBox(width: 5),
-                              Icon(
-                                CupertinoIcons.sparkles,
-                                size: 14,
+                              child: const Icon(
+                                CupertinoIcons.calendar,
+                                size: 36,
                                 color: AppColors.primaryPink,
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            'Kostum tersedia untuk disewa.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textMuted,
                             ),
-                          ),
-                        ],
+                            const SizedBox(height: 16),
+                            const Text(
+                              'Tidak ada booking',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textDark,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     )
                   else
@@ -709,8 +685,8 @@ class _RentalSlotCard extends StatelessWidget {
         label = 'Dikirim';
         break;
       case RentalItemStatus.returned:
-        bg = Colors.grey.shade200;
-        fg = Colors.black54;
+        bg = AppColors.softPinkBg.withValues(alpha: 0.5);
+        fg = const Color(0xFF3A3A3C);
         label = 'Dikembalikan';
         break;
       case RentalItemStatus.laundry:

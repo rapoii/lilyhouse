@@ -4,7 +4,7 @@ class AppColors {
   static const Color primaryPink = Color(0xFFFF85A1);
   static const Color pastelPink = Color(0xFFFFA6BA);
   static const Color softPinkBg = Color(0xFFFFE5EC);
-  static const Color background = Color(0xFFF2F2F7); // iOS / macOS secondary system grouped background
+  static const Color background = Color(0xFFF8F9FA); // Warm off-white background
   static const Color cardBg = Color(0xFFFFFFFF);
   static const Color textDark = Color(0xFF2D2D3A);
   static const Color textMuted = Color(0xFF8C8CA1);

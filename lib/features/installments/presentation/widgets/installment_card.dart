@@ -153,15 +153,21 @@ class InstallmentCard extends StatelessWidget {
                   color: AppColors.softPinkBg,
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: LinearProgressIndicator(
-                    value: installment.progress,
-                    backgroundColor: Colors.transparent,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      isDone ? AppColors.successMint : AppColors.primaryPink,
-                    ),
-                  ),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return Stack(
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 300),
+                          width: constraints.maxWidth * (installment.progress).clamp(0.0, 1.0),
+                          decoration: BoxDecoration(
+                            color: isDone ? AppColors.successMint : AppColors.primaryPink,
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ),
               const SizedBox(height: 14),
@@ -217,7 +223,7 @@ class InstallmentCard extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 12),
-              const Divider(color: AppColors.softPinkBg, height: 1),
+              Container(height: 1, color: AppColors.softPinkBg),
               const SizedBox(height: 10),
 
               // Footer: Sisa & Due Date

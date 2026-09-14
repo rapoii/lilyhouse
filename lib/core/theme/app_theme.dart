@@ -18,8 +18,8 @@ class AppTheme {
         color: AppColors.cardBg,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-          side: const BorderSide(color: AppColors.borderSubtle, width: 1),
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: AppColors.borderSubtle, width: 0.5),
         ),
       ),
       appBarTheme: const AppBarTheme(
