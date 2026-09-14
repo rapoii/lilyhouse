@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../domain/installment.dart';
@@ -21,13 +20,8 @@ class InstallmentCard extends StatelessWidget {
     return 'Rp $parts';
   }
 
-  String _formatDate(DateTime dt) {
-    return '${dt.day.toString().padLeft(2, '0')}/${dt.month.toString().padLeft(2, '0')}/${dt.year}';
-  }
-
   @override
   Widget build(BuildContext context) {
-    final percent = (installment.progress * 100).toInt();
     final isDone = installment.isPaidOff;
 
     return GestureDetector(
@@ -53,215 +47,88 @@ class InstallmentCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Row: Item Name, Store, and Status Badge
+            // Header Row: Title & Status Badge
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        installment.itemName,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textDark,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (installment.storeName != null && installment.storeName!.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            const Icon(
-                              CupertinoIcons.bag,
-                              size: 14,
-                              color: AppColors.textMuted,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                installment.storeName!,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: AppColors.textMuted,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ],
+                  child: Text(
+                    installment.itemName,
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1C1C1E),
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                  const SizedBox(width: 8),
-                  // Status Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                    decoration: BoxDecoration(
-                      color: isDone ? const Color(0xFFE3F9EC) : AppColors.softPinkBg,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: isDone ? AppColors.successMint : AppColors.pastelPink,
-                        width: 1,
-                      ),
-                    ),
-                    child: Text(
-                      isDone ? 'Lunas' : 'Cicilan',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: isDone ? const Color(0xFF1E824C) : AppColors.primaryPink,
-                      ),
+                const SizedBox(width: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isDone ? const Color(0xFFE3F9EC) : AppColors.softPinkBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDone ? AppColors.successMint : AppColors.pastelPink,
+                      width: 1,
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Cute Rounded Pill Progress Bar
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Progress Pembayaran',
+                  child: Text(
+                    isDone ? 'Lunas' : 'Cicilan',
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textMuted.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.bold,
+                      color: isDone ? const Color(0xFF1E824C) : AppColors.primaryPink,
                     ),
                   ),
-                  Text(
-                    '$percent%',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                      color: isDone ? AppColors.successMint : AppColors.primaryPink,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 6),
-              Container(
-                key: const Key('installment_progress_bar'),
-                height: 12,
-                decoration: BoxDecoration(
-                  color: AppColors.softPinkBg,
-                  borderRadius: BorderRadius.circular(20),
                 ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return Stack(
-                      children: [
-                        AnimatedContainer(
-                          duration: const Duration(milliseconds: 300),
-                          width: constraints.maxWidth * (installment.progress).clamp(0.0, 1.0),
-                          decoration: BoxDecoration(
-                            color: isDone ? AppColors.successMint : AppColors.primaryPink,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(height: 14),
+              ],
+            ),
+            const SizedBox(height: 12),
 
-              // Financial Breakdown: Terbayar vs Total
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            // Key Number: Remaining Balance or Fully Paid
+            Text(
+              isDone ? 'Lunas Sepenuhnya' : 'Sisa ${_formatCurrency(installment.remainingBalance)}',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: isDone ? AppColors.successMint : AppColors.primaryPink,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // Sleek Progress Bar (6pt)
+            Container(
+              key: const Key('installment_progress_bar'),
+              height: 6,
+              decoration: BoxDecoration(
+                color: AppColors.softPinkBg,
+                borderRadius: BorderRadius.circular(3),
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Stack(
                     children: [
-                      const Text(
-                        'Terbayar',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textMuted,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _formatCurrency(installment.totalPaid),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textDark,
+                      AnimatedContainer(
+                        duration: const Duration(milliseconds: 300),
+                        width: constraints.maxWidth *
+                            (installment.progress).clamp(0.0, 1.0),
+                        decoration: BoxDecoration(
+                          color: isDone
+                              ? AppColors.successMint
+                              : AppColors.primaryPink,
+                          borderRadius: BorderRadius.circular(3),
                         ),
                       ),
                     ],
-                  ),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      const Text(
-                        'Total Harga',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: AppColors.textMuted,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _formatCurrency(installment.totalCost),
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.textDark,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                  );
+                },
               ),
-              const SizedBox(height: 12),
-              Container(height: 1, color: AppColors.softPinkBg),
-              const SizedBox(height: 10),
-
-              // Footer: Sisa & Due Date
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Sisa: ${_formatCurrency(installment.remainingBalance)}',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: isDone ? AppColors.successMint : AppColors.dangerRose,
-                    ),
-                  ),
-                  if (installment.dueDate != null)
-                    Row(
-                      children: [
-                        const Icon(
-                          CupertinoIcons.calendar,
-                          size: 13,
-                          color: AppColors.textMuted,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Jatuh tempo: ${_formatDate(installment.dueDate!)}',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textMuted,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      );
+      ),
+    );
   }
 }

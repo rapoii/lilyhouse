@@ -117,7 +117,7 @@ class MockInstallmentRepository implements IInstallmentRepository {
 
 void main() {
   group('InstallmentCard Widget Tests', () {
-    testWidgets('Renders item details, progress percentage, and rounded pill progress bar', (tester) async {
+    testWidgets('Renders item title, status badge, remaining balance, and sleek progress bar', (tester) async {
       final installment = Installment(
         id: 'inst-card-1',
         itemName: 'Furina Fontaine Archon Gown',
@@ -141,19 +141,16 @@ void main() {
         ),
       );
 
-      // Verify texts
+      // Verify 3 essential elements: Title, Status Badge, Remaining Balance
       expect(find.text('Furina Fontaine Archon Gown'), findsOneWidget);
-      expect(find.text('Uwowo Shop'), findsOneWidget);
-      expect(find.text('45%'), findsOneWidget); // 450k / 1000k = 45%
-      expect(find.text('Rp 450.000'), findsOneWidget);
-      expect(find.text('Rp 1.000.000'), findsOneWidget);
-      expect(find.text('Sisa: Rp 550.000'), findsOneWidget);
+      expect(find.text('Cicilan'), findsOneWidget);
+      expect(find.text('Sisa Rp 550.000'), findsOneWidget);
 
-      // Verify custom cute rounded pill progress bar exists
+      // Verify sleek progress bar exists
       expect(find.byKey(const Key('installment_progress_bar')), findsOneWidget);
     });
 
-    testWidgets('Shows Paid Off / Lunas badge when installment is complete', (tester) async {
+    testWidgets('Shows Paid Off / Lunas badge and Lunas Sepenuhnya when installment is complete', (tester) async {
       final installment = Installment(
         id: 'inst-card-2',
         itemName: 'Hu Tao Ghost Plushie',
@@ -175,7 +172,7 @@ void main() {
         ),
       );
 
-      expect(find.text('100%'), findsOneWidget);
+      expect(find.text('Lunas Sepenuhnya'), findsOneWidget);
       expect(find.text('Lunas'), findsOneWidget);
     });
   });
@@ -219,7 +216,6 @@ void main() {
       await tester.pump();
 
       expect(find.text('Kamisato Ayaka Kimono'), findsOneWidget);
-      expect(find.text('Miaowu'), findsOneWidget);
 
       // Tap on card to open ledger / payment history bottom sheet
       await tester.tap(find.text('Kamisato Ayaka Kimono'));
