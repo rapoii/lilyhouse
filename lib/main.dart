@@ -33,7 +33,7 @@ class LilyHouseApp extends StatelessWidget {
         if (isTestMode) return child ?? const SizedBox.shrink();
         return Stack(
           children: [
-            if (child != null) child,
+            ?child,
             const _CupertinoPickerPrewarmer(),
           ],
         );

@@ -440,7 +440,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.68',
+                    'Versi 1.0.69',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -601,10 +601,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.68 (BUILD 103) - TERBARU'),
+                  header: const Text('VERSI 1.0.69 (BUILD 104) - TERBARU'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.creditcard_fill,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: Text('Detail Cicilan & Riwayat Apple HIG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Standardisasi modal sheet Buku Cicilan ke Inset Grouped, nominal pembayaran presisi di tengah vertikal saat tanpa catatan, dan konfirmasi hapus aman.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
                     CupertinoListTile(
                       leading: SquircleIcon(
                         icon: CupertinoIcons.person_badge_plus_fill,
@@ -619,14 +630,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     CupertinoListTile(
                       leading: SquircleIcon(
                         icon: CupertinoIcons.square_stack_3d_up_fill,
-                        color: AppColors.primaryPink,
+                        color: Color(0xFF5856D6),
                       ),
-                      title: Text('Standardisasi Modal Sheet HIG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      title: Text('Standardisasi Seluruh Modal Sheet HIG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
-                        'Semua picker foto, kondisi aksesori, dan detail rental kini 100% menggunakan Inset Grouped card modern.',
+                        '100% dialog dan modal sheet di seluruh aplikasi kini menggunakan Inset Grouped card modern dan DraggableSheetContainer.',
                         style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
                       ),
                     ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.68 (BUILD 103)'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
                     CupertinoListTile(
                       leading: SquircleIcon(
                         icon: CupertinoIcons.arrow_2_circlepath_circle_fill,
@@ -936,7 +954,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.68', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.69', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),
@@ -960,7 +978,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: Color(0xFFFF9500),
                 ),
                 title: const Text('Catatan Rilis', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                subtitle: const Text('Pembaruan fitur di build 103', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                subtitle: const Text('Pembaruan fitur di build 104', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showChangelogSheet,
               ),

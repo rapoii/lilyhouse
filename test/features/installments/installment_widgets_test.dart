@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:lilyhouse/core/theme/app_theme.dart';
@@ -269,6 +270,82 @@ void main() {
       expect(updated!.isPaidOff, isTrue);
       expect(updated.totalPaid, 900000.0);
       expect(updated.remainingBalance, 0.0);
+    });
+
+    testWidgets('Renders Apple HIG Detail Cicilan modal sheet with centered nominal when no notes', (tester) async {
+      final customRepo = MockInstallmentRepository(
+        installments: [
+          Installment(
+            id: 'inst_test_furina',
+            itemName: 'Wig_Furina',
+            storeName: 'Taobao_Cos',
+            totalCost: 300000.0,
+            totalPaid: 300000.0,
+            remainingBalance: 0.0,
+            status: InstallmentStatus.paidOff,
+          ),
+        ],
+        logs: [
+          InstallmentLog(
+            id: 'log_1',
+            installmentId: 'inst_test_furina',
+            paymentDate: DateTime(2026, 9, 10),
+            amountPaid: 200000.0,
+            notes: null, // No notes: title should be vertically centered, subtitle null
+          ),
+          InstallmentLog(
+            id: 'log_2',
+            installmentId: 'inst_test_furina',
+            paymentDate: DateTime(2026, 9, 10),
+            amountPaid: 100000.0,
+            notes: 'DP Awal',
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: InstallmentListScreen(repository: customRepo),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      // Tap on Wig_Furina to open sheet
+      await tester.tap(find.text('Wig_Furina'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Verify Apple HIG nav bar and sections
+      expect(find.text('Detail Cicilan'), findsOneWidget);
+      expect(find.text('Tutup'), findsOneWidget);
+      expect(find.text('INFORMASI BARANG'), findsOneWidget);
+      expect(find.text('RINGKASAN PEMBAYARAN'), findsOneWidget);
+      expect(find.text('Riwayat Cicilan'), findsOneWidget);
+
+      // Verify items rendered
+      expect(find.text('Rp 200.000'), findsOneWidget);
+      expect(find.text('Rp 100.000'), findsOneWidget);
+      expect(find.text('DP Awal'), findsOneWidget);
+
+      // Verify CupertinoListTile for log_1 has null subtitle (vertically centered)
+      final tileFinder = find.ancestor(
+        of: find.text('Rp 200.000'),
+        matching: find.byType(CupertinoListTile),
+      );
+      expect(tileFinder, findsOneWidget);
+      final tileWidget = tester.widget<CupertinoListTile>(tileFinder);
+      expect(tileWidget.subtitle, isNull);
+
+      // Verify CupertinoListTile for log_2 has non-null subtitle ("DP Awal")
+      final tileWithNoteFinder = find.ancestor(
+        of: find.text('Rp 100.000'),
+        matching: find.byType(CupertinoListTile),
+      );
+      expect(tileWithNoteFinder, findsOneWidget);
+      final tileWithNoteWidget = tester.widget<CupertinoListTile>(tileWithNoteFinder);
+      expect(tileWithNoteWidget.subtitle, isNotNull);
     });
   });
 }

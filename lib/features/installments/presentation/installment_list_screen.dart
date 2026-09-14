@@ -431,10 +431,8 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
   }
 
   void _showLedgerDetailSheet(Installment installment) {
-    showModalBottomSheet(
+    showCupertinoModalPopup<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
       builder: (ctx) {
         return _PaymentHistorySheet(
           installmentId: installment.id,
@@ -444,7 +442,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
             Navigator.pop(ctx);
             Navigator.push(
               context,
-              MaterialPageRoute(
+              CupertinoPageRoute(
                 builder: (_) => InstallmentDetailScreen(
                   installmentId: installment.id,
                   repository: widget.repository,
@@ -747,275 +745,309 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
     );
   }
 
+  void _confirmDeleteLog(InstallmentLog log) {
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('Hapus Catatan Pembayaran?'),
+        content: Text('Apakah Anda yakin ingin menghapus catatan pembayaran sebesar ${_formatCurrency(log.amountPaid)}?'),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(color: AppColors.textDark)),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () async {
+              Navigator.pop(ctx);
+              await widget.repository.deletePaymentLog(log.id, widget.installmentId);
+              widget.onDataChanged();
+              _fetchDetails();
+              if (mounted) {
+                IosToast.show(context, 'Catatan pembayaran berhasil dihapus', icon: CupertinoIcons.trash);
+              }
+            },
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Container(
-        height: 300,
-        decoration: const BoxDecoration(
-          color: AppColors.cardBg,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      return DraggableSheetContainer(
+        backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(context).pop(),
+        builder: (ctx) => const SizedBox(
+          height: 300,
+          child: Center(child: CupertinoActivityIndicator(radius: 14)),
         ),
-        child: const Center(child: CupertinoActivityIndicator(radius: 14)),
       );
     }
 
     final inst = _installment;
     if (inst == null) {
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: const BoxDecoration(
-          color: AppColors.cardBg,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      return DraggableSheetContainer(
+        backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(context).pop(),
+        builder: (ctx) => const SizedBox(
+          height: 200,
+          child: Center(
+            child: Text('Data cicilan tidak ditemukan', style: TextStyle(color: AppColors.textMuted)),
+          ),
         ),
-        child: const Text('Data cicilan tidak ditemukan'),
       );
     }
 
-    return DraggableScrollableSheet(
-      initialChildSize: 0.75,
-      maxChildSize: 0.95,
-      minChildSize: 0.5,
-      builder: (context, scrollController) {
-        return Container(
-          decoration: const BoxDecoration(
-            color: AppColors.cardBg,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: ListView(
-            controller: scrollController,
-            children: [
-              const SizedBox(height: 12),
-              Center(
-                child: Container(
-                  width: 44,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: AppColors.pastelPink.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-              // Title and Subtitle
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          inst.itemName,
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                        if (inst.storeName != null)
-                          Text(
-                            inst.storeName!,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textMuted,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: inst.isPaidOff ? const Color(0xFFE3F9EC) : AppColors.softPinkBg,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      inst.isPaidOff ? 'Lunas' : 'Belum Lunas',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: inst.isPaidOff ? const Color(0xFF1E824C) : AppColors.primaryPink,
+    return DraggableSheetContainer(
+      backgroundColor: AppColors.background,
+      onDismissed: () => Navigator.of(context).pop(),
+      builder: (ctx) => DefaultTextStyle(
+        style: const TextStyle(
+          decoration: TextDecoration.none,
+          fontFamily: '.SF Pro Text',
+          color: AppColors.textDark,
+        ),
+        child: CupertinoPageScaffold(
+          backgroundColor: AppColors.background,
+          navigationBar: CupertinoNavigationBar(
+            backgroundColor: AppColors.background,
+            border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
+            leading: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Tutup', style: AppTypography.actionButton),
+            ),
+            middle: const Text('Detail Cicilan', style: AppTypography.navTitle),
+            trailing: widget.onOpenDetail != null
+                ? CupertinoButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: widget.onOpenDetail,
+                    child: const Text('Detail Lengkap', style: AppTypography.actionButton),
+                  )
+                : null,
+          ),
+          child: SafeArea(
+            top: false,
+            child: ListView(
+              physics: const BouncingScrollPhysics(),
+              padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 32),
+              children: [
+                // Section 1: INFORMASI BARANG
+                CupertinoListSection.insetGrouped(
+                  backgroundColor: AppColors.background,
+                  header: const Text('INFORMASI BARANG'),
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  children: [
+                    CupertinoListTile(
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.sparkles,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: const Text('Nama Barang', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                      additionalInfo: Text(
+                        inst.itemName,
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
                       ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Summary Box
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.borderSubtle),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Total Harga:', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                        Text(_formatCurrency(inst.totalCost), style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Sudah Terbayar:', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                        Text(
-                          _formatCurrency(inst.totalPaid),
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14, color: AppColors.primaryPink),
+                    if (inst.storeName != null && inst.storeName!.trim().isNotEmpty)
+                      CupertinoListTile(
+                        leading: const SquircleIcon(
+                          icon: CupertinoIcons.bag_fill,
+                          color: Color(0xFFFF9500),
                         ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Text('Sisa Tagihan:', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-                        Text(
-                          _formatCurrency(inst.remainingBalance),
+                        title: const Text('Toko / Vendor', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                        additionalInfo: Text(
+                          inst.storeName!,
+                          style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                        ),
+                      ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: inst.isPaidOff ? CupertinoIcons.checkmark_seal_fill : CupertinoIcons.clock_fill,
+                        color: inst.isPaidOff ? const Color(0xFF34C759) : AppColors.primaryPink,
+                      ),
+                      title: const Text('Status Pelunasan', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                      trailing: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: inst.isPaidOff ? const Color(0xFFE3F9EC) : AppColors.softPinkBg,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          inst.isPaidOff ? 'Lunas' : 'Belum Lunas',
                           style: TextStyle(
-                            fontWeight: FontWeight.w800,
-                            fontSize: 15,
-                            color: inst.isPaidOff ? AppColors.successMint : AppColors.dangerRose,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: inst.isPaidOff ? const Color(0xFF1E824C) : AppColors.primaryPink,
                           ),
                         ),
-                      ],
+                      ),
+                    ),
+                    if (inst.dueDate != null)
+                      CupertinoListTile(
+                        leading: const SquircleIcon(
+                          icon: CupertinoIcons.calendar,
+                          color: Color(0xFF5856D6),
+                        ),
+                        title: const Text('Jatuh Tempo', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                        additionalInfo: Text(
+                          _formatDate(inst.dueDate!),
+                          style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                        ),
+                      ),
+                  ],
+                ),
+
+                // Section 2: RINGKASAN PEMBAYARAN
+                CupertinoListSection.insetGrouped(
+                  backgroundColor: AppColors.background,
+                  header: const Text('RINGKASAN PEMBAYARAN'),
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  children: [
+                    CupertinoListTile(
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.tag_fill,
+                        color: Color(0xFF007AFF),
+                      ),
+                      title: const Text('Total Harga', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                      additionalInfo: Text(
+                        _formatCurrency(inst.totalCost),
+                        style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.arrow_down_circle_fill,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: const Text('Sudah Terbayar', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                      additionalInfo: Text(
+                        _formatCurrency(inst.totalPaid),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w700,
+                          color: AppColors.primaryPink,
+                        ),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.money_dollar_circle_fill,
+                        color: inst.isPaidOff ? const Color(0xFF34C759) : const Color(0xFFFF3B30),
+                      ),
+                      title: const Text('Sisa Tagihan', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                      additionalInfo: Text(
+                        _formatCurrency(inst.remainingBalance),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: inst.isPaidOff ? const Color(0xFF34C759) : const Color(0xFFFF3B30),
+                        ),
+                      ),
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 20),
 
-              // Action button: Catat Pembayaran
-              SizedBox(
-                width: double.infinity,
-                child: CupertinoButton.filled(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  borderRadius: BorderRadius.circular(10),
-                  onPressed: _showAddPaymentSheet,
-                  child: const Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(CupertinoIcons.creditcard_fill, color: Colors.white, size: 18),
-                      SizedBox(width: 8),
-                      Text(
-                        '+ Catat Pembayaran',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                // Action button: + Catat Pembayaran
+                if (!inst.isPaidOff)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 14, 16, 0),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: CupertinoButton(
+                        color: AppColors.primaryPink,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        borderRadius: BorderRadius.circular(12),
+                        onPressed: _showAddPaymentSheet,
+                        child: const Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(CupertinoIcons.creditcard_fill, color: CupertinoColors.white, size: 18),
+                            SizedBox(width: 8),
+                            Text(
+                              '+ Catat Pembayaran',
+                              style: TextStyle(
+                                color: CupertinoColors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Payment Logs Ledger Header
-              const Text(
-                'Riwayat Cicilan',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textDark,
-                ),
-              ),
-              const SizedBox(height: 10),
-
-              if (_logs.isEmpty)
-                Container(
-                  padding: const EdgeInsets.all(24),
-                  alignment: Alignment.center,
-                  child: const Text(
-                    'Belum ada catatan pembayaran cicilan.',
-                    style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                  ),
-                )
-              else
-                ..._logs.map((log) {
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 10),
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: AppColors.cardBg,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: AppColors.borderSubtle),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: AppColors.background,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(CupertinoIcons.checkmark_circle_fill, color: AppColors.primaryPink, size: 18),
+                  ),
+
+                // Section 3: RIWAYAT CICILAN
+                CupertinoListSection.insetGrouped(
+                  backgroundColor: AppColors.background,
+                  header: const Text('Riwayat Cicilan'),
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  children: [
+                    if (_logs.isEmpty)
+                      const CupertinoListTile(
+                        title: Text(
+                          'Belum ada catatan pembayaran cicilan.',
+                          style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
+                        ),
+                      )
+                    else
+                      ..._logs.map((log) {
+                        final hasNote = log.notes != null && log.notes!.trim().isNotEmpty;
+                        return CupertinoListTile(
+                          leading: const SquircleIcon(
+                            icon: CupertinoIcons.checkmark_alt,
+                            color: AppColors.primaryPink,
+                          ),
+                          title: Text(
+                            _formatCurrency(log.amountPaid),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textDark,
                             ),
-                            const SizedBox(width: 12),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  _formatCurrency(log.amountPaid),
+                          ),
+                          subtitle: hasNote
+                              ? Text(
+                                  log.notes!.trim(),
                                   style: const TextStyle(
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppColors.textDark,
-                                  ),
-                                ),
-                                const SizedBox(height: 2),
-                                Text(
-                                  log.notes ?? _formatDate(log.paymentDate),
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    color: AppColors.textMuted,
+                                    fontSize: 13,
+                                    color: Color(0xFF8E8E93),
                                     fontWeight: FontWeight.w500,
                                   ),
-                                ),
-                              ],
+                                )
+                              : null,
+                          additionalInfo: Text(
+                            _formatDate(log.paymentDate),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Color(0xFF8E8E93),
                             ),
-                          ],
-                        ),
-                        Row(
-                          children: [
-                            Text(
-                              _formatDate(log.paymentDate),
-                              style: const TextStyle(
-                                fontSize: 11,
-                                color: AppColors.textMuted,
-                              ),
+                          ),
+                          trailing: CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(28, 28),
+                            onPressed: () => _confirmDeleteLog(log),
+                            child: const Icon(
+                              CupertinoIcons.trash,
+                              size: 16,
+                              color: AppColors.dangerRose,
                             ),
-                            const SizedBox(width: 4),
-                            IconButton(
-                              icon: const Icon(CupertinoIcons.trash, size: 16, color: AppColors.dangerRose),
-                              onPressed: () async {
-                                await widget.repository.deletePaymentLog(log.id, widget.installmentId);
-                                widget.onDataChanged();
-                                _fetchDetails();
-                              },
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  );
-                }),
-              const SizedBox(height: 30),
-            ],
+                          ),
+                        );
+                      }),
+                  ],
+                ),
+              ],
+            ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }

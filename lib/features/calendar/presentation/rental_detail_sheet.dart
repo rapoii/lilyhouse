@@ -65,7 +65,7 @@ class RentalDetailSheet extends StatelessWidget {
       return Image.network(
         path,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, _) => const Center(
+        errorBuilder: (context, error, stackTrace) => const Center(
           child: Icon(CupertinoIcons.photo, size: 16, color: Color(0xFF8E8E93)),
         ),
       );
@@ -76,7 +76,7 @@ class RentalDetailSheet extends StatelessWidget {
       return Image.file(
         file,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, _) => const Center(
+        errorBuilder: (context, error, stackTrace) => const Center(
           child: Icon(CupertinoIcons.photo, size: 16, color: Color(0xFF8E8E93)),
         ),
       );
@@ -97,7 +97,7 @@ class RentalDetailSheet extends StatelessWidget {
             child: CupertinoActivityIndicator(color: Colors.white, radius: 14),
           );
         },
-        errorBuilder: (_, __, _) => const Center(
+        errorBuilder: (context, error, stackTrace) => const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -115,7 +115,7 @@ class RentalDetailSheet extends StatelessWidget {
       return Image.file(
         file,
         fit: BoxFit.contain,
-        errorBuilder: (_, __, _) => const Center(
+        errorBuilder: (context, error, stackTrace) => const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
