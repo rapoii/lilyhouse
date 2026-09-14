@@ -240,7 +240,7 @@ class ChangeAccessoryConditionSheet extends StatelessWidget {
         Navigator.of(context).pop();
         await onSelectCondition(condition);
         if (context.mounted) {
-          IosToast.show(context, 'Kondisi diubah ke "$title" ✨');
+          IosToast.show(context, 'Kondisi diubah ke "$title"');
         }
       },
     );

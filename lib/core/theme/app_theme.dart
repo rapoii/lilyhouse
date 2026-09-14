@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_typography.dart';
@@ -27,6 +28,17 @@ class AppTheme {
         elevation: 0,
         centerTitle: false,
         titleTextStyle: AppTypography.largeTitle,
+      ),
+      cupertinoOverrideTheme: const CupertinoThemeData(
+        primaryColor: AppColors.primaryPink,
+        scaffoldBackgroundColor: AppColors.background,
+        textTheme: CupertinoTextThemeData(
+          textStyle: TextStyle(
+            decoration: TextDecoration.none,
+            fontFamily: '.SF Pro Text',
+            color: AppColors.textDark,
+          ),
+        ),
       ),
     );
   }

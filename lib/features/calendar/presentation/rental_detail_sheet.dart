@@ -420,7 +420,7 @@ class RentalDetailSheet extends StatelessWidget {
                 await repository!.updateRental(updated);
                 onRentalUpdated?.call();
                 if (context.mounted) {
-                  IosToast.show(context, 'Booking berhasil dibatalkan ❌');
+                  IosToast.show(context, 'Booking berhasil dibatalkan');
                 }
               }
             },
@@ -680,7 +680,7 @@ class RentalDetailSheet extends StatelessWidget {
                           ? () {
                               HapticFeedback.lightImpact();
                               Clipboard.setData(ClipboardData(text: custPhone));
-                              IosToast.show(context, 'Nomor HP disalin ke clipboard 📋');
+                              IosToast.show(context, 'Nomor HP disalin ke clipboard');
                             }
                           : null,
                       trailing: (custPhone != '-')
@@ -690,7 +690,7 @@ class RentalDetailSheet extends StatelessWidget {
                               onPressed: () {
                                 HapticFeedback.lightImpact();
                                 Clipboard.setData(ClipboardData(text: custPhone));
-                                IosToast.show(context, 'Nomor HP disalin ke clipboard 📋');
+                                IosToast.show(context, 'Nomor HP disalin ke clipboard');
                               },
                               child: Container(
                                 width: 32,
@@ -724,7 +724,7 @@ class RentalDetailSheet extends StatelessWidget {
                         onTap: () {
                           HapticFeedback.lightImpact();
                           Clipboard.setData(ClipboardData(text: customer!.parentPhone!));
-                          IosToast.show(context, 'Nomor HP ortu disalin 📋');
+                          IosToast.show(context, 'Nomor HP ortu disalin');
                         },
                         trailing: CupertinoButton(
                           padding: EdgeInsets.zero,
@@ -732,7 +732,7 @@ class RentalDetailSheet extends StatelessWidget {
                           onPressed: () {
                             HapticFeedback.lightImpact();
                             Clipboard.setData(ClipboardData(text: customer!.parentPhone!));
-                            IosToast.show(context, 'Nomor HP ortu disalin 📋');
+                            IosToast.show(context, 'Nomor HP ortu disalin');
                           },
                           child: Container(
                             width: 32,
@@ -913,7 +913,7 @@ class RentalDetailSheet extends StatelessWidget {
                             await repository!.updateRental(updated);
                             onRentalUpdated?.call();
                             if (context.mounted) {
-                              IosToast.show(context, 'Status rental diubah ke "Sedang Disewa" ✨');
+                              IosToast.show(context, 'Status rental diubah ke "Sedang Disewa"');
                             }
                           }
                         },
@@ -941,7 +941,7 @@ class RentalDetailSheet extends StatelessWidget {
                             await repository!.updateRental(updated);
                             onRentalUpdated?.call();
                             if (context.mounted) {
-                              IosToast.show(context, 'Status rental diubah ke "Sudah Dikembalikan" ✨');
+                              IosToast.show(context, 'Status rental diubah ke "Sudah Dikembalikan"');
                             }
                           }
                         },
@@ -968,7 +968,7 @@ class RentalDetailSheet extends StatelessWidget {
                             await repository!.updateRental(updated);
                             onRentalUpdated?.call();
                             if (context.mounted) {
-                              IosToast.show(context, 'Pembayaran rental berhasil ditandai Lunas ✨');
+                              IosToast.show(context, 'Pembayaran rental berhasil ditandai Lunas');
                             }
                           }
                         },

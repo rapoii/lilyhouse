@@ -76,7 +76,7 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
 
       if (mounted) {
         Navigator.of(context).pop();
-        IosToast.show(context, 'Aksesori "$name" berhasil ditambahkan ✨');
+        IosToast.show(context, 'Aksesori "$name" berhasil ditambahkan');
       }
     } catch (_) {
       if (mounted) {

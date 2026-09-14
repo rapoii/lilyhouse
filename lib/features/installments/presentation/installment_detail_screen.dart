@@ -153,29 +153,35 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
 
     final percent = (inst.progress * 100).toInt();
 
-    return CupertinoPageScaffold(
-      backgroundColor: AppColors.background,
-      navigationBar: CupertinoNavigationBar(
-        backgroundColor: AppColors.background,
-        border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
-        leading: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => Navigator.maybePop(context),
-          child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
-        ),
-        middle: const Text('Detail Cicilan', style: AppTypography.navTitle),
-        trailing: CupertinoButton(
-          padding: EdgeInsets.zero,
-          onPressed: () => _confirmDeleteInstallment(inst),
-          child: const Icon(CupertinoIcons.trash, color: AppColors.dangerRose, size: 20),
-        ),
+    return DefaultTextStyle(
+      style: const TextStyle(
+        decoration: TextDecoration.none,
+        fontFamily: '.SF Pro Text',
+        color: AppColors.textDark,
       ),
-      child: SafeArea(
-        top: false,
-        child: ListView(
-          physics: const BouncingScrollPhysics(),
-        padding: const EdgeInsets.only(bottom: 40),
-        children: [
+      child: CupertinoPageScaffold(
+        backgroundColor: AppColors.background,
+        navigationBar: CupertinoNavigationBar(
+          backgroundColor: AppColors.background,
+          border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
+          leading: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => Navigator.maybePop(context),
+            child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
+          ),
+          middle: const Text('Detail Cicilan', style: AppTypography.navTitle),
+          trailing: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => _confirmDeleteInstallment(inst),
+            child: const Icon(CupertinoIcons.trash, color: AppColors.dangerRose, size: 20),
+          ),
+        ),
+        child: SafeArea(
+          top: false,
+          child: ListView(
+            physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.only(bottom: 40),
+          children: [
           // Section 1: INFORMASI BARANG
           CupertinoListSection.insetGrouped(
             backgroundColor: AppColors.background,
@@ -222,6 +228,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
+                      decoration: TextDecoration.none,
                       color: inst.isPaidOff ? const Color(0xFF1E824C) : AppColors.primaryPink,
                     ),
                   ),
@@ -325,8 +332,13 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                     Icon(CupertinoIcons.checkmark_seal_fill, color: Color(0xFF1E824C), size: 18),
                     SizedBox(width: 8),
                     Text(
-                      'Cicilan Sudah Lunas ✨',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1E824C)),
+                      'Cicilan Sudah Lunas',
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.none,
+                        color: Color(0xFF1E824C),
+                      ),
                     ),
                   ],
                 ),
@@ -423,6 +435,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           ),
         ],
       ),
+    ),
     ),
     );
   }

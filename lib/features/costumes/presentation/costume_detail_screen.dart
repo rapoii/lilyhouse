@@ -135,9 +135,15 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
   Widget build(BuildContext context) {
     final statusData = _getStatusBadgeData(_costume.status);
 
-    return CupertinoPageScaffold(
-      backgroundColor: AppColors.background,
-      navigationBar: CupertinoNavigationBar(
+    return DefaultTextStyle(
+      style: const TextStyle(
+        decoration: TextDecoration.none,
+        fontFamily: '.SF Pro Text',
+        color: AppColors.textDark,
+      ),
+      child: CupertinoPageScaffold(
+        backgroundColor: AppColors.background,
+        navigationBar: CupertinoNavigationBar(
         backgroundColor: AppColors.background,
         border: const Border(
           bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
@@ -249,6 +255,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w700,
+                        decoration: TextDecoration.none,
                         color: statusData.$2,
                       ),
                     ),
@@ -364,6 +371,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -465,7 +473,12 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
             children: [
               Text(
                 condition.displayName.toUpperCase(),
-                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colors.text),
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.none,
+                  color: colors.text,
+                ),
               ),
               if (accessory != null) ...[
                 const SizedBox(width: 4),
