@@ -5,7 +5,7 @@ import 'package:lilyhouse/features/costumes/domain/costume.dart';
 import 'package:lilyhouse/features/costumes/presentation/widgets/costume_card.dart';
 
 void main() {
-  testWidgets('CostumeCard renders costume name, anime series, size, price, and status pill badge', (tester) async {
+  testWidgets('CostumeCard renders 3 essential elements: name, status badge, and price', (tester) async {
     final costume = Costume(
       id: 'c-test-1',
       name: 'Yor Forger Dress',
@@ -32,18 +32,18 @@ void main() {
       ),
     );
 
-    // Verify Title and Anime Series
+    // Element 1: Title
     expect(find.text('Yor Forger Dress'), findsOneWidget);
-    expect(find.text('Spy x Family'), findsOneWidget);
 
-    // Verify Size badge
-    expect(find.text('Size M'), findsOneWidget);
+    // Element 2: Status Pill
+    expect(find.text('Tersedia'), findsOneWidget);
 
-    // Verify Formatted Price
+    // Element 3: Formatted Price
     expect(find.textContaining('135.000'), findsOneWidget);
 
-    // Verify Status Pill
-    expect(find.text('Tersedia'), findsOneWidget);
+    // Removed elements should not be displayed
+    expect(find.text('Spy x Family'), findsNothing);
+    expect(find.text('Size M'), findsNothing);
 
     // Verify Tap interaction
     await tester.tap(find.byType(CostumeCard));

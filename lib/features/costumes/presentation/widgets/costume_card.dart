@@ -27,11 +27,13 @@ class CostumeCard extends StatelessWidget {
     if (path.startsWith('http://') || path.startsWith('https://')) {
       return Image.network(
         path,
+        width: 56,
+        height: 56,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => const Icon(
           CupertinoIcons.sparkles,
           color: AppColors.primaryPink,
-          size: 32,
+          size: 28,
         ),
       );
     }
@@ -39,21 +41,25 @@ class CostumeCard extends StatelessWidget {
       final cleanPath = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
       return Image.file(
         File(cleanPath),
+        width: 56,
+        height: 56,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => const Icon(
           CupertinoIcons.sparkles,
           color: AppColors.primaryPink,
-          size: 32,
+          size: 28,
         ),
       );
     }
     return Image.asset(
       path,
+      width: 56,
+      height: 56,
       fit: BoxFit.cover,
       errorBuilder: (context, error, stackTrace) => const Icon(
         CupertinoIcons.sparkles,
         color: AppColors.primaryPink,
-        size: 32,
+        size: 28,
       ),
     );
   }
@@ -99,128 +105,90 @@ class CostumeCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Costume Thumbnail or Placeholder Avatar
-                Container(
-                  width: 72,
-                  height: 72,
-                  decoration: BoxDecoration(
-                    color: AppColors.background,
-                    borderRadius: BorderRadius.circular(12.0),
-                  ),
-                  child: Center(
-                    child: costume.coverPhoto != null && costume.coverPhoto!.isNotEmpty
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(12.0),
-                            child: _buildCoverPhoto(costume.coverPhoto!),
-                          )
-                        : const Icon(
-                            CupertinoIcons.sparkles,
-                            color: AppColors.primaryPink,
-                            size: 32,
-                          ),
-                  ),
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Costume Thumbnail or Placeholder Avatar
+              Container(
+                width: 56,
+                height: 56,
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(10.0),
                 ),
-                const SizedBox(width: 16),
-                // Details
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              costume.name,
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.textDark,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          // Status Pill Badge
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 10,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: statusData.$1,
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                            child: Text(
-                              statusData.$3,
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: statusData.$2,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        costume.animeSeries,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.textMuted,
-                          fontWeight: FontWeight.w500,
+                child: Center(
+                  child: costume.coverPhoto != null && costume.coverPhoto!.isNotEmpty
+                      ? ClipRRect(
+                          borderRadius: BorderRadius.circular(10.0),
+                          child: _buildCoverPhoto(costume.coverPhoto!),
+                        )
+                      : const Icon(
+                          CupertinoIcons.sparkles,
+                          color: AppColors.primaryPink,
+                          size: 28,
                         ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          // Size pill
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 2,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: AppColors.borderSubtle,
-                                width: 1,
-                              ),
-                            ),
-                            child: Text(
-                              'Size ${costume.size}',
-                              style: const TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textDark,
-                              ),
-                            ),
-                          ),
-                          const Spacer(),
-                          // 3-day Price
-                          Text(
-                            '${_formatCurrency(costume.rentPrice3Days)} / 3d',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primaryPink,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 14),
+              // Details: 3 Essential Elements
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        // Element 1: Judul
+                        Expanded(
+                          child: Text(
+                            costume.name,
+                            style: const TextStyle(
+                              fontSize: 17,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF1C1C1E),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Element 2: Status Badge
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: statusData.$1,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Text(
+                            statusData.$3,
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: statusData.$2,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    // Element 3: Angka Kunci (Harga sewa per 3 hari)
+                    Text(
+                      '${_formatCurrency(costume.rentPrice3Days)} / 3d',
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryPink,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
+      ),
     );
   }
 }
