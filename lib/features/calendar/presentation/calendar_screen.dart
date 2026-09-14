@@ -8,6 +8,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/header_action_button.dart';
+import '../../../core/widgets/squircle_icon.dart';
 import '../../costumes/data/costume_repository.dart';
 import '../../costumes/domain/costume.dart';
 import '../../rentals/data/form_parser.dart';
@@ -16,7 +17,6 @@ import '../../rentals/domain/customer.dart';
 import '../../rentals/domain/parsed_rental_data.dart';
 import '../../rentals/domain/rental.dart';
 import '../domain/booking_conflict_engine.dart';
-import 'entry_method_card.dart';
 import 'manual_booking_modal.dart';
 import 'rental_detail_sheet.dart';
 
@@ -110,12 +110,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   void _openBookingEntrySheet() {
-    // Entry chooser — pilih mau Smart Paste atau Input Manual.
-    // Style: DraggableSheetContainer (sama dengan modal Tambah Katalog & Cicilan).
     showCupertinoModalPopup<void>(
       context: context,
       builder: (ctx) {
         return DraggableSheetContainer(
+          initialHeightFraction: 0.28,
+          maxHeightFraction: 0.34,
           backgroundColor: AppColors.background,
           onDismissed: () => Navigator.of(ctx).pop(),
           builder: (sheetCtx) => DefaultTextStyle(
@@ -127,57 +127,69 @@ class _CalendarScreenState extends State<CalendarScreen> {
             child: CupertinoPageScaffold(
               backgroundColor: AppColors.background,
               navigationBar: CupertinoNavigationBar(
+                automaticallyImplyLeading: false,
                 backgroundColor: AppColors.background,
                 border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
-                // No leading "Batal" — the drag handle is enough affordance
-                // for dismissing the chooser. We pass an empty `leading` AND
-                // `automaticallyImplyLeading: false` because modal popup
-                // routes can still show a default back-chevron otherwise.
-                // Tapping outside the sheet (on the scrim) still dismisses it.
-                leading: const SizedBox.shrink(),
-                automaticallyImplyLeading: false,
                 middle: const Text('Tambah Pesanan', style: AppTypography.navTitle),
+                trailing: CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  onPressed: () => Navigator.of(sheetCtx).pop(),
+                  child: const Text('Tutup', style: TextStyle(color: AppColors.primaryPink, fontSize: 15, fontWeight: FontWeight.w600)),
+                ),
               ),
               child: SafeArea(
                 top: false,
                 child: ListView(
-                  padding: const EdgeInsets.fromLTRB(0, 8, 0, 24),
+                  padding: const EdgeInsets.fromLTRB(0, 12, 0, 140),
                   physics: const BouncingScrollPhysics(),
                   children: [
-                    // ====== METODE 1: SMART PASTE ======
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: EntryMethodCard(
-                        key: const Key('entry_smart_paste'),
-                        leadingIcon: CupertinoIcons.sparkles,
-                        leadingBg: const Color(0xFFFFF1F4),
-                        leadingFg: const Color(0xFFFF85A1),
-                        title: 'Smart Paste',
-                        subtitle: 'Paste teks chat / form booking, sistem akan parsing otomatis.',
-                        onTap: () {
-                          Navigator.of(ctx).pop();
-                          _openSmartPasteDialog();
-                        },
+                    CupertinoListSection.insetGrouped(
+                      header: const Text(
+                        'PILIH METODE INPUT',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Color(0xFF8E8E93),
+                        ),
                       ),
-                    ),
-
-                    const SizedBox(height: 12),
-
-                    // ====== METODE 2: MANUAL ======
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: EntryMethodCard(
-                        key: const Key('entry_manual'),
-                        leadingIcon: CupertinoIcons.square_pencil,
-                        leadingBg: const Color(0xFFEAF1FF),
-                        leadingFg: const Color(0xFF5856D6),
-                        title: 'Input Manual',
-                        subtitle: 'Ketik data pesanan satu per satu lewat form.',
-                        onTap: () {
-                          Navigator.of(ctx).pop();
-                          _openManualBookingDialog();
-                        },
-                      ),
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                      backgroundColor: Colors.transparent,
+                      children: [
+                        CupertinoListTile(
+                          key: const Key('entry_smart_paste'),
+                          leading: const SquircleIcon(
+                            icon: CupertinoIcons.sparkles,
+                            color: AppColors.primaryPink,
+                          ),
+                          title: const Text('Smart Paste', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                          subtitle: const Text(
+                            'Parsing otomatis form booking WhatsApp',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                          ),
+                          trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                          onTap: () {
+                            Navigator.of(ctx).pop();
+                            _openSmartPasteDialog();
+                          },
+                        ),
+                        CupertinoListTile(
+                          key: const Key('entry_manual'),
+                          leading: const SquircleIcon(
+                            icon: CupertinoIcons.square_pencil,
+                            color: Color(0xFF5856D6),
+                          ),
+                          title: const Text('Input Manual', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                          subtitle: const Text(
+                            'Ketik data pesanan satu per satu lewat form',
+                            style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                          ),
+                          trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                          onTap: () {
+                            Navigator.of(ctx).pop();
+                            _openManualBookingDialog();
+                          },
+                        ),
+                      ],
                     ),
                   ],
                 ),
@@ -938,39 +950,53 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Summary card
-                  Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0xFFE5E5EA), width: 0.5),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 8,
-                          offset: const Offset(0, 1),
-                        ),
-                      ],
+                  // Summary card as Apple HIG Inset Grouped section
+                  CupertinoListSection.insetGrouped(
+                    header: const Text(
+                      'DATA HASIL DETEKSI',
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF8E8E93)),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        _buildDetailRow('Nama Penyewa', _parsedData!.fullName ?? '-'),
-                        _buildDetailRow('No HP', _parsedData!.normalizedPhone ?? _parsedData!.phone ?? '-'),
-                        _buildDetailRow('Alamat', _parsedData!.address ?? '-'),
-                        _buildDetailRow('No HP Ortu / Keluarga', _parsedData!.parentPhone ?? '-'),
-                        _buildDetailRow('Akun Sosmed', _parsedData!.socialMedia ?? '-'),
-                        _buildDetailRow('Kostum', _parsedData!.costumeName ?? '-'),
-                        _buildDetailRow(
-                          'Tanggal',
+                    margin: EdgeInsets.zero,
+                    backgroundColor: Colors.transparent,
+                    children: [
+                      CupertinoListTile(
+                        leading: const SquircleIcon(icon: CupertinoIcons.person_fill, color: AppColors.primaryPink),
+                        title: const Text('Nama Penyewa', style: TextStyle(fontSize: 14, color: AppColors.textDark)),
+                        additionalInfo: Text(_parsedData!.fullName ?? '-', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                      ),
+                      CupertinoListTile(
+                        leading: const SquircleIcon(icon: CupertinoIcons.phone_fill, color: Color(0xFF34C759)),
+                        title: const Text('No. WhatsApp', style: TextStyle(fontSize: 14, color: AppColors.textDark)),
+                        additionalInfo: Text(_parsedData!.normalizedPhone ?? _parsedData!.phone ?? '-', style: const TextStyle(fontSize: 14, color: AppColors.textDark)),
+                      ),
+                      if (_parsedData!.address != null && _parsedData!.address!.isNotEmpty)
+                        CupertinoListTile(
+                          leading: const SquircleIcon(icon: CupertinoIcons.location_fill, color: Color(0xFFFF9500)),
+                          title: const Text('Alamat', style: TextStyle(fontSize: 14, color: AppColors.textDark)),
+                          additionalInfo: Text(_parsedData!.address!, style: const TextStyle(fontSize: 14, color: AppColors.textDark)),
+                        ),
+                      CupertinoListTile(
+                        leading: const SquircleIcon(icon: CupertinoIcons.sparkles, color: Color(0xFF5856D6)),
+                        title: const Text('Kostum', style: TextStyle(fontSize: 14, color: AppColors.textDark)),
+                        additionalInfo: Text(_parsedData!.costumeName ?? '-', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                      ),
+                      CupertinoListTile(
+                        leading: const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFF007AFF)),
+                        title: const Text('Tanggal Sewa', style: TextStyle(fontSize: 14, color: AppColors.textDark)),
+                        additionalInfo: Text(
                           _parsedData!.startDate != null
-                              ? '${DateFormat('d MMM yyyy').format(_parsedData!.startDate!)} - ${DateFormat('d MMM yyyy').format(_parsedData!.endDate!)} (${_parsedData!.rentalDurationDays ?? 3} hari)'
+                              ? '${DateFormat('d MMM').format(_parsedData!.startDate!)} - ${DateFormat('d MMM yyyy').format(_parsedData!.endDate!)} (${_parsedData!.rentalDurationDays ?? 3} hari)'
                               : (_parsedData!.datesRaw ?? '-'),
+                          style: const TextStyle(fontSize: 14, color: AppColors.textDark),
                         ),
-                        _buildDetailRow('Keperluan', _parsedData!.purpose ?? '-'),
-                      ],
-                    ),
+                      ),
+                      if (_parsedData!.purpose != null && _parsedData!.purpose!.isNotEmpty)
+                        CupertinoListTile(
+                          leading: const SquircleIcon(icon: CupertinoIcons.doc_text_fill, color: Color(0xFF8E8E93)),
+                          title: const Text('Keperluan', style: TextStyle(fontSize: 14, color: AppColors.textDark)),
+                          additionalInfo: Text(_parsedData!.purpose!, style: const TextStyle(fontSize: 14, color: AppColors.textDark)),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 10),
                   Container(
@@ -1021,35 +1047,6 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
             ),
           ),
         ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 95,
-            child: Text(
-              label,
-              style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-            ),
-          ),
-          const Text(': ', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
-          Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textDark,
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

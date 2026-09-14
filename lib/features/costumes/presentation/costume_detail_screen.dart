@@ -7,6 +7,7 @@ import '../domain/costume.dart';
 import '../domain/accessory.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/ios_toast.dart';
+import '../../../core/widgets/squircle_icon.dart';
 import 'add_costume_sheet.dart';
 import 'widgets/add_accessory_sheet.dart';
 import 'widgets/change_accessory_condition_sheet.dart';
@@ -321,41 +322,41 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
             if (_isLoading)
               const Center(child: CupertinoActivityIndicator(radius: 14))
-            else if (_accessories.isEmpty && _costume.includedAccessories.isEmpty)
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: AppColors.borderSubtle),
-                ),
-                child: const Text(
-                  'Belum ada aksesori yang dicatat untuk kostum ini.',
-                  style: TextStyle(color: AppColors.textMuted, fontSize: 13),
-                ),
-              )
-            else ...[
-              // Registered Accessory objects from DB
-              ..._accessories.map((acc) => _buildAccessoryRow(
-                    acc.name,
-                    acc.type,
-                    acc.conditionStatus,
-                    accessory: acc,
-                  )),
-              // Legacy strings list in includedAccessories
-              ..._costume.includedAccessories
-                  .where((accStr) => !_accessories.any((a) => a.name.toLowerCase() == accStr.toLowerCase()))
-                  .map((accStr) => _buildAccessoryRow(
-                        accStr,
-                        'Kelengkapan Set',
-                        AccessoryCondition.good,
-                      )),
-            ],
+            else
+              CupertinoListSection.insetGrouped(
+                margin: EdgeInsets.zero,
+                backgroundColor: Colors.transparent,
+                children: [
+                  if (_accessories.isEmpty && _costume.includedAccessories.isEmpty)
+                    const CupertinoListTile(
+                      title: Text(
+                        'Belum ada aksesori yang dicatat untuk kostum ini.',
+                        style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      ),
+                    )
+                  else ...[
+                    // Registered Accessory objects from DB
+                    ..._accessories.map((acc) => _buildAccessoryTile(
+                          acc.name,
+                          acc.type,
+                          acc.conditionStatus,
+                          accessory: acc,
+                        )),
+                    // Legacy strings list in includedAccessories
+                    ..._costume.includedAccessories
+                        .where((accStr) => !_accessories.any((a) => a.name.toLowerCase() == accStr.toLowerCase()))
+                        .map((accStr) => _buildAccessoryTile(
+                              accStr,
+                              'Kelengkapan Set',
+                              AccessoryCondition.good,
+                            )),
+                  ],
+                ],
+              ),
           ],
         ),
       ),
@@ -460,7 +461,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
     );
   }
 
-  Widget _buildAccessoryRow(
+  Widget _buildAccessoryTile(
     String name,
     String type,
     AccessoryCondition condition, {
@@ -468,75 +469,51 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
   }) {
     final colors = _getConditionColors(condition);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.borderSubtle),
+    return CupertinoListTile(
+      leading: const SquircleIcon(
+        icon: CupertinoIcons.star_fill,
+        color: AppColors.primaryPink,
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.softPinkBg,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(CupertinoIcons.star_fill, color: AppColors.primaryPink, size: 16),
+      title: Text(
+        name,
+        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.textDark),
+      ),
+      subtitle: Text(
+        type,
+        style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+      ),
+      additionalInfo: GestureDetector(
+        onTap: accessory != null ? () => _showChangeConditionSheet(accessory) : null,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            color: colors.bg,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: colors.text.withValues(alpha: 0.3)),
           ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  name,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: AppColors.textDark),
-                ),
-                Text(
-                  type,
-                  style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                condition.displayName.toUpperCase(),
+                style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colors.text),
+              ),
+              if (accessory != null) ...[
+                const SizedBox(width: 4),
+                Icon(CupertinoIcons.chevron_down, size: 10, color: colors.text),
               ],
-            ),
+            ],
           ),
-          GestureDetector(
-            onTap: accessory != null ? () => _showChangeConditionSheet(accessory) : null,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              decoration: BoxDecoration(
-                color: colors.bg,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: colors.text.withValues(alpha: 0.3)),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    condition.displayName.toUpperCase(),
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: colors.text),
-                  ),
-                  if (accessory != null) ...[
-                    const SizedBox(width: 4),
-                    Icon(CupertinoIcons.chevron_down, size: 10, color: colors.text),
-                  ],
-                ],
-              ),
-            ),
-          ),
-          if (accessory != null) ...[
-            const SizedBox(width: 8),
-            CupertinoButton(
-              padding: EdgeInsets.zero,
-              minimumSize: Size.zero,
-              onPressed: () => _confirmDeleteAccessory(accessory.id, name),
-              child: const Icon(CupertinoIcons.trash, color: Color(0xFFFF3B30), size: 18),
-            ),
-          ],
-        ],
+        ),
       ),
+      trailing: accessory != null
+          ? CupertinoButton(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(28, 28),
+              onPressed: () => _confirmDeleteAccessory(accessory.id, name),
+              child: const Icon(CupertinoIcons.trash, color: Color(0xFFFF3B30), size: 16),
+            )
+          : null,
     );
   }
 }
