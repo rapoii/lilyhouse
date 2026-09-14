@@ -489,10 +489,6 @@ class _RentalSlotCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dateFormat = DateFormat('d MMM');
-    final dateRangeText =
-        '${dateFormat.format(rental.startDate)} - ${dateFormat.format(rental.endDate)} (${rental.durationDays} hari)';
-
     // Check if this rental has any conflict with other rentals
     final hasConflict = BookingConflictEngine.hasConflict(allRentals, rental);
 
@@ -550,114 +546,42 @@ class _RentalSlotCard extends StatelessWidget {
                   child: Text(
                     costume?.name ?? rental.costumeId,
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textDark,
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1C1C1E),
                     ),
                   ),
                 ),
-                _buildPaymentStatusPill(rental.paymentStatus),
+                _buildItemStatusPill(rental.itemStatus),
               ],
             ),
-          const SizedBox(height: 6),
-          Row(
-            children: [
-              const Icon(CupertinoIcons.person, size: 14, color: AppColors.textMuted),
-              const SizedBox(width: 4),
-              Text(
-                customer?.fullName ?? rental.customerId,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w500,
-                  color: AppColors.textDark,
-                ),
-              ),
-              const SizedBox(width: 12),
-              const Icon(CupertinoIcons.calendar, size: 12, color: AppColors.textMuted),
-              const SizedBox(width: 4),
-              Text(
-                dateRangeText,
-                style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-              ),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              _buildItemStatusPill(rental.itemStatus),
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  rental.purpose,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textMuted,
-                    fontWeight: FontWeight.w500,
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                const Icon(CupertinoIcons.person, size: 14, color: AppColors.textMuted),
+                const SizedBox(width: 4),
+                Expanded(
+                  child: Text(
+                    customer?.fullName ?? rental.customerId,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500,
+                      color: AppColors.textMuted,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-              ),
-              const Spacer(),
-              Text(
-                'Rp ${rental.totalPrice.toStringAsFixed(0)}',
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primaryPink,
+                Text(
+                  'Rp ${rental.totalPrice.toStringAsFixed(0)}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryPink,
+                  ),
                 ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    ),
-  );
-}
-
-  Widget _buildPaymentStatusPill(RentalPaymentStatus status) {
-    Color bg;
-    Color fg;
-    String label;
-
-    switch (status) {
-      case RentalPaymentStatus.paid:
-        bg = AppColors.successMint.withValues(alpha: 0.15);
-        fg = const Color(0xFF289868);
-        label = 'Lunas';
-        break;
-      case RentalPaymentStatus.dpPaid:
-        bg = AppColors.warningOrange.withValues(alpha: 0.15);
-        fg = const Color(0xFFD67710);
-        label = 'DP Terbayar';
-        break;
-      case RentalPaymentStatus.unpaid:
-        bg = AppColors.dangerRose.withValues(alpha: 0.12);
-        fg = AppColors.dangerRose;
-        label = 'Belum Bayar';
-        break;
-      case RentalPaymentStatus.refunded:
-        bg = AppColors.textMuted.withValues(alpha: 0.15);
-        fg = AppColors.textDark;
-        label = 'Dikembalikan';
-        break;
-    }
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: fg,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
+              ],
+            ),
+          ],
         ),
       ),
     );

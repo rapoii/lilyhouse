@@ -275,7 +275,7 @@ void main() {
       expect(find.text('Citlali'), findsWidgets);
       expect(find.text('Jihan Fatin'), findsOneWidget);
       expect(find.text('Dibooking'), findsWidgets);
-      expect(find.text('DP Terbayar'), findsWidgets);
+      expect(find.text('Rp 150000'), findsWidgets);
     });
 
     testWidgets('opening Smart Paste dialog allows input and shows conflict warning', (tester) async {
