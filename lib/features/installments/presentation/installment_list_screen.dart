@@ -195,6 +195,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
       context: context,
       builder: (ctx) {
         final bottomInset = MediaQuery.of(ctx).viewInsets.bottom;
+        bool isSaving = false;
         return StatefulBuilder(
           builder: (context, setSheetState) {
             return DraggableSheetContainer(
@@ -224,7 +225,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                     ),
                     trailing: CupertinoButton(
                       padding: EdgeInsets.zero,
-                      onPressed: () async {
+                      onPressed: isSaving ? null : () async {
                         final name = nameController.text.trim();
                         final cost = double.tryParse(costController.text.trim()) ?? 0.0;
                         final dp = double.tryParse(dpController.text.trim()) ?? 0.0;
@@ -240,6 +241,8 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                           _showFormAlert(ctx, 'DP Melebihi Total', 'Jumlah DP awal tidak boleh melebihi total harga.');
                           return;
                         }
+
+                        setSheetState(() => isSaving = true);
 
                         final id = 'inst_${DateTime.now().millisecondsSinceEpoch}';
                         final remaining = (cost - dp).clamp(0.0, cost);
@@ -271,7 +274,9 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                         _loadInstallments();
                         IosToast.show(context, 'Cicilan "$name" berhasil ditambahkan');
                       },
-                      child: const Text('Simpan', style: AppTypography.actionButton),
+                      child: isSaving
+                          ? const CupertinoActivityIndicator()
+                          : const Text('Simpan', style: AppTypography.actionButton),
                     ),
                   ),
                   child: SafeArea(
@@ -553,14 +558,18 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
                                   onTap: () {
                                     setState(() => _selectedStatus = null);
                                     _loadInstallments();
                                   },
-                                  child: Icon(
-                                    CupertinoIcons.clear_circled_solid,
-                                    size: 14,
-                                    color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : const Color(0xFFD97706),
+                                  child: Padding(
+                                    padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                    child: Icon(
+                                      CupertinoIcons.clear_circled_solid,
+                                      size: 14,
+                                      color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : const Color(0xFFD97706),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -585,11 +594,15 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
                                   onTap: () {
                                     setState(() => _selectedSortBy = 'due_date_asc');
                                     _loadInstallments();
                                   },
-                                  child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF8E8E93)),
+                                  child: const Padding(
+                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF8E8E93)),
+                                  ),
                                 ),
                               ],
                             ),
@@ -1092,7 +1105,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                           ),
                           trailing: CupertinoButton(
                             padding: EdgeInsets.zero,
-                            minimumSize: const Size(28, 28),
+                            minimumSize: const Size(44, 44),
                             onPressed: () => _confirmDeleteLog(log),
                             child: const Icon(
                               CupertinoIcons.trash,

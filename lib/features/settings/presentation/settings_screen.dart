@@ -89,6 +89,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (ctx) => DraggableSheetContainer(
         backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(ctx).pop(),
         initialHeightFraction: 0.75,
         maxHeightFraction: 0.9,
         builder: (sheetCtx) => DefaultTextStyle(
@@ -222,6 +223,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (ctx) => DraggableSheetContainer(
         backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(ctx).pop(),
         initialHeightFraction: 0.65,
         maxHeightFraction: 0.8,
         builder: (sheetCtx) => DefaultTextStyle(
@@ -383,6 +385,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (ctx) => DraggableSheetContainer(
         backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(ctx).pop(),
         initialHeightFraction: 0.65,
         maxHeightFraction: 0.8,
         builder: (sheetCtx) => DefaultTextStyle(
@@ -440,7 +443,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.76',
+                    'Versi 1.0.77',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -501,6 +504,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (ctx) => DraggableSheetContainer(
         backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(ctx).pop(),
         initialHeightFraction: 0.7,
         maxHeightFraction: 0.85,
         builder: (sheetCtx) => DefaultTextStyle(
@@ -577,6 +581,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (ctx) => DraggableSheetContainer(
         backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(ctx).pop(),
         initialHeightFraction: 0.75,
         maxHeightFraction: 0.9,
         builder: (sheetCtx) => DefaultTextStyle(
@@ -601,7 +606,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.76 (BUILD 111) - TERBARU'),
+                  header: const Text('VERSI 1.0.77 (BUILD 112) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.shield_fill,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: Text('Proteksi Data Finansial & Konfirmasi', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Pencegahan dobel simpan pembayaran cicilan, proteksi modal overlay settings, dan dialog konfirmasi untuk pelunasan serta pengembalian sewa.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.hand_draw_fill,
+                        color: Color(0xFF5856D6),
+                      ),
+                      title: Text('Penyempurnaan Taktil & Touch Target', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Touch target tombol hapus dan chip filter diperluas hingga 44pt Apple HIG, kurva animasi ProMotion 240fps, dan penanganan ramah izin kamera.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.76 (BUILD 111)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1076,14 +1110,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onTap: _showDatabaseStatsSheet,
               ),
 
-              // Row 2: Bersihkan Cache (HAS chevron — opens action sheet)
+              // Row 2: Bersihkan Cache (Opens confirmation dialog — no chevron)
               CupertinoListTile(
                 leading: const SquircleIcon(
                   icon: CupertinoIcons.trash_fill,
                   color: Color(0xFFFF3B30),
                 ),
                 title: const Text('Bersihkan Cache Gambar', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showClearCacheDialog,
               ),
             ],
@@ -1110,7 +1143,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.76', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.77', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),

@@ -283,11 +283,15 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
                                   onTap: () {
                                     setState(() => _selectedSeries = null);
                                     _fetchCostumes();
                                   },
-                                  child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: AppColors.primaryPink),
+                                  child: const Padding(
+                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: AppColors.primaryPink),
+                                  ),
                                 ),
                               ],
                             ),
@@ -312,11 +316,15 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
                                   onTap: () {
                                     setState(() => _selectedStatus = null);
                                     _fetchCostumes();
                                   },
-                                  child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF1E824C)),
+                                  child: const Padding(
+                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF1E824C)),
+                                  ),
                                 ),
                               ],
                             ),
@@ -341,11 +349,15 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
                                   onTap: () {
                                     setState(() => _selectedSize = null);
                                     _fetchCostumes();
                                   },
-                                  child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFFD97706)),
+                                  child: const Padding(
+                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFFD97706)),
+                                  ),
                                 ),
                               ],
                             ),
@@ -369,11 +381,15 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
                                   onTap: () {
                                     setState(() => _selectedSortBy = 'name_asc');
                                     _fetchCostumes();
                                   },
-                                  child: const Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF8E8E93)),
+                                  child: const Padding(
+                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF8E8E93)),
+                                  ),
                                 ),
                               ],
                             ),

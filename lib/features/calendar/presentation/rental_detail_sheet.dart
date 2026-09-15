@@ -999,6 +999,25 @@ class RentalDetailSheet extends StatelessWidget {
                         subtitle: const Text('Kostum telah diterima kembali dari penyewa', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                         trailing: const Icon(CupertinoIcons.checkmark_alt, size: 18, color: AppColors.primaryPink),
                         onTap: () async {
+                          final confirm = await showCupertinoDialog<bool>(
+                            context: context,
+                            builder: (dialogCtx) => CupertinoAlertDialog(
+                              title: const Text('Konfirmasi Pengembalian'),
+                              content: const Text('Tandai kostum ini sudah dikembalikan oleh penyewa?'),
+                              actions: [
+                                CupertinoDialogAction(
+                                  isDefaultAction: true,
+                                  child: const Text('Batal'),
+                                  onPressed: () => Navigator.pop(dialogCtx, false),
+                                ),
+                                CupertinoDialogAction(
+                                  child: const Text('Ya, Sudah Kembali'),
+                                  onPressed: () => Navigator.pop(dialogCtx, true),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm != true) return;
                           if (repository != null) {
                             final updated = rental.copyWith(itemStatus: RentalItemStatus.returned);
                             await repository!.updateRental(updated);
@@ -1025,6 +1044,25 @@ class RentalDetailSheet extends StatelessWidget {
                         subtitle: const Text('Catat bahwa seluruh biaya sewa telah dilunasi', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                         trailing: const Icon(CupertinoIcons.checkmark_alt, size: 18, color: Color(0xFF289868)),
                         onTap: () async {
+                          final confirm = await showCupertinoDialog<bool>(
+                            context: context,
+                            builder: (dialogCtx) => CupertinoAlertDialog(
+                              title: const Text('Konfirmasi Pelunasan'),
+                              content: const Text('Tandai seluruh biaya sewa telah dilunasi?'),
+                              actions: [
+                                CupertinoDialogAction(
+                                  isDefaultAction: true,
+                                  child: const Text('Batal'),
+                                  onPressed: () => Navigator.pop(dialogCtx, false),
+                                ),
+                                CupertinoDialogAction(
+                                  child: const Text('Ya, Sudah Lunas'),
+                                  onPressed: () => Navigator.pop(dialogCtx, true),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm != true) return;
                           if (repository != null) {
                             final updated = rental.copyWith(paymentStatus: RentalPaymentStatus.paid);
                             await repository!.updateRental(updated);

@@ -120,7 +120,16 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       if (picked != null) {
         setState(() => _selectedImagePath = picked.path);
       }
-    } catch (_) {}
+    } catch (_) {
+      if (mounted) {
+        IosToast.show(
+          context,
+          'Gagal mengambil foto. Periksa izin perangkat.',
+          icon: CupertinoIcons.exclamationmark_circle_fill,
+          iconColor: AppColors.warningOrange,
+        );
+      }
+    }
   }
 
   void _showImagePickerActionSheet() {

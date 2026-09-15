@@ -609,7 +609,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       trailing: accessory != null
           ? CupertinoButton(
               padding: EdgeInsets.zero,
-              minimumSize: const Size(28, 28),
+              minimumSize: const Size(44, 44),
               onPressed: () => _confirmDeleteAccessory(accessory.id, name),
               child: const Icon(CupertinoIcons.trash, color: Color(0xFFFF3B30), size: 16),
             )

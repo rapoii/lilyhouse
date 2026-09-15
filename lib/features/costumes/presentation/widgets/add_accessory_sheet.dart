@@ -123,6 +123,7 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
           child: SafeArea(
             top: false,
             child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               physics: const BouncingScrollPhysics(),
               padding: EdgeInsets.fromLTRB(0, 16, 0, bottomInset + 180),
               children: [

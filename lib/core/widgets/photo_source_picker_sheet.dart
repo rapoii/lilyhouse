@@ -92,7 +92,6 @@ class PhotoSourcePickerSheet extends StatelessWidget {
                         'Buka kamera HP untuk mengambil foto baru',
                         style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
                       ),
-                      trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                       onTap: () {
                         Navigator.of(context).pop();
                         onCamera();
@@ -111,7 +110,6 @@ class PhotoSourcePickerSheet extends StatelessWidget {
                         'Pilih foto dari penyimpanan galeri perangkat',
                         style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
                       ),
-                      trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                       onTap: () {
                         Navigator.of(context).pop();
                         onGallery();

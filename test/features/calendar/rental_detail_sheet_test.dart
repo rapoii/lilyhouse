@@ -277,6 +277,10 @@ void main() {
     final lunasTile = find.text('Tandai Pembayaran Lunas');
     await tester.scrollUntilVisible(lunasTile, 200, scrollable: find.byType(Scrollable).last);
     await tester.tap(lunasTile);
+    await tester.pumpAndSettle();
+
+    // Confirm in dialog
+    await tester.tap(find.text('Ya, Sudah Lunas'));
     await tester.pump();
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();

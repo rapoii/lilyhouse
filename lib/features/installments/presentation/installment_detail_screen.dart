@@ -421,7 +421,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                     ),
                     trailing: CupertinoButton(
                       padding: EdgeInsets.zero,
-                      minimumSize: const Size(28, 28),
+                      minimumSize: const Size(44, 44),
                       onPressed: () => _confirmDeleteLog(log),
                       child: const Icon(
                         CupertinoIcons.trash,

@@ -112,6 +112,7 @@ class InstallmentCard extends StatelessWidget {
                     children: [
                       AnimatedContainer(
                         duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeOutCubic,
                         width: constraints.maxWidth *
                             (installment.progress).clamp(0.0, 1.0),
                         decoration: BoxDecoration(

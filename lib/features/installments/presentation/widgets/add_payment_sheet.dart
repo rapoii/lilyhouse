@@ -30,6 +30,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
   final _amountController = TextEditingController();
   final _notesController = TextEditingController();
   DateTime _selectedDate = DateTime.now();
+  bool _isSaving = false;
 
   static const _months = [
     '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
@@ -46,6 +47,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
   }
 
   Future<void> _submit() async {
+    if (_isSaving) return;
     final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
     if (amount <= 0) {
       IosToast.show(
@@ -56,6 +58,8 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
       );
       return;
     }
+
+    setState(() => _isSaving = true);
 
     final log = InstallmentLog(
       id: 'log_${DateTime.now().millisecondsSinceEpoch}',
@@ -98,8 +102,10 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
             middle: const Text('Catat Pembayaran Cicilan', style: AppTypography.navTitle),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
-              onPressed: _submit,
-              child: const Text('Simpan', style: AppTypography.actionButton),
+              onPressed: _isSaving ? null : _submit,
+              child: _isSaving
+                  ? const CupertinoActivityIndicator()
+                  : const Text('Simpan', style: AppTypography.actionButton),
             ),
           ),
           child: SafeArea(

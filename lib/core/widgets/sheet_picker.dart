@@ -84,7 +84,7 @@ class _DeferredWheelPickerSheetState<T>
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOutCubic));
   }
 
   @override
@@ -234,7 +234,7 @@ class _DeferredDatePickerSheetState extends State<_DeferredDatePickerSheet>
     _slideAnim = Tween<Offset>(
       begin: const Offset(0, 1),
       end: Offset.zero,
-    ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOut));
+    ).animate(CurvedAnimation(parent: _slideCtrl, curve: Curves.easeOutCubic));
   }
 
   @override
