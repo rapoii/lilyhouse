@@ -155,6 +155,9 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
             }
           }
           _selectedCostume = match;
+          if (_selectedCostume != null && _totalPriceController.text.isEmpty && _selectedCostume!.rentPrice3Days > 0) {
+            _totalPriceController.text = _selectedCostume!.rentPrice3Days.toInt().toString();
+          }
         }
       });
     }
@@ -299,9 +302,9 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
 
       if (mounted) {
         setState(() => _isSaving = false);
+        _showSuccessSnack();
         widget.onBookingAdded();
         Navigator.of(context).pop();
-        _showSuccessSnack();
       }
     } catch (e) {
       if (mounted) {
@@ -652,6 +655,9 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                                 setState(() {
                                   _selectedCostume = c;
                                   _costumeError = null;
+                                  if (_totalPriceController.text.isEmpty && c.rentPrice3Days > 0) {
+                                    _totalPriceController.text = c.rentPrice3Days.toInt().toString();
+                                  }
                                 });
                               }
                             },

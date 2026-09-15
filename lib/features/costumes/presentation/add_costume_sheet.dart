@@ -244,6 +244,11 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
     try {
       await widget.repository.deleteCostume(widget.initialCostume!.id);
       if (!mounted) return;
+      IosToast.show(
+        context,
+        'Kostum "${widget.initialCostume!.name}" berhasil dihapus',
+        icon: CupertinoIcons.trash,
+      );
       Navigator.of(context).pop();
       widget.onDeleted?.call();
     } catch (e) {

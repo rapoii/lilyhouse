@@ -67,9 +67,9 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
 
     await widget.repository.addPaymentLog(log);
     if (!mounted) return;
+    IosToast.show(context, 'Pembayaran ${_formatCurrency(amount)} berhasil dicatat');
     Navigator.of(context).pop();
     widget.onSaved();
-    IosToast.show(context, 'Pembayaran ${_formatCurrency(amount)} berhasil dicatat');
   }
 
   @override

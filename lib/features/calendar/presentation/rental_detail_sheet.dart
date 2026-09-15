@@ -414,15 +414,14 @@ class RentalDetailSheet extends StatelessWidget {
             isDestructiveAction: true,
             onPressed: () async {
               Navigator.pop(dialogCtx);
-              Navigator.pop(context);
               if (repository != null) {
                 final updated = rental.copyWith(itemStatus: RentalItemStatus.cancelled);
                 await repository!.updateRental(updated);
                 onRentalUpdated?.call();
-                if (context.mounted) {
-                  IosToast.show(context, 'Booking berhasil dibatalkan');
-                }
               }
+              if (!context.mounted) return;
+              IosToast.show(context, 'Booking berhasil dibatalkan');
+              Navigator.pop(context);
             },
             child: const Text('Batalkan Booking'),
           ),
@@ -761,6 +760,39 @@ class RentalDetailSheet extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
                       ),
                       subtitle: const Text('Akun Media Sosial', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                      onTap: (custSosmed != '-')
+                          ? () {
+                              HapticFeedback.lightImpact();
+                              Clipboard.setData(ClipboardData(text: custSosmed));
+                              IosToast.show(context, 'Akun media sosial disalin');
+                            }
+                          : null,
+                      trailing: (custSosmed != '-')
+                          ? CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(32, 32),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                Clipboard.setData(ClipboardData(text: custSosmed));
+                                IosToast.show(context, 'Akun media sosial disalin');
+                              },
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.softPinkBg,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    CupertinoIcons.doc_on_doc,
+                                    size: 15,
+                                    color: AppColors.primaryPink,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : null,
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(
@@ -772,6 +804,39 @@ class RentalDetailSheet extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
                       ),
                       subtitle: const Text('Alamat Pengiriman / Domisili', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                      onTap: (custAddr != '-')
+                          ? () {
+                              HapticFeedback.lightImpact();
+                              Clipboard.setData(ClipboardData(text: custAddr));
+                              IosToast.show(context, 'Alamat disalin ke clipboard');
+                            }
+                          : null,
+                      trailing: (custAddr != '-')
+                          ? CupertinoButton(
+                              padding: EdgeInsets.zero,
+                              minimumSize: const Size(32, 32),
+                              onPressed: () {
+                                HapticFeedback.lightImpact();
+                                Clipboard.setData(ClipboardData(text: custAddr));
+                                IosToast.show(context, 'Alamat disalin ke clipboard');
+                              },
+                              child: Container(
+                                width: 32,
+                                height: 32,
+                                decoration: const BoxDecoration(
+                                  color: AppColors.softPinkBg,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Center(
+                                  child: Icon(
+                                    CupertinoIcons.doc_on_doc,
+                                    size: 15,
+                                    color: AppColors.primaryPink,
+                                  ),
+                                ),
+                              ),
+                            )
+                          : null,
                     ),
                   ],
                 ),
@@ -907,15 +972,14 @@ class RentalDetailSheet extends StatelessWidget {
                         subtitle: const Text('Kostum telah diserahkan atau dikirim ke penyewa', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                         trailing: const Icon(CupertinoIcons.checkmark_alt, size: 18, color: Color(0xFF289868)),
                         onTap: () async {
-                          Navigator.pop(context);
                           if (repository != null) {
                             final updated = rental.copyWith(itemStatus: RentalItemStatus.rented);
                             await repository!.updateRental(updated);
                             onRentalUpdated?.call();
-                            if (context.mounted) {
-                              IosToast.show(context, 'Status rental diubah ke "Sedang Disewa"');
-                            }
                           }
+                          if (!context.mounted) return;
+                          IosToast.show(context, 'Status rental diubah ke "Sedang Disewa"');
+                          Navigator.pop(context);
                         },
                       ),
 
@@ -935,15 +999,14 @@ class RentalDetailSheet extends StatelessWidget {
                         subtitle: const Text('Kostum telah diterima kembali dari penyewa', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                         trailing: const Icon(CupertinoIcons.checkmark_alt, size: 18, color: AppColors.primaryPink),
                         onTap: () async {
-                          Navigator.pop(context);
                           if (repository != null) {
                             final updated = rental.copyWith(itemStatus: RentalItemStatus.returned);
                             await repository!.updateRental(updated);
                             onRentalUpdated?.call();
-                            if (context.mounted) {
-                              IosToast.show(context, 'Status rental diubah ke "Sudah Dikembalikan"');
-                            }
                           }
+                          if (!context.mounted) return;
+                          IosToast.show(context, 'Status rental diubah ke "Sudah Dikembalikan"');
+                          Navigator.pop(context);
                         },
                       ),
 
@@ -962,15 +1025,14 @@ class RentalDetailSheet extends StatelessWidget {
                         subtitle: const Text('Catat bahwa seluruh biaya sewa telah dilunasi', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                         trailing: const Icon(CupertinoIcons.checkmark_alt, size: 18, color: Color(0xFF289868)),
                         onTap: () async {
-                          Navigator.pop(context);
                           if (repository != null) {
                             final updated = rental.copyWith(paymentStatus: RentalPaymentStatus.paid);
                             await repository!.updateRental(updated);
                             onRentalUpdated?.call();
-                            if (context.mounted) {
-                              IosToast.show(context, 'Pembayaran rental berhasil ditandai Lunas');
-                            }
                           }
+                          if (!context.mounted) return;
+                          IosToast.show(context, 'Pembayaran rental berhasil ditandai Lunas');
+                          Navigator.pop(context);
                         },
                       ),
 

@@ -87,8 +87,8 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
               Navigator.pop(ctx);
               await widget.repository.deleteInstallment(inst.id);
               if (!mounted) return;
-              Navigator.pop(context);
               IosToast.show(context, 'Cicilan "${inst.itemName}" berhasil dihapus', icon: CupertinoIcons.trash);
+              Navigator.pop(context);
             },
             child: const Text('Hapus'),
           ),
