@@ -87,6 +87,26 @@ void main() {
       final deleted = await repository.getCustomerById('cust_101');
       expect(deleted, isNull);
     });
+
+    test('deleteCustomer throws StateError when customer has active rentals', () async {
+      await repository.insertCustomer(testCustomer);
+      await repository.insertRental(Rental(
+        id: 'rent_active_guard',
+        costumeId: 'cos_guard',
+        customerId: 'cust_101',
+        startDate: DateTime(2026, 9, 20),
+        endDate: DateTime(2026, 9, 23),
+        durationDays: 4,
+        purpose: 'event',
+        totalPrice: 200000.0,
+        itemStatus: RentalItemStatus.booked,
+      ));
+
+      expect(() => repository.deleteCustomer('cust_101'), throwsStateError);
+
+      final stillExists = await repository.getCustomerById('cust_101');
+      expect(stillExists, isNotNull);
+    });
   });
 
   group('RentalRepository Rental CRUD & Filtering', () {

@@ -49,8 +49,8 @@ class Installment {
     this.dueDate,
     InstallmentStatus? status,
     this.syncStatus = 'pending',
-  })  : remainingBalance = remainingBalance ?? ((totalCost - totalPaid) > 0 ? (totalCost - totalPaid) : 0.0),
-        status = status ?? (totalPaid >= totalCost && totalCost > 0 ? InstallmentStatus.paidOff : InstallmentStatus.ongoing);
+  })  : remainingBalance = remainingBalance ?? ((totalCost - totalPaid) > 0.009 ? (totalCost - totalPaid) : 0.0),
+        status = status ?? ((totalCost - totalPaid) <= 0.01 && totalCost > 0 ? InstallmentStatus.paidOff : InstallmentStatus.ongoing);
 
   double get progress {
     if (totalCost <= 0) return 0.0;
@@ -60,12 +60,13 @@ class Installment {
     return p;
   }
 
-  bool get isPaidOff => remainingBalance <= 0 && totalPaid >= totalCost && totalCost > 0;
+  bool get isPaidOff => remainingBalance <= 0.01 && totalPaid >= (totalCost - 0.01) && totalCost > 0;
 
   Installment recalculateWithLogs(List<InstallmentLog> logs) {
     final newTotalPaid = logs.fold<double>(0.0, (sum, log) => sum + log.amountPaid);
-    final newRemaining = (totalCost - newTotalPaid) > 0 ? (totalCost - newTotalPaid) : 0.0;
-    final newStatus = (newRemaining == 0.0 && totalCost > 0) ? InstallmentStatus.paidOff : InstallmentStatus.ongoing;
+    final rawRemaining = totalCost - newTotalPaid;
+    final newRemaining = rawRemaining > 0.009 ? rawRemaining : 0.0;
+    final newStatus = (newRemaining <= 0.01 && totalCost > 0) ? InstallmentStatus.paidOff : InstallmentStatus.ongoing;
 
     return copyWith(
       totalPaid: newTotalPaid,

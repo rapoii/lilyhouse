@@ -71,9 +71,15 @@ void main() {
       expect(hasConflict, isFalse);
     });
 
-    test('ignores cancelled rentals when detecting conflicts', () {
+    test('ignores cancelled, returned, and completed rentals when detecting conflicts', () {
       final cancelledRental = existingRental.copyWith(
         itemStatus: RentalItemStatus.cancelled,
+      );
+      final returnedRental = existingRental.copyWith(
+        itemStatus: RentalItemStatus.returned,
+      );
+      final completedRental = existingRental.copyWith(
+        itemStatus: RentalItemStatus.completed,
       );
 
       final candidate = Rental(
@@ -87,8 +93,9 @@ void main() {
         totalPrice: 150000.0,
       );
 
-      final hasConflict = BookingConflictEngine.hasConflict([cancelledRental], candidate);
-      expect(hasConflict, isFalse);
+      expect(BookingConflictEngine.hasConflict([cancelledRental], candidate), isFalse);
+      expect(BookingConflictEngine.hasConflict([returnedRental], candidate), isFalse);
+      expect(BookingConflictEngine.hasConflict([completedRental], candidate), isFalse);
     });
 
     test('ignores self when editing an existing rental (same id)', () {

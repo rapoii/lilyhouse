@@ -14,6 +14,7 @@ abstract class IRentalRepository {
   Future<List<Customer>> searchCustomers(String query);
   Future<int> updateCustomer(Customer customer);
   Future<int> deleteCustomer(String id);
+  Future<int> getActiveRentalsCountByCustomer(String customerId);
 
   // Rentals
   Future<int> insertRental(Rental rental);
@@ -121,7 +122,27 @@ class RentalRepository implements IRentalRepository {
   }
 
   @override
+  Future<int> getActiveRentalsCountByCustomer(String customerId) async {
+    final database = await _db;
+    try {
+      final result = await database.rawQuery(
+        'SELECT COUNT(*) as count FROM ${AppTables.rentals} '
+        'WHERE customer_id = ? AND item_status NOT IN (?, ?)',
+        [customerId, RentalItemStatus.completed.toSqliteString(), RentalItemStatus.cancelled.toSqliteString()],
+      );
+      if (result.isEmpty) return 0;
+      return (result.first['count'] as num?)?.toInt() ?? 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  @override
   Future<int> deleteCustomer(String id) async {
+    final activeRentals = await getActiveRentalsCountByCustomer(id);
+    if (activeRentals > 0) {
+      throw StateError('Tidak dapat menghapus pelanggan yang masih memiliki $activeRentals jadwal sewa aktif.');
+    }
     final database = await _db;
     final result = await database.delete(
       AppTables.customers,
@@ -171,25 +192,21 @@ class RentalRepository implements IRentalRepository {
 
   @override
   Future<List<Rental>> getRentalsForDate(DateTime date) async {
-    final all = await getAllRentals();
-    final target = DateTime(date.year, date.month, date.day);
-    return all.where((r) {
-      final s = DateTime(r.startDate.year, r.startDate.month, r.startDate.day);
-      final e = DateTime(r.endDate.year, r.endDate.month, r.endDate.day);
-      return !target.isBefore(s) && !target.isAfter(e);
-    }).toList();
+    return getRentalsByDateRange(date, date);
   }
 
   @override
   Future<List<Rental>> getRentalsByDateRange(DateTime start, DateTime end) async {
-    final all = await getAllRentals();
-    final startDay = DateTime(start.year, start.month, start.day);
-    final endDay = DateTime(end.year, end.month, end.day);
-    return all.where((r) {
-      final s = DateTime(r.startDate.year, r.startDate.month, r.startDate.day);
-      final e = DateTime(r.endDate.year, r.endDate.month, r.endDate.day);
-      return !s.isAfter(endDay) && !e.isBefore(startDay);
-    }).toList();
+    final database = await _db;
+    final startDayStr = DateTime(start.year, start.month, start.day, 0, 0, 0).toIso8601String();
+    final endDayStr = DateTime(end.year, end.month, end.day, 23, 59, 59, 999).toIso8601String();
+    final results = await database.query(
+      AppTables.rentals,
+      where: 'start_date <= ? AND end_date >= ?',
+      whereArgs: [endDayStr, startDayStr],
+      orderBy: 'start_date ASC',
+    );
+    return results.map((m) => Rental.fromSqlite(m)).toList();
   }
 
   @override

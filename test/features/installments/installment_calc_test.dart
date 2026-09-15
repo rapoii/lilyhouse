@@ -148,5 +148,25 @@ void main() {
       expect(fromMap.notes, equals(log.notes));
       expect(fromMap.syncStatus, equals(log.syncStatus));
     });
+
+    test('Handles floating-point precision differences cleanly when marking paidOff', () {
+      final base = Installment(
+        id: 'inst-float',
+        itemName: 'Wig Special',
+        storeName: 'Aliexpress',
+        totalCost: 100.0,
+        totalPaid: 0.0,
+      );
+
+      final logs = [
+        InstallmentLog(id: 'l1', installmentId: 'inst-float', paymentDate: DateTime.now(), amountPaid: 33.33333333333333),
+        InstallmentLog(id: 'l2', installmentId: 'inst-float', paymentDate: DateTime.now(), amountPaid: 33.33333333333333),
+        InstallmentLog(id: 'l3', installmentId: 'inst-float', paymentDate: DateTime.now(), amountPaid: 33.33333333333333),
+      ];
+
+      final recalculated = base.recalculateWithLogs(logs);
+      expect(recalculated.isPaidOff, isTrue);
+      expect(recalculated.status, equals(InstallmentStatus.paidOff));
+    });
   });
 }

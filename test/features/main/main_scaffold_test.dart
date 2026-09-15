@@ -68,6 +68,8 @@ class MockRentalRepository implements IRentalRepository {
   Future<int> updateCustomer(Customer customer) async => 1;
   @override
   Future<int> deleteCustomer(String id) async => 1;
+  @override
+  Future<int> getActiveRentalsCountByCustomer(String customerId) async => 0;
 
   @override
   Future<int> insertRental(Rental rental) async => 1;

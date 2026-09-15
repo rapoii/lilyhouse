@@ -18,8 +18,10 @@ class BookingConflictEngine {
         return false;
       }
 
-      // Ignore cancelled bookings
-      if (existing.itemStatus == RentalItemStatus.cancelled) {
+      // Ignore cancelled, returned, or completed bookings (costume is back in inventory or booking voided)
+      if (existing.itemStatus == RentalItemStatus.cancelled ||
+          existing.itemStatus == RentalItemStatus.returned ||
+          existing.itemStatus == RentalItemStatus.completed) {
         return false;
       }
 
