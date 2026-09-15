@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/pressable_card.dart';
 import '../../domain/costume.dart';
 
 class CostumeCard extends StatelessWidget {
@@ -83,9 +84,8 @@ class CostumeCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final statusData = _getStatusBadgeData(costume.status);
 
-    return GestureDetector(
+    return PressableCard(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

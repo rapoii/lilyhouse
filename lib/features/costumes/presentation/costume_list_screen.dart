@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../../../core/sync/sync_manager.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/animated_list_item.dart';
 import '../../../core/widgets/header_action_button.dart';
+import '../../../core/widgets/state_crossfade.dart';
 import '../data/costume_repository.dart';
 import '../domain/costume.dart';
 import 'widgets/costume_card.dart';
@@ -29,6 +31,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
 
   List<Costume> _costumes = [];
   bool _isLoading = true;
+  UniqueKey _listKey = UniqueKey();
   CostumeStatus? _selectedStatus;
   String? _selectedSize;
   String? _selectedSeries;
@@ -68,6 +71,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
       setState(() {
         _costumes = results;
         _isLoading = false;
+        _listKey = UniqueKey();
       });
     }
   }
@@ -374,72 +378,78 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
 
           // Costume List Content
           Expanded(
-            child: _isLoading
-                ? const Center(
-                    child: CupertinoActivityIndicator(radius: 14),
-                  )
-                : _costumes.isEmpty
-                    ? Column(
-                        // Flex-based optical centering: content at 1/3 from
-                        // top of available area (Apple HIG empty-state
-                        // position). Same device-agnostic pattern as Cicilan
-                        // for visual consistency across empty states.
-                        children: [
-                          const Spacer(flex: 5),
-                          Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 72,
-                                  height: 72,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryPink.withValues(alpha: 0.12),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    CupertinoIcons.sparkles,
-                                    size: 36,
-                                    color: AppColors.primaryPink,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'Belum ada kostum',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textDark,
-                                  ),
-                                ),
-                              ],
+            child: StateCrossfade(
+              isLoading: _isLoading,
+              isEmpty: _costumes.isEmpty,
+              loadingChild: const Center(
+                child: CupertinoActivityIndicator(radius: 14),
+              ),
+              emptyChild: Column(
+                // Flex-based optical centering: content at 1/3 from
+                // top of available area (Apple HIG empty-state
+                // position). Same device-agnostic pattern as Cicilan
+                // for visual consistency across empty states.
+                children: [
+                  const Spacer(flex: 5),
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryPink.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            CupertinoIcons.sparkles,
+                            size: 36,
+                            color: AppColors.primaryPink,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Belum ada kostum',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Spacer(flex: 8),
+                ],
+              ),
+              contentChild: ListView.separated(
+                key: _listKey,
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 112),
+                itemCount: _costumes.length,
+                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final costume = _costumes[index];
+                  return AnimatedListItem(
+                    index: index,
+                    child: CostumeCard(
+                      costume: costume,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          CupertinoPageRoute(
+                            builder: (_) => CostumeDetailScreen(
+                              costume: costume,
+                              repository: _repository,
                             ),
                           ),
-                          const Spacer(flex: 8),
-                        ],
-                      )
-                    : ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 16, 16, 112),
-                        itemCount: _costumes.length,
-                        separatorBuilder: (context, index) => const SizedBox(height: 12),
-                        itemBuilder: (context, index) {
-                          final costume = _costumes[index];
-                          return CostumeCard(
-                            costume: costume,
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                CupertinoPageRoute(
-                                  builder: (_) => CostumeDetailScreen(
-                                    costume: costume,
-                                    repository: _repository,
-                                  ),
-                                ),
-                              ).then((_) => _fetchCostumes());
-                            },
-                          );
-                        },
-                      ),
+                        ).then((_) => _fetchCostumes());
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
           ),
         ],
       ),

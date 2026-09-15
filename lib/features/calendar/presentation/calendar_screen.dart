@@ -6,6 +6,7 @@ import 'package:table_calendar/table_calendar.dart';
 import '../../../core/sync/sync_manager.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/animated_list_item.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/header_action_button.dart';
 import '../../../core/widgets/squircle_icon.dart';
@@ -47,6 +48,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Map<String, Customer> _customerCache = {};
   Map<String, Costume> _costumeCache = {};
   bool _isLoading = true;
+  UniqueKey _slotsKey = UniqueKey();
 
   @override
   void initState() {
@@ -292,6 +294,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         setState(() {
                           _selectedDay = selectedDay;
                           _focusedDay = focusedDay;
+                          _slotsKey = UniqueKey();
                         });
                       },
                       onPageChanged: (focusedDay) {
@@ -428,24 +431,30 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                     )
                   else
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                      itemCount: selectedDayRentals.length,
-                      itemBuilder: (context, index) {
-                        final rental = selectedDayRentals[index];
-                        final customer = _customerCache[rental.customerId];
-                        final costume = _costumeCache[rental.costumeId];
-                        return _RentalSlotCard(
-                          rental: rental,
-                          customer: customer,
-                          costume: costume,
-                          allRentals: _allRentals,
-                          repository: _repository,
-                          onRentalUpdated: _loadData,
-                        );
-                      },
+                    KeyedSubtree(
+                      key: _slotsKey,
+                      child: ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                        itemCount: selectedDayRentals.length,
+                        itemBuilder: (context, index) {
+                          final rental = selectedDayRentals[index];
+                          final customer = _customerCache[rental.customerId];
+                          final costume = _costumeCache[rental.costumeId];
+                          return AnimatedListItem(
+                            index: index,
+                            child: _RentalSlotCard(
+                              rental: rental,
+                              customer: customer,
+                              costume: costume,
+                              allRentals: _allRentals,
+                              repository: _repository,
+                              onRentalUpdated: _loadData,
+                            ),
+                          );
+                        },
+                      ),
                     ),
 
                   const SizedBox(height: 112),

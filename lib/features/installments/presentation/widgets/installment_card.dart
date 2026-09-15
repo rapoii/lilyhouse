@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/pressable_card.dart';
 import '../../domain/installment.dart';
 
 class InstallmentCard extends StatelessWidget {
@@ -24,9 +25,8 @@ class InstallmentCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDone = installment.isPaidOff;
 
-    return GestureDetector(
+    return PressableCard(
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
       child: Container(
         decoration: BoxDecoration(
           color: Colors.white,

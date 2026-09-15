@@ -792,18 +792,24 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: statusColor,
                 ),
                 title: const Text('Status Koneksi', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: statusColor.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Text(
-                    statusBadge,
-                    style: TextStyle(
-                      color: statusColor,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                additionalInfo: AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 220),
+                  switchInCurve: Curves.easeOutCubic,
+                  transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                  child: Container(
+                    key: ValueKey(statusBadge),
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      statusBadge,
+                      style: TextStyle(
+                        color: statusColor,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ),
@@ -848,9 +854,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               // Row 4: Action Button (Sinkronkan Sekarang)
               CupertinoListTile(
                 title: Center(
-                  child: syncState.status == SyncStatus.syncing
-                      ? Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 220),
+                    switchInCurve: Curves.easeOutCubic,
+                    transitionBuilder: (child, animation) => FadeTransition(opacity: animation, child: child),
+                    child: syncState.status == SyncStatus.syncing
+                        ? Row(
+                            key: const ValueKey('syncing'),
+                            mainAxisAlignment: MainAxisAlignment.center,
                           children: const [
                             CupertinoActivityIndicator(radius: 8),
                             SizedBox(width: 8),
@@ -864,14 +875,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             ),
                           ],
                         )
-                      : const Text(
+                      : Text(
+                          key: const ValueKey('idle'),
                           'Sinkronkan Sekarang',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: AppColors.primaryPink,
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
                         ),
+                  ),
                 ),
                 onTap: syncState.status == SyncStatus.syncing ? null : _handleSync,
               ),
@@ -952,7 +965,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.70', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.71', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),

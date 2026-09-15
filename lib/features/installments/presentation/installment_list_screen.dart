@@ -8,6 +8,8 @@ import '../../../core/widgets/header_action_button.dart';
 import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
+import '../../../core/widgets/animated_list_item.dart';
+import '../../../core/widgets/state_crossfade.dart';
 import '../data/installment_repository.dart';
 import '../domain/installment.dart';
 import '../domain/installment_log.dart';
@@ -34,6 +36,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
   bool _isLoading = true;
   InstallmentStatus? _selectedStatus;
   String _selectedSortBy = 'due_date_asc';
+  UniqueKey _listKey = UniqueKey();
 
   static const _months = [
     '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
@@ -72,6 +75,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
       setState(() {
         _installments = items;
         _isLoading = false;
+        _listKey = UniqueKey();
       });
     }
   }
@@ -589,74 +593,73 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
           ),
           // Content
           Expanded(
-            child: _isLoading
-                ? const Center(child: CupertinoActivityIndicator(radius: 14))
-                : _installments.isEmpty
-                    ? Column(
-                        // Flex-based optical centering: 1 part above content,
-                        // 1 part the content, 2 parts below = content sits at
-                        // 25% from the top of the available area (Apple HIG
-                        // empty-state position). Scales to any screen — no
-                        // magic pixels, no MediaQuery dance. The bottom Spacer
-                        // is naturally larger to leave breathing room above
-                        // the floating nav.
-                        children: [
-                          const Spacer(flex: 5),
-                          Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 72,
-                                  height: 72,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.primaryPink.withValues(alpha: 0.12),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(
-                                    CupertinoIcons.creditcard,
-                                    size: 36,
-                                    color: AppColors.primaryPink,
-                                  ),
-                                ),
-                                const SizedBox(height: 16),
-                                const Text(
-                                  'Belum ada daftar cicilan',
-                                  textAlign: TextAlign.center,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textDark,
-                                  ),
-                                ),
-                              ],
-                            ),
+            child: StateCrossfade(
+              isLoading: _isLoading,
+              isEmpty: _installments.isEmpty,
+              loadingChild: const Center(child: CupertinoActivityIndicator(radius: 14)),
+              emptyChild: Column(
+                children: [
+                  const Spacer(flex: 5),
+                  Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 72,
+                          height: 72,
+                          decoration: BoxDecoration(
+                            color: AppColors.primaryPink.withValues(alpha: 0.12),
+                            shape: BoxShape.circle,
                           ),
-                          const Spacer(flex: 8),
-                        ],
-                      )
-                    : CustomScrollView(
-                        physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                        slivers: [
-                          CupertinoSliverRefreshControl(
-                            onRefresh: _loadInstallments,
+                          child: const Icon(
+                            CupertinoIcons.creditcard,
+                            size: 36,
+                            color: AppColors.primaryPink,
                           ),
-                          SliverPadding(
-                            padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 112.0),
-                            sliver: SliverList.separated(
-                              itemCount: _installments.length,
-                              separatorBuilder: (context, index) => const SizedBox(height: 14),
-                              itemBuilder: (context, index) {
-                                final item = _installments[index];
-                                return InstallmentCard(
-                                  installment: item,
-                                  onTap: () => _showLedgerDetailSheet(item),
-                                );
-                              },
-                            ),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          'Belum ada daftar cicilan',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textDark,
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Spacer(flex: 8),
+                ],
+              ),
+              contentChild: CustomScrollView(
+                key: _listKey,
+                physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                slivers: [
+                  CupertinoSliverRefreshControl(
+                    onRefresh: _loadInstallments,
+                  ),
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 112.0),
+                    sliver: SliverList.separated(
+                      itemCount: _installments.length,
+                      separatorBuilder: (context, index) => const SizedBox(height: 14),
+                      itemBuilder: (context, index) {
+                        final item = _installments[index];
+                        return AnimatedListItem(
+                          index: index,
+                          child: InstallmentCard(
+                            installment: item,
+                            onTap: () => _showLedgerDetailSheet(item),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ],
       ),
