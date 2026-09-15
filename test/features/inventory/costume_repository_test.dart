@@ -20,6 +20,7 @@ void main() {
         onCreate: (db, version) async {
           await db.execute(AppTables.createCostumes);
           await db.execute(AppTables.createAccessories);
+          await db.execute(AppTables.createRentals);
           await db.execute(AppTables.createSyncQueue);
         },
       ),
@@ -94,6 +95,37 @@ void main() {
       await repository.deleteCostume('cos-3');
       final retrieved = await repository.getCostumeById('cos-3');
       expect(retrieved, isNull);
+    });
+
+    test('deleteCostume throws StateError if costume has active rentals', () async {
+      final costume = Costume(
+        id: 'cos-active',
+        name: 'Active Rented Costume',
+        animeSeries: 'Test',
+        size: 'L',
+        rentPrice3Days: 100000.0,
+      );
+      await repository.insertCostume(costume);
+
+      // Insert active rental for this costume
+      await testDb.insert(AppTables.rentals, {
+        'id': 'rent-1',
+        'costume_id': 'cos-active',
+        'customer_id': 'cust-1',
+        'start_date': '2026-09-15T00:00:00.000',
+        'end_date': '2026-09-18T00:00:00.000',
+        'duration_days': 3,
+        'purpose': 'rent',
+        'total_price': 100000.0,
+        'dp_amount': 50000.0,
+        'payment_status': 'dp_paid',
+        'item_status': 'rented',
+      });
+
+      expect(
+        () => repository.deleteCostume('cos-active'),
+        throwsA(isA<StateError>()),
+      );
     });
   });
 

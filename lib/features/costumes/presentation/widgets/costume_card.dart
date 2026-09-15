@@ -38,7 +38,11 @@ class CostumeCard extends StatelessWidget {
         ),
       );
     }
-    if (path.startsWith('/') || path.startsWith('file:') || File(path).existsSync()) {
+    // Check if path looks like a local filesystem path (POSIX, Windows drive letter, or file:// URI)
+    final isLocalFile = path.startsWith('/') ||
+        path.startsWith('file:') ||
+        (path.length >= 2 && path[1] == ':');
+    if (isLocalFile) {
       final cleanPath = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
       return Image.file(
         File(cleanPath),

@@ -227,7 +227,40 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
     }
   }
 
-  void _confirmDeleteCostume() {
+  Future<void> _confirmDeleteCostume() async {
+    final costumeId = widget.initialCostume?.id;
+    if (costumeId != null) {
+      final activeCount = await widget.repository.getActiveRentalsCount(costumeId);
+      if (!mounted) return;
+      if (activeCount > 0) {
+        HapticFeedback.mediumImpact();
+        showCupertinoDialog<void>(
+          context: context,
+          builder: (ctx) => CupertinoAlertDialog(
+            title: const Text('Tidak Dapat Dihapus'),
+            content: Text(
+              'Kostum "${_nameController.text.trim()}" masih memiliki $activeCount jadwal sewa aktif atau booking di kalender. Selesaikan atau batalkan jadwal sewa terlebih dahulu.',
+            ),
+            actions: [
+              CupertinoDialogAction(
+                isDefaultAction: true,
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text(
+                  'Mengerti',
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryPink,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
+    }
+
     showCupertinoDialog<void>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(

@@ -35,6 +35,8 @@ class RestoreResult {
 }
 
 class SyncService {
+  static const Duration _httpTimeout = Duration(seconds: 25);
+
   final String endpointUrl;
   final DatabaseHelper dbHelper;
   final http.Client _client;
@@ -51,7 +53,9 @@ class SyncService {
     Map<String, String>? headers,
     Object? body,
   }) async {
-    final initialResponse = await _client.post(uri, headers: headers, body: body);
+    final initialResponse = await _client
+        .post(uri, headers: headers, body: body)
+        .timeout(_httpTimeout);
     if ((initialResponse.statusCode == 301 ||
             initialResponse.statusCode == 302 ||
             initialResponse.statusCode == 303 ||
@@ -59,7 +63,9 @@ class SyncService {
             initialResponse.statusCode == 308) &&
         initialResponse.headers.containsKey('location')) {
       final redirectUrl = initialResponse.headers['location']!;
-      return await _client.get(Uri.parse(redirectUrl));
+      return await _client
+          .get(Uri.parse(redirectUrl))
+          .timeout(_httpTimeout);
     }
     return initialResponse;
   }
@@ -240,7 +246,7 @@ class SyncService {
       }
 
       final uri = Uri.parse(endpointUrl).replace(queryParameters: {'action': 'fetch_all'});
-      final response = await _client.get(uri);
+      final response = await _client.get(uri).timeout(_httpTimeout);
 
       if (response.statusCode != 200) {
         return SyncResult(
@@ -326,7 +332,7 @@ class SyncService {
       }
 
       final uri = Uri.parse(endpointUrl).replace(queryParameters: {'action': 'fetch_all'});
-      final response = await _client.get(uri);
+      final response = await _client.get(uri).timeout(_httpTimeout);
 
       if (response.statusCode != 200) {
         return RestoreResult(

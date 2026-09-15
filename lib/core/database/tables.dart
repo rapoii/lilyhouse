@@ -113,4 +113,16 @@ class AppTables {
       created_at TEXT NOT NULL
     );
   ''';
+
+  static const List<String> createIndexes = [
+    'CREATE INDEX IF NOT EXISTS idx_rentals_costume ON rentals(costume_id);',
+    'CREATE INDEX IF NOT EXISTS idx_rentals_customer ON rentals(customer_id);',
+    'CREATE INDEX IF NOT EXISTS idx_rentals_dates ON rentals(start_date, end_date);',
+    'CREATE INDEX IF NOT EXISTS idx_rentals_item_status ON rentals(item_status);',
+    'CREATE INDEX IF NOT EXISTS idx_costumes_status ON costumes(status);',
+    'CREATE INDEX IF NOT EXISTS idx_costumes_series ON costumes(anime_series);',
+    'CREATE INDEX IF NOT EXISTS idx_accessories_costume ON accessories(related_costume_id);',
+    'CREATE INDEX IF NOT EXISTS idx_installment_logs_inst ON installment_logs(installment_id);',
+    'CREATE INDEX IF NOT EXISTS idx_installments_status ON installments(status);',
+  ];
 }

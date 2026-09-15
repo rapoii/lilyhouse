@@ -10,6 +10,7 @@ import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../../costumes/domain/costume.dart';
+import '../../costumes/presentation/costume_detail_screen.dart';
 import '../../rentals/data/rental_repository.dart';
 import '../../rentals/domain/customer.dart';
 import '../../rentals/domain/rental.dart';
@@ -635,6 +636,42 @@ class RentalDetailSheet extends StatelessWidget {
                             ],
                           ),
                         ),
+                        if (costume != null) ...[
+                          const SizedBox(height: 10),
+                          Container(
+                            height: 0.5,
+                            color: AppColors.borderSubtle,
+                          ),
+                          const SizedBox(height: 6),
+                          CupertinoButton(
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(0, 36),
+                            onPressed: () {
+                              HapticFeedback.lightImpact();
+                              Navigator.of(context).push(
+                                CupertinoPageRoute(
+                                  builder: (_) => CostumeDetailScreen(costume: costume!),
+                                ),
+                              );
+                            },
+                            child: const Row(
+                              children: [
+                                Icon(CupertinoIcons.info_circle_fill, size: 16, color: AppColors.primaryPink),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Lihat Detail & Kelengkapan Kostum',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primaryPink,
+                                  ),
+                                ),
+                                Spacer(),
+                                Icon(CupertinoIcons.chevron_right, size: 13, color: Color(0xFFC7C7CC)),
+                              ],
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),

@@ -123,6 +123,9 @@ class MockCostumeRepository implements ICostumeRepository {
     _accessories.removeWhere((a) => a.id == id);
     return 1;
   }
+
+  @override
+  Future<int> getActiveRentalsCount(String costumeId) async => 0;
 }
 
 void main() {

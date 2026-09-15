@@ -47,6 +47,8 @@ class MockCostumeRepository implements ICostumeRepository {
   Future<int> updateAccessory(Accessory accessory) async => 1;
   @override
   Future<int> deleteAccessory(String id) async => 1;
+  @override
+  Future<int> getActiveRentalsCount(String costumeId) async => 0;
 }
 
 class MockRentalRepository implements IRentalRepository {

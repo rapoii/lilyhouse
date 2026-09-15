@@ -34,7 +34,15 @@ class DatabaseHelper {
     return await openDatabase(
       path,
       version: _dbVersion,
+      onConfigure: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON;');
+      },
       onCreate: _onCreate,
+      onOpen: (db) async {
+        for (final idx in AppTables.createIndexes) {
+          await db.execute(idx);
+        }
+      },
     );
   }
 
@@ -46,6 +54,9 @@ class DatabaseHelper {
     await db.execute(AppTables.createInstallments);
     await db.execute(AppTables.createInstallmentLogs);
     await db.execute(AppTables.createSyncQueue);
+    for (final idx in AppTables.createIndexes) {
+      await db.execute(idx);
+    }
   }
 
   Future<void> close() async {
