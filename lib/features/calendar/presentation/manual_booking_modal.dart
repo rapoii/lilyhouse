@@ -217,7 +217,23 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       _costumeError = okCostume ? null : 'Pilih kostum dulu';
       _dateError = okDate ? null : 'Tanggal selesai harus setelah mulai';
     });
-    return okName && okPhone && okCostume && okDate;
+    if (!okName) {
+      _showErrorSnack('Nama penyewa wajib diisi');
+      return false;
+    }
+    if (!okPhone) {
+      _showErrorSnack('Nomor WhatsApp wajib diisi');
+      return false;
+    }
+    if (!okCostume) {
+      _showErrorSnack('Pilih kostum yang akan disewa');
+      return false;
+    }
+    if (!okDate) {
+      _showErrorSnack('Tanggal selesai harus setelah tanggal mulai');
+      return false;
+    }
+    return true;
   }
 
   Future<void> _save() async {
@@ -614,8 +630,8 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                               if (hadFocus) {
                                 FocusScope.of(context).unfocus();
                                 await Future<void>.delayed(const Duration(milliseconds: 150));
-                                if (!mounted) return;
                               }
+                              if (!mounted || !context.mounted) return;
                               final id = await showSheetPicker<String>(
                                 context: context,
                                 title: 'Pilih Kostum',
@@ -663,8 +679,8 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         if (hadFocus) {
                           FocusScope.of(context).unfocus();
                           await Future<void>.delayed(const Duration(milliseconds: 150));
-                          if (!mounted) return;
                         }
+                        if (!mounted || !context.mounted) return;
                         final d = await showSheetDatePicker(
                           context: context,
                           title: 'Tanggal Mulai',
@@ -716,8 +732,8 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         if (hadFocus) {
                           FocusScope.of(context).unfocus();
                           await Future<void>.delayed(const Duration(milliseconds: 150));
-                          if (!mounted) return;
                         }
+                        if (!mounted || !context.mounted) return;
                         final d = await showSheetDatePicker(
                           context: context,
                           title: 'Tanggal Selesai',
@@ -756,8 +772,8 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         if (hadFocus) {
                           FocusScope.of(context).unfocus();
                           await Future<void>.delayed(const Duration(milliseconds: 150));
-                          if (!mounted) return;
                         }
+                        if (!mounted || !context.mounted) return;
                         const items = [
                           SheetPickerItem('homecos', 'Homecos (Pakai Sendiri)'),
                           SheetPickerItem('event', 'Event Cosplay'),

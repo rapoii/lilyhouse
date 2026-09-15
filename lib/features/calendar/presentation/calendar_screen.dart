@@ -9,6 +9,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/animated_list_item.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/header_action_button.dart';
+import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../../costumes/data/costume_repository.dart';
 import '../../costumes/domain/costume.dart';
@@ -457,7 +458,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                     ),
 
-                  const SizedBox(height: 112),
+                  const SizedBox(height: 160),
                 ],
               ),
             ),
@@ -482,6 +483,14 @@ class _RentalSlotCard extends StatelessWidget {
     this.onRentalUpdated,
   });
 
+  String _formatCurrency(double amount) {
+    final parts = amount.toInt().toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]}.',
+        );
+    return 'Rp $parts';
+  }
+
   void _showRentalDetailSheet(BuildContext context, bool hasConflict) {
     showCupertinoModalPopup<void>(
       context: context,
@@ -501,7 +510,7 @@ class _RentalSlotCard extends StatelessWidget {
     // Check if this rental has any conflict with other rentals
     final hasConflict = BookingConflictEngine.hasConflict(allRentals, rental);
 
-    return GestureDetector(
+    return PressableCard(
       onTap: () => _showRentalDetailSheet(context, hasConflict),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
@@ -581,7 +590,7 @@ class _RentalSlotCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Rp ${rental.totalPrice.toStringAsFixed(0)}',
+                  _formatCurrency(rental.totalPrice),
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,

@@ -425,7 +425,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
               ),
               contentChild: ListView.separated(
                 key: _listKey,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 112),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 160),
                 itemCount: _costumes.length,
                 separatorBuilder: (context, index) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {

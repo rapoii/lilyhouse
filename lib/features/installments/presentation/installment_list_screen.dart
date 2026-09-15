@@ -641,7 +641,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                     onRefresh: _loadInstallments,
                   ),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 112.0),
+                    padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 160.0),
                     sliver: SliverList.separated(
                       itemCount: _installments.length,
                       separatorBuilder: (context, index) => const SizedBox(height: 14),

@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/costume_repository.dart';
 import '../domain/costume.dart';
 import '../domain/accessory.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import 'add_costume_sheet.dart';
@@ -116,6 +118,84 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
     );
   }
 
+  void _showPhotoPreviewModal(
+    BuildContext context, {
+    required String title,
+    required String photoPath,
+  }) {
+    HapticFeedback.selectionClick();
+    showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => DraggableSheetContainer(
+        initialHeightFraction: 0.88,
+        maxHeightFraction: 0.96,
+        backgroundColor: const Color(0xFF1C1C1E),
+        onDismissed: () => Navigator.of(ctx).pop(),
+        builder: (sheetCtx) => CupertinoPageScaffold(
+          backgroundColor: const Color(0xFF1C1C1E),
+          navigationBar: CupertinoNavigationBar(
+            automaticallyImplyLeading: false,
+            backgroundColor: const Color(0xFF2C2C2E),
+            border: const Border(bottom: BorderSide(color: Color(0xFF38383A), width: 0.5)),
+            middle: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+              ),
+            ),
+            trailing: CupertinoButton(
+              padding: EdgeInsets.zero,
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text(
+                'Tutup',
+                style: TextStyle(
+                  color: AppColors.primaryPink,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+            ),
+          ),
+          child: SafeArea(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Center(
+                    child: InteractiveViewer(
+                      minScale: 0.8,
+                      maxScale: 5.0,
+                      child: _buildCoverPhoto(photoPath),
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  color: const Color(0xFF2C2C2E),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(CupertinoIcons.zoom_in, size: 14, color: Color(0xFF8E8E93)),
+                      SizedBox(width: 6),
+                      Text(
+                        'Cubit layar untuk zoom & geser foto',
+                        style: TextStyle(
+                          color: Color(0xFF8E8E93),
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   (Color bg, Color text, String label) _getStatusBadgeData(CostumeStatus status) {
     switch (status) {
       case CostumeStatus.available:
@@ -198,7 +278,45 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: _costume.coverPhoto != null && _costume.coverPhoto!.isNotEmpty
-                      ? _buildCoverPhoto(_costume.coverPhoto!)
+                      ? GestureDetector(
+                          onTap: () => _showPhotoPreviewModal(
+                            context,
+                            title: _costume.name,
+                            photoPath: _costume.coverPhoto!,
+                          ),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              _buildCoverPhoto(_costume.coverPhoto!),
+                              Positioned(
+                                right: 10,
+                                bottom: 10,
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: CupertinoColors.black.withValues(alpha: 0.6),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(CupertinoIcons.zoom_in, color: CupertinoColors.white, size: 12),
+                                      SizedBox(width: 4),
+                                      Text(
+                                        'Perbesar',
+                                        style: TextStyle(
+                                          color: CupertinoColors.white,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
                       : const Center(
                           child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
                         ),

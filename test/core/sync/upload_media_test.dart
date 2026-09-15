@@ -17,6 +17,5 @@ void main() {
 
     expect(url, isNotNull);
     expect(url, startsWith('https://drive.google.com/'));
-    print('Uploaded image Google Drive URL: $url');
   });
 }
