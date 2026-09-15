@@ -150,6 +150,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
           child: SafeArea(
             top: false,
             child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 40),
               physics: const BouncingScrollPhysics(),
               children: [

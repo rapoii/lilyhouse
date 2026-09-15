@@ -105,6 +105,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
           child: SafeArea(
             top: false,
             child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: EdgeInsets.fromLTRB(0, 12, 0, bottomInset + 32),
               physics: const BouncingScrollPhysics(),
               children: [

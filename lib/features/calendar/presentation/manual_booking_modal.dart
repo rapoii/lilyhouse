@@ -397,6 +397,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
             top: false,
             child: RepaintBoundary(
               child: ListView(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 24),
                 physics: const BouncingScrollPhysics(),
                 addRepaintBoundaries: false,

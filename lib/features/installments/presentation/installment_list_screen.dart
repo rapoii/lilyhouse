@@ -611,33 +611,93 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                 children: [
                   const Spacer(flex: 5),
                   Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Container(
-                          width: 72,
-                          height: 72,
-                          decoration: BoxDecoration(
-                            color: AppColors.primaryPink.withValues(alpha: 0.12),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.creditcard,
-                            size: 36,
-                            color: AppColors.primaryPink,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        const Text(
-                          'Belum ada daftar cicilan',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textDark,
-                          ),
-                        ),
-                      ],
+                    child: Builder(
+                      builder: (context) {
+                        final hasFilterOrQuery = _searchController.text.trim().isNotEmpty ||
+                            _selectedStatus != null ||
+                            _selectedSortBy != 'due_date_asc';
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 72,
+                              height: 72,
+                              decoration: BoxDecoration(
+                                color: AppColors.primaryPink.withValues(alpha: 0.12),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                hasFilterOrQuery ? CupertinoIcons.search : CupertinoIcons.creditcard,
+                                size: 36,
+                                color: AppColors.primaryPink,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              hasFilterOrQuery ? 'Tidak ada cicilan yang cocok' : 'Belum ada daftar cicilan',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.textDark,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              hasFilterOrQuery
+                                  ? 'Coba sesuaikan filter atau kata kunci pencarian'
+                                  : 'Catat cicilan kostum baru untuk memantau jatuh tempo',
+                              style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 14),
+                            if (hasFilterOrQuery)
+                              CupertinoButton(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                color: AppColors.softPinkBg,
+                                borderRadius: BorderRadius.circular(20),
+                                onPressed: () {
+                                  try {
+                                    HapticFeedback.lightImpact();
+                                  } catch (_) {}
+                                  _searchController.clear();
+                                  setState(() {
+                                    _selectedStatus = null;
+                                    _selectedSortBy = 'due_date_asc';
+                                  });
+                                  _loadInstallments();
+                                },
+                                child: const Text(
+                                  'Atur Ulang Filter',
+                                  style: TextStyle(color: AppColors.primaryPink, fontSize: 13, fontWeight: FontWeight.w600),
+                                ),
+                              )
+                            else
+                              CupertinoButton(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                color: AppColors.softPinkBg,
+                                borderRadius: BorderRadius.circular(20),
+                                onPressed: () {
+                                  try {
+                                    HapticFeedback.lightImpact();
+                                  } catch (_) {}
+                                  _showAddInstallmentDialog();
+                                },
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(CupertinoIcons.plus, size: 14, color: AppColors.primaryPink),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      'Tambah Cicilan',
+                                      style: TextStyle(color: AppColors.primaryPink, fontSize: 13, fontWeight: FontWeight.w600),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        );
+                      },
                     ),
                   ),
                   const Spacer(flex: 8),
@@ -645,6 +705,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
               ),
               contentChild: CustomScrollView(
                 key: _listKey,
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                 physics: const BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
                 slivers: [
                   CupertinoSliverRefreshControl(

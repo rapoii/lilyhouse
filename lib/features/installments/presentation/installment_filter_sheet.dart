@@ -113,6 +113,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
           child: SafeArea(
             top: false,
             child: ListView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 40),
               physics: const BouncingScrollPhysics(),
               children: [

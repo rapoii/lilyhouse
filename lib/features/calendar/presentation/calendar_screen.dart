@@ -10,6 +10,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/animated_list_item.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/header_action_button.dart';
+import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../../costumes/data/costume_repository.dart';
@@ -262,6 +263,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               child: CupertinoActivityIndicator(radius: 14),
             )
           : SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -429,6 +431,38 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textDark,
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            const Text(
+                              'Belum ada pesanan rental di tanggal ini',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Color(0xFF8E8E93),
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 14),
+                            CupertinoButton(
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              color: AppColors.softPinkBg,
+                              borderRadius: BorderRadius.circular(20),
+                              onPressed: () {
+                                try {
+                                  HapticFeedback.lightImpact();
+                                } catch (_) {}
+                                _openBookingEntrySheet();
+                              },
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(CupertinoIcons.plus, size: 14, color: AppColors.primaryPink),
+                                  SizedBox(width: 6),
+                                  Text(
+                                    'Tambah Booking',
+                                    style: TextStyle(color: AppColors.primaryPink, fontSize: 13, fontWeight: FontWeight.w600),
+                                  ),
+                                ],
                               ),
                             ),
                           ],
@@ -699,7 +733,17 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
   }
 
   Future<void> _handleParse() async {
-    final rawText = _textController.text;
+    final rawText = _textController.text.trim();
+    if (rawText.isEmpty) {
+      IosToast.show(
+        context,
+        'Tempel teks format sewa terlebih dahulu',
+        icon: CupertinoIcons.exclamationmark_circle_fill,
+        iconColor: AppColors.warningOrange,
+      );
+      return;
+    }
+    FocusScope.of(context).unfocus();
     final parsed = SmartFormParser.parse(rawText);
 
     bool conflict = false;
@@ -783,6 +827,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
           child: SafeArea(
             top: false,
             child: SingleChildScrollView(
+              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               physics: const BouncingScrollPhysics(),
               padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset + 32),
               child: Column(
