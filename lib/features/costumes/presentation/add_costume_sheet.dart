@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
@@ -152,8 +153,10 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
 
   Future<void> _save() async {
     final name = _nameController.text.trim();
-    final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
+    final rawPrice = _priceController.text.trim().replaceAll('.', '').replaceAll(',', '');
+    final price = double.tryParse(rawPrice) ?? 0.0;
     if (name.isEmpty) {
+      HapticFeedback.lightImpact();
       IosToast.show(
         context,
         'Nama kostum wajib diisi',
@@ -163,6 +166,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       return;
     }
     if (price <= 0) {
+      HapticFeedback.lightImpact();
       IosToast.show(
         context,
         'Tarif sewa harus lebih dari Rp 0',
@@ -652,11 +656,12 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                                 title: Text(acc, style: const TextStyle(fontSize: 15, color: AppColors.textDark, fontWeight: FontWeight.w500)),
                                 trailing: CupertinoButton(
                                   padding: EdgeInsets.zero,
-                                  minimumSize: Size.zero,
+                                  minimumSize: const Size(44, 44),
                                   onPressed: () {
+                                    HapticFeedback.lightImpact();
                                     setState(() => _accessories.removeAt(idx));
                                   },
-                                  child: const Icon(CupertinoIcons.minus_circle_fill, color: Color(0xFFFF3B30), size: 20),
+                                  child: const Icon(CupertinoIcons.minus_circle_fill, color: Color(0xFFFF3B30), size: 22),
                                 ),
                               );
                             }),

@@ -117,7 +117,9 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: _isSubmitting ? null : _submit,
-              child: const Text('Simpan', style: AppTypography.actionButton),
+              child: _isSubmitting
+                  ? const CupertinoActivityIndicator(radius: 10)
+                  : const Text('Simpan', style: AppTypography.actionButton),
             ),
           ),
           child: SafeArea(

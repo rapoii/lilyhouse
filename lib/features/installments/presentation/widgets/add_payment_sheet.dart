@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/draggable_sheet_container.dart';
@@ -48,8 +49,11 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
 
   Future<void> _submit() async {
     if (_isSaving) return;
-    final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
+
+    final rawText = _amountController.text.trim().replaceAll('.', '').replaceAll(',', '');
+    final amount = double.tryParse(rawText) ?? 0.0;
     if (amount <= 0) {
+      HapticFeedback.lightImpact();
       IosToast.show(
         context,
         'Nominal pembayaran harus lebih dari Rp 0',
@@ -59,21 +63,73 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
       return;
     }
 
+    if (widget.installment.remainingBalance <= 0) {
+      HapticFeedback.lightImpact();
+      IosToast.show(
+        context,
+        'Tagihan cicilan ini sudah lunas',
+        icon: CupertinoIcons.info_circle_fill,
+        iconColor: AppColors.primaryPink,
+      );
+      return;
+    }
+
+    if (amount > widget.installment.remainingBalance) {
+      HapticFeedback.selectionClick();
+      final proceed = await showCupertinoDialog<bool>(
+        context: context,
+        builder: (ctx) => CupertinoAlertDialog(
+          title: const Text('Nominal Melebihi Sisa'),
+          content: Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Text(
+              'Nominal ${_formatCurrency(amount)} melebihi sisa tagihan ${_formatCurrency(widget.installment.remainingBalance)}. Kelebihan pembayaran sebesar ${_formatCurrency(amount - widget.installment.remainingBalance)}. Tetap catat pembayaran ini?',
+            ),
+          ),
+          actions: [
+            CupertinoDialogAction(
+              onPressed: () => Navigator.of(ctx).pop(false),
+              child: const Text('Batal'),
+            ),
+            CupertinoDialogAction(
+              isDestructiveAction: true,
+              onPressed: () => Navigator.of(ctx).pop(true),
+              child: const Text('Tetap Catat'),
+            ),
+          ],
+        ),
+      );
+      if (proceed != true) return;
+    }
+
     setState(() => _isSaving = true);
 
-    final log = InstallmentLog(
-      id: 'log_${DateTime.now().millisecondsSinceEpoch}',
-      installmentId: widget.installment.id,
-      paymentDate: _selectedDate,
-      amountPaid: amount,
-      notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
-    );
+    try {
+      final log = InstallmentLog(
+        id: 'log_${DateTime.now().millisecondsSinceEpoch}',
+        installmentId: widget.installment.id,
+        paymentDate: _selectedDate,
+        amountPaid: amount,
+        notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
+      );
 
-    await widget.repository.addPaymentLog(log);
-    if (!mounted) return;
-    IosToast.show(context, 'Pembayaran ${_formatCurrency(amount)} berhasil dicatat');
-    Navigator.of(context).pop();
-    widget.onSaved();
+      await widget.repository.addPaymentLog(log);
+      if (!mounted) return;
+      HapticFeedback.selectionClick();
+      IosToast.show(context, 'Pembayaran ${_formatCurrency(amount)} berhasil dicatat');
+      Navigator.of(context).pop();
+      widget.onSaved();
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSaving = false);
+      HapticFeedback.lightImpact();
+      IosToast.show(
+        context,
+        'Gagal mencatat pembayaran: $e',
+        icon: CupertinoIcons.exclamationmark_circle_fill,
+        iconColor: AppColors.dangerRose,
+      );
+    }
   }
 
   @override

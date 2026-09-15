@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/draggable_sheet_container.dart';
-import '../../../../core/widgets/ios_toast.dart';
 import '../../../../core/widgets/squircle_icon.dart';
 import '../../domain/accessory.dart';
 
@@ -237,11 +237,11 @@ class ChangeAccessoryConditionSheet extends StatelessWidget {
           ? Icon(CupertinoIcons.checkmark_alt, size: 20, color: color)
           : null,
       onTap: () async {
+        HapticFeedback.selectionClick();
         Navigator.of(context).pop();
-        await onSelectCondition(condition);
-        if (context.mounted) {
-          IosToast.show(context, 'Kondisi diubah ke "$title"');
-        }
+        try {
+          await onSelectCondition(condition);
+        } catch (_) {}
       },
     );
   }

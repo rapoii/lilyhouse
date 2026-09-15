@@ -490,6 +490,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               allRentals: _allRentals,
                               repository: _repository,
                               onRentalUpdated: _loadData,
+                              selectedDay: _selectedDay,
                             ),
                           );
                         },
@@ -511,6 +512,7 @@ class _RentalSlotCard extends StatelessWidget {
   final List<Rental> allRentals;
   final IRentalRepository? repository;
   final VoidCallback? onRentalUpdated;
+  final DateTime? selectedDay;
 
   const _RentalSlotCard({
     required this.rental,
@@ -519,6 +521,7 @@ class _RentalSlotCard extends StatelessWidget {
     required this.allRentals,
     this.repository,
     this.onRentalUpdated,
+    this.selectedDay,
   });
 
   String _formatCurrency(double amount) {
@@ -543,10 +546,79 @@ class _RentalSlotCard extends StatelessWidget {
     );
   }
 
+  Widget? _buildDateContextBadge(DateTime day) {
+    final isStart = isSameDay(day, rental.startDate);
+    final isEnd = isSameDay(day, rental.endDate);
+
+    if (isStart && isEnd) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFF5856D6).withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(CupertinoIcons.arrow_2_circlepath, size: 12, color: Color(0xFF5856D6)),
+            SizedBox(width: 4),
+            Text(
+              'Mulai & Kembali Hari Ini',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF5856D6)),
+            ),
+          ],
+        ),
+      );
+    } else if (isStart) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFF007AFF).withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(CupertinoIcons.arrow_down_circle_fill, size: 12, color: Color(0xFF007AFF)),
+            SizedBox(width: 4),
+            Text(
+              'Hari Ambil / Mulai Sewa',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF007AFF)),
+            ),
+          ],
+        ),
+      );
+    } else if (isEnd) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFF9500).withValues(alpha: 0.12),
+          borderRadius: BorderRadius.circular(6),
+        ),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(CupertinoIcons.arrow_up_circle_fill, size: 12, color: Color(0xFFD97706)),
+            SizedBox(width: 4),
+            Text(
+              'Jatuh Tempo Pengembalian',
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFD97706)),
+            ),
+          ],
+        ),
+      );
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     // Check if this rental has any conflict with other rentals
     final hasConflict = BookingConflictEngine.hasConflict(allRentals, rental);
+    final dateBadge = selectedDay != null ? _buildDateContextBadge(selectedDay!) : null;
 
     return PressableCard(
       onTap: () => _showRentalDetailSheet(context, hasConflict),
@@ -595,6 +667,7 @@ class _RentalSlotCard extends StatelessWidget {
                   ],
                 ),
               ),
+            ?dateBadge,
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

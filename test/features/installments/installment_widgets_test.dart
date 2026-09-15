@@ -6,6 +6,7 @@ import 'package:lilyhouse/features/installments/data/installment_repository.dart
 import 'package:lilyhouse/features/installments/domain/installment.dart';
 import 'package:lilyhouse/features/installments/domain/installment_log.dart';
 import 'package:lilyhouse/features/installments/presentation/installment_list_screen.dart';
+import 'package:lilyhouse/features/installments/presentation/widgets/add_payment_sheet.dart';
 import 'package:lilyhouse/features/installments/presentation/widgets/installment_card.dart';
 
 class MockInstallmentRepository implements IInstallmentRepository {
@@ -342,6 +343,60 @@ void main() {
       expect(tileWithNoteFinder, findsOneWidget);
       final tileWithNoteWidget = tester.widget<CupertinoListTile>(tileWithNoteFinder);
       expect(tileWithNoteWidget.subtitle, isNotNull);
+    });
+
+    testWidgets('AddPaymentSheet correctly handles dot thousand separator and logs payment', (tester) async {
+      final inst = Installment(
+        id: 'inst_test',
+        itemName: 'Costume A',
+        totalCost: 100000.0,
+        totalPaid: 0.0,
+        remainingBalance: 100000.0,
+        status: InstallmentStatus.ongoing,
+        dueDate: DateTime.now().add(const Duration(days: 7)),
+      );
+      final repo = MockInstallmentRepository(installments: [inst]);
+      bool saved = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => CupertinoButton(
+                child: const Text('Open'),
+                onPressed: () {
+                  showCupertinoModalPopup<void>(
+                    context: ctx,
+                    builder: (_) => AddPaymentSheet(
+                      installment: inst,
+                      repository: repo,
+                      onSaved: () => saved = true,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Enter amount with dot separator "50.000"
+      await tester.enterText(find.byKey(const Key('payment_amount_input')), '50.000');
+      await tester.pump();
+
+      // Tap Simpan
+      await tester.tap(find.text('Simpan'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(saved, isTrue);
+      expect(repo._logs.length, 1);
+      expect(repo._logs.first.amountPaid, 50000.0);
     });
   });
 }

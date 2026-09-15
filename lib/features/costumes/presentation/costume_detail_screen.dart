@@ -513,6 +513,9 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       onSelectCondition: (newCondition) async {
         await _repository.updateAccessory(acc.copyWith(conditionStatus: newCondition));
         await _loadAccessories();
+        if (mounted) {
+          IosToast.show(context, 'Kondisi diubah ke "${newCondition.displayName}"');
+        }
       },
     );
   }

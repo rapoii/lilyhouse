@@ -268,9 +268,14 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   // State, which is preserved across rebuilds.
   bool _validate() {
     final okName = _nameController.text.trim().isNotEmpty;
-    final okPhone = _phoneController.text.trim().isNotEmpty;
+    final rawPhone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+    final okPhone = rawPhone.length >= 8 && rawPhone.length <= 15;
     final okCostume = _selectedCostume != null;
     final okDate = !_endDate.isBefore(_startDate);
+    final rawPrice = _totalPriceController.text.replaceAll('.', '').replaceAll(',', '').trim();
+    final parsedPrice = rawPrice.isEmpty ? 0.0 : double.tryParse(rawPrice);
+    final okPrice = parsedPrice != null && parsedPrice >= 0;
+
     setState(() {
       _costumeError = okCostume ? null : 'Pilih kostum dulu';
       _dateError = okDate ? null : 'Tanggal selesai harus setelah mulai';
@@ -279,9 +284,20 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       _showErrorSnack('Nama penyewa wajib diisi');
       return false;
     }
-    if (!okPhone) {
+    if (_phoneController.text.trim().isEmpty) {
       _showErrorSnack('Nomor WhatsApp wajib diisi');
       return false;
+    }
+    if (!okPhone) {
+      _showErrorSnack('Nomor WhatsApp tidak valid (minimal 8 digit)');
+      return false;
+    }
+    if (_parentPhoneController.text.trim().isNotEmpty) {
+      final parentDigits = _parentPhoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+      if (parentDigits.length < 8 || parentDigits.length > 15) {
+        _showErrorSnack('Nomor HP orang tua tidak valid (minimal 8 digit)');
+        return false;
+      }
     }
     if (!okCostume) {
       _showErrorSnack('Pilih kostum yang akan disewa');
@@ -289,6 +305,10 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     }
     if (!okDate) {
       _showErrorSnack('Tanggal selesai harus setelah tanggal mulai');
+      return false;
+    }
+    if (!okPrice) {
+      _showErrorSnack('Total harga sewa tidak boleh bernilai negatif');
       return false;
     }
     return true;
@@ -893,6 +913,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
                         keyboardType: TextInputType.number,
+                        textInputAction: TextInputAction.done,
                       ),
                     ),
                   ],
