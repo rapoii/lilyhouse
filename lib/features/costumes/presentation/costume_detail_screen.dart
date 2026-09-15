@@ -252,7 +252,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
         top: false,
         child: ListView(
           physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 40),
+          padding: const EdgeInsets.only(bottom: 96),
           children: [
             // Hero cover photo — Apple card spec: radius 12, hairline 0.5, subtle shadow
             Padding(

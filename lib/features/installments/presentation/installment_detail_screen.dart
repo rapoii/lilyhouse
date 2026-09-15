@@ -180,7 +180,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           top: false,
           child: ListView(
             physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.only(bottom: 40),
+          padding: const EdgeInsets.only(bottom: 96),
           children: [
           // Section 1: INFORMASI BARANG
           CupertinoListSection.insetGrouped(

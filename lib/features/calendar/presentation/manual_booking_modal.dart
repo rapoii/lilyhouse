@@ -58,6 +58,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   String? _selfieKtpPath;
 
   List<Costume> _costumes = [];
+  List<Customer> _existingCustomers = [];
   Costume? _selectedCostume;
   DateTime _startDate = DateTime.now();
   DateTime _endDate = DateTime.now().add(const Duration(days: 3));
@@ -71,6 +72,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   void initState() {
     super.initState();
     initializeDateFormatting('id_ID', null);
+    _phoneController.addListener(_onPhoneChanged);
 
     final prefill = widget.initialParsedData;
     if (prefill != null) {
@@ -126,6 +128,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
 
   @override
   void dispose() {
+    _phoneController.removeListener(_onPhoneChanged);
     _nameController.dispose();
     _phoneController.dispose();
     _addressController.dispose();
@@ -135,12 +138,55 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     super.dispose();
   }
 
+  void _onPhoneChanged() {
+    _matchExistingCustomer();
+  }
+
+  void _matchExistingCustomer() {
+    final rawPhone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+    if (rawPhone.length < 8) return;
+
+    Customer? match;
+    for (final c in _existingCustomers) {
+      final cDigits = c.phone.replaceAll(RegExp(r'\D'), '');
+      if (cDigits.isNotEmpty && (cDigits == rawPhone || cDigits.endsWith(rawPhone) || rawPhone.endsWith(cDigits))) {
+        match = c;
+        break;
+      }
+    }
+
+    if (match != null) {
+      if (_nameController.text.trim().isEmpty && match.fullName.isNotEmpty) {
+        _nameController.text = match.fullName;
+      }
+      if (_addressController.text.trim().isEmpty && match.address.isNotEmpty && match.address != '-') {
+        _addressController.text = match.address;
+      }
+      if (_parentPhoneController.text.trim().isEmpty && match.parentPhone != null && match.parentPhone!.isNotEmpty) {
+        _parentPhoneController.text = match.parentPhone!;
+      }
+      if (_socialMediaController.text.trim().isEmpty && match.socialMedia != null && match.socialMedia!.isNotEmpty) {
+        _socialMediaController.text = match.socialMedia!;
+      }
+      if (_ktpPhotoPath == null && match.ktpPhotoUrl != null && match.ktpPhotoUrl!.isNotEmpty) {
+        setState(() => _ktpPhotoPath = match!.ktpPhotoUrl);
+      }
+      if (_selfieKtpPath == null && match.selfieKtpUrl != null && match.selfieKtpUrl!.isNotEmpty) {
+        setState(() => _selfieKtpPath = match!.selfieKtpUrl);
+      }
+    }
+  }
+
   Future<void> _loadCostumes() async {
     final list = await widget.costumeRepository.getAllCostumes();
+    final customers = await widget.rentalRepository.getAllCustomers();
     if (mounted) {
       setState(() {
         _costumes = list;
+        _existingCustomers = customers;
         _isLoadingCostumes = false;
+
+        _matchExistingCustomer();
 
         // Try to match parsed costume name to a Costume in the catalogue.
         final wanted = widget.initialParsedData?.costumeName;
@@ -266,24 +312,39 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         }
       }
 
-      final custId = 'cust_${DateTime.now().millisecondsSinceEpoch}';
+      final rawPhone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+      Customer? existingCustomer;
+      for (final c in _existingCustomers) {
+        final cDigits = c.phone.replaceAll(RegExp(r'\D'), '');
+        if (cDigits.isNotEmpty && (cDigits == rawPhone || cDigits.endsWith(rawPhone) || rawPhone.endsWith(cDigits))) {
+          existingCustomer = c;
+          break;
+        }
+      }
+
+      final custId = existingCustomer?.id ?? 'cust_${DateTime.now().millisecondsSinceEpoch}';
       final customer = Customer(
         id: custId,
         fullName: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
         address: _addressController.text.trim().isEmpty
-            ? '-'
+            ? (existingCustomer?.address.isNotEmpty == true ? existingCustomer!.address : '-')
             : _addressController.text.trim(),
         parentPhone: _parentPhoneController.text.trim().isEmpty
-            ? null
+            ? existingCustomer?.parentPhone
             : _parentPhoneController.text.trim(),
         socialMedia: _socialMediaController.text.trim().isEmpty
-            ? null
+            ? existingCustomer?.socialMedia
             : _socialMediaController.text.trim(),
-        ktpPhotoUrl: _ktpPhotoPath,
-        selfieKtpUrl: _selfieKtpPath,
+        ktpPhotoUrl: _ktpPhotoPath ?? existingCustomer?.ktpPhotoUrl,
+        selfieKtpUrl: _selfieKtpPath ?? existingCustomer?.selfieKtpUrl,
       );
-      await widget.rentalRepository.insertCustomer(customer);
+
+      if (existingCustomer != null) {
+        await widget.rentalRepository.updateCustomer(customer);
+      } else {
+        await widget.rentalRepository.insertCustomer(customer);
+      }
 
       final rentalId = 'rent_${DateTime.now().millisecondsSinceEpoch}';
       final rental = Rental(
