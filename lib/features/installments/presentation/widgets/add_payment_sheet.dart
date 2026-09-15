@@ -45,27 +45,15 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
     return 'Rp $parts';
   }
 
-  void _showAlert(String title, String message) {
-    showCupertinoDialog<void>(
-      context: context,
-      builder: (ctx) => CupertinoAlertDialog(
-        title: Text(title),
-        content: Text(message),
-        actions: [
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Oke', style: TextStyle(color: AppColors.primaryPink, fontWeight: FontWeight.w600)),
-          ),
-        ],
-      ),
-    );
-  }
-
   Future<void> _submit() async {
     final amount = double.tryParse(_amountController.text.trim()) ?? 0.0;
     if (amount <= 0) {
-      _showAlert('Nominal Tidak Valid', 'Masukkan jumlah pembayaran yang valid lebih dari Rp 0.');
+      IosToast.show(
+        context,
+        'Nominal pembayaran harus lebih dari Rp 0',
+        icon: CupertinoIcons.exclamationmark_circle_fill,
+        iconColor: AppColors.warningOrange,
+      );
       return;
     }
 
@@ -247,6 +235,12 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                       ),
                       trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                       onTap: () async {
+                        final hadFocus = FocusScope.of(context).hasFocus;
+                        if (hadFocus) {
+                          FocusScope.of(context).unfocus();
+                          await Future<void>.delayed(const Duration(milliseconds: 150));
+                          if (!context.mounted) return;
+                        }
                         final picked = await showSheetDatePicker(
                           context: context,
                           title: 'Pilih Tanggal Bayar',

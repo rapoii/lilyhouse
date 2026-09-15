@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,7 +19,7 @@ class IosToast {
       HapticFeedback.lightImpact();
     } catch (_) {}
 
-    final overlay = Overlay.maybeOf(context);
+    final overlay = Overlay.maybeOf(context, rootOverlay: true) ?? Overlay.maybeOf(context);
     if (overlay == null) return;
 
     late OverlayEntry entry;
@@ -70,6 +71,7 @@ class _ToastOverlayState extends State<_ToastOverlay>
   static const _exitMs = 200;
 
   bool _exiting = false;
+  Timer? _exitTimer;
 
   @override
   void initState() {
@@ -105,7 +107,7 @@ class _ToastOverlayState extends State<_ToastOverlay>
     // Schedule exit: after (duration - 200ms), trigger exit animation
     final holdTime = widget.duration - const Duration(milliseconds: _exitMs);
     final safeHold = holdTime.isNegative ? Duration.zero : holdTime;
-    Future.delayed(safeHold, _startExit);
+    _exitTimer = Timer(safeHold, _startExit);
   }
 
   void _startExit() {
@@ -118,6 +120,7 @@ class _ToastOverlayState extends State<_ToastOverlay>
 
   @override
   void dispose() {
+    _exitTimer?.cancel();
     _entryController.dispose();
     _exitController.dispose();
     super.dispose();

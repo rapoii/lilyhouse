@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
+import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/photo_source_picker_sheet.dart';
 import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
@@ -144,11 +145,21 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
     final name = _nameController.text.trim();
     final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
     if (name.isEmpty) {
-      _showAlert('Nama Kostum Wajib Diisi', 'Silakan masukkan nama kostum terlebih dahulu.');
+      IosToast.show(
+        context,
+        'Nama kostum wajib diisi',
+        icon: CupertinoIcons.exclamationmark_circle_fill,
+        iconColor: AppColors.warningOrange,
+      );
       return;
     }
     if (price <= 0) {
-      _showAlert('Harga Sewa Tidak Valid', 'Mohon masukkan harga sewa yang valid (lebih dari 0).');
+      IosToast.show(
+        context,
+        'Tarif sewa harus lebih dari Rp 0',
+        icon: CupertinoIcons.exclamationmark_circle_fill,
+        iconColor: AppColors.warningOrange,
+      );
       return;
     }
 
@@ -191,6 +202,10 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       if (!mounted) return;
       Navigator.of(context).pop();
       widget.onSaved();
+      IosToast.show(
+        context,
+        _isEditing ? 'Perubahan kostum berhasil disimpan' : 'Kostum baru berhasil ditambahkan',
+      );
     } catch (e) {
       if (!mounted) return;
       _showAlert('Gagal Menyimpan', 'Terjadi kesalahan: $e');

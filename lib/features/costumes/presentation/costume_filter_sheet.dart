@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
@@ -69,7 +70,17 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
     }
   }
 
+  void _select(VoidCallback fn) {
+    try {
+      HapticFeedback.selectionClick();
+    } catch (_) {}
+    setState(fn);
+  }
+
   void _resetFilters() {
+    try {
+      HapticFeedback.lightImpact();
+    } catch (_) {}
     setState(() {
       _selectedSeries = null;
       _selectedStatus = null;
@@ -79,6 +90,9 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
   }
 
   void _apply() {
+    try {
+      HapticFeedback.lightImpact();
+    } catch (_) {}
     widget.onApply(
       series: _selectedSeries,
       status: _selectedStatus,
@@ -152,7 +166,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                       leading: const SquircleIcon(icon: CupertinoIcons.sparkles, color: AppColors.primaryPink),
                       title: const Text('Semua Kategori', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSeries == null),
-                      onTap: () => setState(() => _selectedSeries = null),
+                      onTap: () => _select(() => _selectedSeries = null),
                     ),
                     if (_isLoadingSeries)
                       const CupertinoListTile(
@@ -177,7 +191,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                             ),
                           ),
                           trailing: _buildCheckmark(isSelected),
-                          onTap: () => setState(() => _selectedSeries = series),
+                          onTap: () => _select(() => _selectedSeries = series),
                         );
                       }),
                   ],
@@ -196,37 +210,37 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                       leading: const SquircleIcon(icon: CupertinoIcons.layers_alt_fill, color: Color(0xFF8E8E93)),
                       title: const Text('Semua Status', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == null),
-                      onTap: () => setState(() => _selectedStatus = null),
+                      onTap: () => _select(() => _selectedStatus = null),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.checkmark_circle_fill, color: Color(0xFF1E824C)),
                       title: const Text('Tersedia', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == CostumeStatus.available),
-                      onTap: () => setState(() => _selectedStatus = CostumeStatus.available),
+                      onTap: () => _select(() => _selectedStatus = CostumeStatus.available),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.bookmark_fill, color: Color(0xFFD97706)),
                       title: const Text('Dibooking', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == CostumeStatus.booked),
-                      onTap: () => setState(() => _selectedStatus = CostumeStatus.booked),
+                      onTap: () => _select(() => _selectedStatus = CostumeStatus.booked),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.arrow_right_circle_fill, color: AppColors.primaryPink),
                       title: const Text('Disewa', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == CostumeStatus.rented),
-                      onTap: () => setState(() => _selectedStatus = CostumeStatus.rented),
+                      onTap: () => _select(() => _selectedStatus = CostumeStatus.rented),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.drop_fill, color: Color(0xFF2563EB)),
                       title: const Text('Dicuci', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == CostumeStatus.laundry),
-                      onTap: () => setState(() => _selectedStatus = CostumeStatus.laundry),
+                      onTap: () => _select(() => _selectedStatus = CostumeStatus.laundry),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.wrench_fill, color: AppColors.dangerRose),
                       title: const Text('Perawatan', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == CostumeStatus.maintenance),
-                      onTap: () => setState(() => _selectedStatus = CostumeStatus.maintenance),
+                      onTap: () => _select(() => _selectedStatus = CostumeStatus.maintenance),
                     ),
                   ],
                 ),
@@ -244,7 +258,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                       leading: const SquircleIcon(icon: CupertinoIcons.tag_fill, color: Color(0xFFFF9500)),
                       title: const Text('Semua Ukuran', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSize == null || _selectedSize == 'All'),
-                      onTap: () => setState(() => _selectedSize = null),
+                      onTap: () => _select(() => _selectedSize = null),
                     ),
                     ...['S', 'M', 'L', 'XL', 'All Size', 'Custom'].map((sz) {
                       final isSelected = _selectedSize == sz;
@@ -259,7 +273,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                           ),
                         ),
                         trailing: _buildCheckmark(isSelected),
-                        onTap: () => setState(() => _selectedSize = sz),
+                        onTap: () => _select(() => _selectedSize = sz),
                       );
                     }),
                   ],
@@ -278,25 +292,25 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                       leading: const SquircleIcon(icon: CupertinoIcons.sort_down, color: Color(0xFF007AFF)),
                       title: const Text('Nama Kostum (A - Z)', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSortBy == 'name_asc'),
-                      onTap: () => setState(() => _selectedSortBy = 'name_asc'),
+                      onTap: () => _select(() => _selectedSortBy = 'name_asc'),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.sort_up, color: Color(0xFF007AFF)),
                       title: const Text('Nama Kostum (Z - A)', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSortBy == 'name_desc'),
-                      onTap: () => setState(() => _selectedSortBy = 'name_desc'),
+                      onTap: () => _select(() => _selectedSortBy = 'name_desc'),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.money_dollar_circle_fill, color: Color(0xFF34C759)),
                       title: const Text('Tarif Sewa (Termurah)', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSortBy == 'price_asc'),
-                      onTap: () => setState(() => _selectedSortBy = 'price_asc'),
+                      onTap: () => _select(() => _selectedSortBy = 'price_asc'),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.money_dollar_circle, color: Color(0xFFFF9500)),
                       title: const Text('Tarif Sewa (Termahal)', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSortBy == 'price_desc'),
-                      onTap: () => setState(() => _selectedSortBy = 'price_desc'),
+                      onTap: () => _select(() => _selectedSortBy = 'price_desc'),
                     ),
                   ],
                 ),

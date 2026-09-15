@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 
 import '../theme/app_colors.dart';
 
@@ -339,7 +340,12 @@ class _SheetPickerBarButtonState extends State<_SheetPickerBarButton>
       onTapDown: (_) => _press.forward(),
       onTapUp: (_) => _press.reverse(),
       onTapCancel: () => _press.reverse(),
-      onTap: widget.onPressed,
+      onTap: () {
+        try {
+          HapticFeedback.lightImpact();
+        } catch (_) {}
+        widget.onPressed();
+      },
       child: AnimatedBuilder(
         animation: _press,
         builder: (ctx, child) {

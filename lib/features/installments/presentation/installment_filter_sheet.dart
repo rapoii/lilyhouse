@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
@@ -36,7 +37,17 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
     _selectedSortBy = widget.initialSortBy;
   }
 
+  void _select(VoidCallback fn) {
+    try {
+      HapticFeedback.selectionClick();
+    } catch (_) {}
+    setState(fn);
+  }
+
   void _resetFilters() {
+    try {
+      HapticFeedback.lightImpact();
+    } catch (_) {}
     setState(() {
       _selectedStatus = null;
       _selectedSortBy = 'due_date_asc';
@@ -44,6 +55,9 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
   }
 
   void _apply() {
+    try {
+      HapticFeedback.lightImpact();
+    } catch (_) {}
     widget.onApply(
       status: _selectedStatus,
       sortBy: _selectedSortBy,
@@ -115,19 +129,19 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
                       leading: const SquircleIcon(icon: CupertinoIcons.layers_alt_fill, color: Color(0xFF8E8E93)),
                       title: const Text('Semua Status', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == null),
-                      onTap: () => setState(() => _selectedStatus = null),
+                      onTap: () => _select(() => _selectedStatus = null),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.clock_fill, color: Color(0xFFFF9500)),
                       title: const Text('Sedang Berjalan', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == InstallmentStatus.ongoing),
-                      onTap: () => setState(() => _selectedStatus = InstallmentStatus.ongoing),
+                      onTap: () => _select(() => _selectedStatus = InstallmentStatus.ongoing),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.checkmark_seal_fill, color: Color(0xFF34C759)),
                       title: const Text('Sudah Lunas', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == InstallmentStatus.paidOff),
-                      onTap: () => setState(() => _selectedStatus = InstallmentStatus.paidOff),
+                      onTap: () => _select(() => _selectedStatus = InstallmentStatus.paidOff),
                     ),
                   ],
                 ),
@@ -145,25 +159,25 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
                       leading: const SquircleIcon(icon: CupertinoIcons.calendar_today, color: AppColors.primaryPink),
                       title: const Text('Jatuh Tempo Terdekat (Default)', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSortBy == 'due_date_asc'),
-                      onTap: () => setState(() => _selectedSortBy = 'due_date_asc'),
+                      onTap: () => _select(() => _selectedSortBy = 'due_date_asc'),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.creditcard_fill, color: Color(0xFFFF3B30)),
                       title: const Text('Sisa Tagihan Terbanyak', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSortBy == 'balance_desc'),
-                      onTap: () => setState(() => _selectedSortBy = 'balance_desc'),
+                      onTap: () => _select(() => _selectedSortBy = 'balance_desc'),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.arrow_up_right_circle_fill, color: Color(0xFF5856D6)),
                       title: const Text('Total Biaya Tertinggi', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSortBy == 'cost_desc'),
-                      onTap: () => setState(() => _selectedSortBy = 'cost_desc'),
+                      onTap: () => _select(() => _selectedSortBy = 'cost_desc'),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.textformat_abc, color: Color(0xFF007AFF)),
                       title: const Text('Nama Barang (A-Z)', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSortBy == 'name_asc'),
-                      onTap: () => setState(() => _selectedSortBy = 'name_asc'),
+                      onTap: () => _select(() => _selectedSortBy = 'name_asc'),
                     ),
                   ],
                 ),

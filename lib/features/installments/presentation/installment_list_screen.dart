@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/sync/sync_manager.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
@@ -142,6 +143,12 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
   }
 
   Future<void> _showFilterSheet() async {
+    final hadFocus = FocusScope.of(context).hasFocus;
+    if (hadFocus) {
+      FocusScope.of(context).unfocus();
+      await Future<void>.delayed(const Duration(milliseconds: 150));
+      if (!mounted) return;
+    }
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (ctx) {
@@ -497,6 +504,9 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                         style: const TextStyle(fontSize: 15, color: Colors.black87),
                         placeholderStyle: const TextStyle(color: Color(0xFF8E8E93), fontSize: 15),
                         onSuffixTap: () {
+                          try {
+                            HapticFeedback.lightImpact();
+                          } catch (_) {}
                           _searchController.clear();
                           _loadInstallments();
                         },
