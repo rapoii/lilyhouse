@@ -111,6 +111,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       return Image.network(
         path,
         fit: BoxFit.cover,
+        cacheWidth: 1200,
         errorBuilder: (context, error, stackTrace) => const Center(
           child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
         ),
@@ -121,6 +122,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       return Image.file(
         File(cleanPath),
         fit: BoxFit.cover,
+        cacheWidth: 1200,
         errorBuilder: (context, error, stackTrace) => const Center(
           child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
         ),

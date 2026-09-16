@@ -437,6 +437,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       imageWidget = Image.network(
         path,
         fit: BoxFit.cover,
+        cacheWidth: 400,
         errorBuilder: (_, _, _) => const Center(
           child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
         ),
@@ -446,6 +447,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       imageWidget = Image.file(
         File(cleanPath),
         fit: BoxFit.cover,
+        cacheWidth: 400,
         errorBuilder: (_, _, _) => const Center(
           child: Icon(CupertinoIcons.sparkles, size: 48, color: AppColors.primaryPink),
         ),

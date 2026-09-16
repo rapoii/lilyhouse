@@ -525,7 +525,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.92',
+                    'Versi 1.0.93',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ),
@@ -690,7 +690,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.92 (BUILD 127) - TERBARU'),
+                  header: const Text('VERSI 1.0.93 (BUILD 128) - TERBARU'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -710,9 +710,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: CupertinoIcons.arrow_clockwise_circle_fill,
                         color: Color(0xFF1E824C),
                       ),
-                      title: Text('Pemulihan Gagal Muat & Thumbnail Hemat Memori', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      title: Text('Pemulihan Gagal Muat', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
-                        'Bila data gagal dimuat, layar kini menampilkan pesan ramah dengan tombol Coba Lagi alih-alih berputar tanpa henti. Thumbnail foto juga dimuat pada resolusi wajar agar aplikasi tetap ringan dengan ratusan foto kostum.',
+                        'Bila data gagal dimuat, layar kini menampilkan pesan ramah dengan tombol Coba Lagi alih-alih berputar tanpa henti, baik di katalog, cicilan, maupun kalender.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.photo_fill_on_rectangle_fill,
+                        color: Color(0xFF007AFF),
+                      ),
+                      title: Text('Foto Hemat Memori', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Seluruh foto kini dimuat pada resolusi wajar, termasuk foto sampul dan dokumen KTP, sehingga aplikasi tetap ringan walau katalog berisi ratusan kostum.',
                         style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
@@ -1676,7 +1687,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.92', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                additionalInfo: const Text('v1.0.93', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),

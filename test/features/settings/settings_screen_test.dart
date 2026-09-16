@@ -255,8 +255,18 @@ void main() {
       await tester.pumpAndSettle();
 
       // A single release header per build — duplicates must be merged into one section.
-      expect(find.text('VERSI 1.0.92 (BUILD 127) - TERBARU'), findsOneWidget);
-      expect(find.text('VERSI 1.0.90 (BUILD 125)'), findsOneWidget);
+      // v1.0.92 was superseded by this build, so its notes now live under 1.0.93.
+      expect(find.text('VERSI 1.0.93 (BUILD 128) - TERBARU'), findsOneWidget);
+
+      // Older release notes live further down the same list — scroll to confirm
+      // they survived the merge (and that the sheet is not truncated).
+      await tester.scrollUntilVisible(
+        find.text('VERSI 1.0.91 (BUILD 126)'),
+        300,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('VERSI 1.0.91 (BUILD 126)'), findsOneWidget);
 
       // Non-standard KBBI spellings must not survive in the changelog copy.
       expect(find.textContaining('Pulasan'), findsNothing);
