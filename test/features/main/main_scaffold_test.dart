@@ -123,6 +123,8 @@ class MockInstallmentRepository implements IInstallmentRepository {
   Future<List<InstallmentLog>> getLogsForInstallment(String installmentId) async => [];
   @override
   Future<int> deletePaymentLog(String logId, String installmentId) async => 1;
+  @override
+  Future<Installment?> recalculateInstallment(String installmentId) async => null;
 }
 
 void main() {

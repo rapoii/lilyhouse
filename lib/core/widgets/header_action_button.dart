@@ -38,7 +38,7 @@ class HeaderActionButton extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color: AppColors.primaryPink,
+                color: AppColors.deepPinkText,
               ),
               const SizedBox(width: 4),
               Text(
@@ -46,7 +46,7 @@ class HeaderActionButton extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primaryPink,
+                  color: AppColors.deepPinkText,
                 ),
               ),
             ],

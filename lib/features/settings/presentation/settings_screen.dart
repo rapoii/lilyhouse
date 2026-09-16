@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -21,6 +22,44 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
+  String _cacheSizeText = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateCacheSize();
+  }
+
+  Future<void> _calculateCacheSize() async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      if (!tempDir.existsSync()) {
+        if (mounted) setState(() => _cacheSizeText = '0 KB');
+        return;
+      }
+      int totalBytes = 0;
+      final entities = tempDir.listSync(recursive: true);
+      for (final entity in entities) {
+        if (entity is File) {
+          totalBytes += entity.lengthSync();
+        }
+      }
+      if (mounted) {
+        setState(() {
+          if (totalBytes < 1024) {
+            _cacheSizeText = '$totalBytes B';
+          } else if (totalBytes < 1024 * 1024) {
+            _cacheSizeText = '${(totalBytes / 1024).toStringAsFixed(1)} KB';
+          } else {
+            _cacheSizeText = '${(totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+          }
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _cacheSizeText = '0 KB');
+    }
+  }
+
   void _showIosToast(String message, {IconData icon = CupertinoIcons.checkmark_circle_fill}) {
     IosToast.show(context, message, icon: icon);
   }
@@ -363,6 +402,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     } catch (_) {}
                   }
                 }
+                await _calculateCacheSize();
                 _showIosToast('Cache gambar berhasil dibersihkan');
               } catch (_) {
                 _showIosToast('Gagal membersihkan cache', icon: CupertinoIcons.exclamationmark_circle_fill);
@@ -444,7 +484,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.81',
+                    'Versi 1.0.82',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -607,7 +647,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.81 (BUILD 116) - TERBARU'),
+                  header: const Text('VERSI 1.0.82 (BUILD 117) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.sparkles,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: Text('Sanitasi String & Filter Kategori', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Pembersihan format teks snake_case pada katalog dan cicilan, serta normalisasi filter seri anime agar pencarian lebih akurat.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.money_dollar_circle_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Konteks Finansial & Aksesibilitas WCAG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Kartu cicilan kini menampilkan total harga barang, sinkronisasi live kalkulasi log pembayaran, indikator ukuran cache disk, dan peningkatan kontras tombol.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.81 (BUILD 116)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1234,6 +1303,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: Color(0xFFFF3B30),
                 ),
                 title: const Text('Bersihkan Cache Gambar', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                additionalInfo: _cacheSizeText.isNotEmpty
+                    ? Text(_cacheSizeText, style: const TextStyle(fontSize: 15, color: Color(0xFF8E8E93)))
+                    : null,
                 onTap: _showClearCacheDialog,
               ),
             ],
@@ -1260,7 +1332,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.81', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.82', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),

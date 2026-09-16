@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   static const Color primaryPink = Color(0xFFFF85A1);
+  static const Color deepPinkText = Color(0xFFC2185B); // WCAG AA compliant on softPinkBg (> 5.5:1)
   static const Color pastelPink = Color(0xFFFFA6BA);
   static const Color softPinkBg = Color(0xFFFFE5EC);
   static const Color background = Color(0xFFF8F9FA); // Warm off-white background

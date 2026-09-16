@@ -144,7 +144,7 @@ class CostumeCard extends StatelessWidget {
                         // Element 1: Judul
                         Expanded(
                           child: Text(
-                            costume.name,
+                            costume.name.replaceAll('_', ' '),
                             style: const TextStyle(
                               fontSize: 17,
                               fontWeight: FontWeight.w600,

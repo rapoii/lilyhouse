@@ -34,7 +34,8 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
   }
 
   Future<void> _fetchDetails() async {
-    final inst = await widget.repository.getInstallmentById(widget.installmentId);
+    final updated = await widget.repository.recalculateInstallment(widget.installmentId);
+    final inst = updated ?? await widget.repository.getInstallmentById(widget.installmentId);
     final logs = await widget.repository.getLogsForInstallment(widget.installmentId);
     if (mounted) {
       setState(() {
@@ -195,7 +196,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                 ),
                 title: const Text('Nama Barang', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                 additionalInfo: Text(
-                  inst.itemName,
+                  inst.itemName.replaceAll('_', ' '),
                   style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
                 ),
               ),
@@ -207,7 +208,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                   ),
                   title: const Text('Toko / Vendor', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                   additionalInfo: Text(
-                    inst.storeName!,
+                    inst.storeName!.replaceAll('_', ' '),
                     style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                   ),
                 ),

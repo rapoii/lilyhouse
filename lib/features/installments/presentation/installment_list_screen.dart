@@ -682,7 +682,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                 },
                                 child: const Text(
                                   'Atur Ulang Filter',
-                                  style: TextStyle(color: AppColors.primaryPink, fontSize: 13, fontWeight: FontWeight.w600),
+                                  style: TextStyle(color: AppColors.deepPinkText, fontSize: 13, fontWeight: FontWeight.w600),
                                 ),
                               )
                             else
@@ -699,11 +699,11 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(CupertinoIcons.plus, size: 14, color: AppColors.primaryPink),
+                                    Icon(CupertinoIcons.plus, size: 14, color: AppColors.deepPinkText),
                                     SizedBox(width: 6),
                                     Text(
                                       'Tambah Cicilan',
-                                      style: TextStyle(color: AppColors.primaryPink, fontSize: 13, fontWeight: FontWeight.w600),
+                                      style: TextStyle(color: AppColors.deepPinkText, fontSize: 13, fontWeight: FontWeight.w600),
                                     ),
                                   ],
                                 ),
@@ -780,7 +780,8 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
   }
 
   Future<void> _fetchDetails() async {
-    final inst = await widget.repository.getInstallmentById(widget.installmentId);
+    final updated = await widget.repository.recalculateInstallment(widget.installmentId);
+    final inst = updated ?? await widget.repository.getInstallmentById(widget.installmentId);
     final logs = await widget.repository.getLogsForInstallment(widget.installmentId);
     if (mounted) {
       setState(() {
@@ -909,7 +910,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
             top: false,
             child: ListView(
               physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 32),
+              padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 80),
               children: [
                 // Section 1: INFORMASI BARANG
                 CupertinoListSection.insetGrouped(
@@ -924,7 +925,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                       ),
                       title: const Text('Nama Barang', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       additionalInfo: Text(
-                        inst.itemName,
+                        inst.itemName.replaceAll('_', ' '),
                         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
                       ),
                     ),
@@ -936,7 +937,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                         ),
                         title: const Text('Toko / Vendor', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                         additionalInfo: Text(
-                          inst.storeName!,
+                          inst.storeName!.replaceAll('_', ' '),
                           style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         ),
                       ),
@@ -1060,7 +1061,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                 // Section 3: RIWAYAT CICILAN
                 CupertinoListSection.insetGrouped(
                   backgroundColor: AppColors.background,
-                  header: const Text('Riwayat Cicilan'),
+                  header: const Text('RIWAYAT CICILAN'),
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
                     if (_logs.isEmpty)

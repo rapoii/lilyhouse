@@ -114,6 +114,19 @@ class MockInstallmentRepository implements IInstallmentRepository {
     }
     return 1;
   }
+
+  @override
+  Future<Installment?> recalculateInstallment(String installmentId) async {
+    final inst = await getInstallmentById(installmentId);
+    if (inst == null) return null;
+    final relatedLogs = _logs.where((l) => l.installmentId == installmentId).toList();
+    final updated = inst.recalculateWithLogs(relatedLogs);
+    final instIdx = _installments.indexWhere((i) => i.id == installmentId);
+    if (instIdx >= 0) {
+      _installments[instIdx] = updated;
+    }
+    return updated;
+  }
 }
 
 void main() {
@@ -224,7 +237,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       // Verify payment history sheet opened
-      expect(find.text('Riwayat Cicilan'), findsOneWidget);
+      expect(find.text('RIWAYAT CICILAN'), findsOneWidget);
       expect(find.text('Cicilan 1'), findsOneWidget);
       expect(find.text('+ Catat Pembayaran'), findsOneWidget);
     });
@@ -309,8 +322,8 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      // Tap on Wig_Furina to open sheet
-      await tester.tap(find.text('Wig_Furina'));
+      // Tap on Wig Furina to open sheet
+      await tester.tap(find.text('Wig Furina'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
@@ -319,7 +332,7 @@ void main() {
       expect(find.text('Tutup'), findsOneWidget);
       expect(find.text('INFORMASI BARANG'), findsOneWidget);
       expect(find.text('RINGKASAN PEMBAYARAN'), findsOneWidget);
-      expect(find.text('Riwayat Cicilan'), findsOneWidget);
+      expect(find.text('RIWAYAT CICILAN'), findsOneWidget);
 
       // Verify items rendered
       expect(find.text('Rp 200.000'), findsOneWidget);

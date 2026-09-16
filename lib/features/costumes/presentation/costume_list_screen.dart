@@ -479,7 +479,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                                 },
                                 child: const Text(
                                   'Atur Ulang Pencarian',
-                                  style: TextStyle(color: AppColors.primaryPink, fontSize: 13, fontWeight: FontWeight.w600),
+                                  style: TextStyle(color: AppColors.deepPinkText, fontSize: 13, fontWeight: FontWeight.w600),
                                 ),
                               )
                             else
@@ -496,11 +496,11 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                                 child: const Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    Icon(CupertinoIcons.plus, size: 14, color: AppColors.primaryPink),
+                                    Icon(CupertinoIcons.plus, size: 14, color: AppColors.deepPinkText),
                                     SizedBox(width: 6),
                                     Text(
                                       'Tambah Kostum',
-                                      style: TextStyle(color: AppColors.primaryPink, fontSize: 13, fontWeight: FontWeight.w600),
+                                      style: TextStyle(color: AppColors.deepPinkText, fontSize: 13, fontWeight: FontWeight.w600),
                                     ),
                                   ],
                                 ),

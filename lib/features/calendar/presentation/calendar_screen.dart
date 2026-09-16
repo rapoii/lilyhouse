@@ -456,11 +456,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               child: const Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Icon(CupertinoIcons.plus, size: 14, color: AppColors.primaryPink),
+                                  Icon(CupertinoIcons.plus, size: 14, color: AppColors.deepPinkText),
                                   SizedBox(width: 6),
                                   Text(
                                     'Tambah Booking',
-                                    style: TextStyle(color: AppColors.primaryPink, fontSize: 13, fontWeight: FontWeight.w600),
+                                    style: TextStyle(color: AppColors.deepPinkText, fontSize: 13, fontWeight: FontWeight.w600),
                                   ),
                                 ],
                               ),

@@ -116,8 +116,9 @@ class CostumeRepository implements ICostumeRepository {
     }
 
     if (series != null && series.trim().isNotEmpty && series != 'Semua') {
-      whereClauses.add('anime_series = ?');
+      whereClauses.add('(anime_series = ? OR REPLACE(anime_series, "_", " ") = ?)');
       whereArgs.add(series.trim());
+      whereArgs.add(series.trim().replaceAll('_', ' '));
     }
 
     String orderBy = 'name ASC';
@@ -156,11 +157,15 @@ class CostumeRepository implements ICostumeRepository {
     final results = await database.rawQuery(
       'SELECT DISTINCT anime_series FROM ${AppTables.costumes} WHERE anime_series IS NOT NULL AND TRIM(anime_series) != "" AND anime_series != "-" ORDER BY anime_series ASC',
     );
-    return results
-        .map((r) => r['anime_series'] as String?)
-        .where((s) => s != null && s.isNotEmpty)
-        .cast<String>()
-        .toList();
+    final Set<String> unique = {};
+    for (final r in results) {
+      final s = r['anime_series'] as String?;
+      if (s != null && s.trim().isNotEmpty && s != '-') {
+        unique.add(s.replaceAll('_', ' ').trim());
+      }
+    }
+    final list = unique.toList()..sort();
+    return list;
   }
 
   @override

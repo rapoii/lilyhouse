@@ -53,7 +53,7 @@ class InstallmentCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    installment.itemName,
+                    installment.itemName.replaceAll('_', ' '),
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -87,14 +87,27 @@ class InstallmentCard extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // Key Number: Remaining Balance or Fully Paid
-            Text(
-              isDone ? 'Lunas Sepenuhnya' : 'Sisa ${_formatCurrency(installment.remainingBalance)}',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: isDone ? const Color(0xFF1E824C) : AppColors.primaryPink,
-              ),
+            // Key Number: Remaining Balance or Fully Paid with Total Context
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  isDone ? 'Lunas Sepenuhnya' : 'Sisa ${_formatCurrency(installment.remainingBalance)}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: isDone ? const Color(0xFF1E824C) : AppColors.primaryPink,
+                  ),
+                ),
+                Text(
+                  'Total ${_formatCurrency(installment.totalCost)}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF8E8E93),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
 

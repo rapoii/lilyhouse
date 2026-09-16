@@ -16,6 +16,7 @@ abstract class IInstallmentRepository {
   Future<int> addPaymentLog(InstallmentLog log);
   Future<List<InstallmentLog>> getLogsForInstallment(String installmentId);
   Future<int> deletePaymentLog(String logId, String installmentId);
+  Future<Installment?> recalculateInstallment(String installmentId);
 
   Future<List<Installment>> searchInstallments({
     String? query,
@@ -259,13 +260,19 @@ class InstallmentRepository implements IInstallmentRepository {
     return result;
   }
 
-  Future<void> _recalculateAndSave(Database database, String installmentId) async {
+  @override
+  Future<Installment?> recalculateInstallment(String installmentId) async {
+    final database = await _db;
+    return _recalculateAndSave(database, installmentId);
+  }
+
+  Future<Installment?> _recalculateAndSave(Database database, String installmentId) async {
     final instResult = await database.query(
       AppTables.installments,
       where: 'id = ?',
       whereArgs: [installmentId],
     );
-    if (instResult.isEmpty) return;
+    if (instResult.isEmpty) return null;
 
     final currentInst = Installment.fromSqlite(instResult.first);
     final logsResult = await database.query(
@@ -285,5 +292,6 @@ class InstallmentRepository implements IInstallmentRepository {
       whereArgs: [installmentId],
     );
     await _recordSync(database, AppTables.installments, installmentId, 'UPDATE', updatedRow);
+    return updatedInst;
   }
 }
