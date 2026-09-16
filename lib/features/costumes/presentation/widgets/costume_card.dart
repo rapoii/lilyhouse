@@ -30,6 +30,8 @@ class CostumeCard extends StatelessWidget {
         path,
         width: 56,
         height: 56,
+        cacheWidth: 400,
+        cacheHeight: 400,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => const Icon(
           CupertinoIcons.sparkles,
@@ -48,6 +50,8 @@ class CostumeCard extends StatelessWidget {
         File(cleanPath),
         width: 56,
         height: 56,
+        cacheWidth: 400,
+        cacheHeight: 400,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => const Icon(
           CupertinoIcons.sparkles,
@@ -74,7 +78,7 @@ class CostumeCard extends StatelessWidget {
       case CostumeStatus.available:
         return (const Color(0xFFE3F9EC), const Color(0xFF1E824C), 'Tersedia');
       case CostumeStatus.booked:
-        return (const Color(0xFFFFF4E5), const Color(0xFFD97706), 'Dibooking');
+        return (const Color(0xFFFFF4E5), AppColors.textAmber, 'Dibooking');
       case CostumeStatus.rented:
         return (const Color(0xFFFFEBF0), AppColors.deepPinkText, 'Disewa');
       case CostumeStatus.laundry:

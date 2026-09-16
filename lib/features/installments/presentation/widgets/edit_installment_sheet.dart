@@ -261,7 +261,7 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
                         style: TextStyle(
                           fontSize: 15,
                           color: _selectedDueDate == null
-                              ? const Color(0xFF8E8E93)
+                              ? AppColors.textSecondary
                               : AppColors.textDark,
                         ),
                       ),
@@ -277,10 +277,14 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
                                 _markEdited();
                                 setState(() => _selectedDueDate = null);
                               },
-                              child: const Icon(
-                                CupertinoIcons.clear_circled_solid,
-                                size: 18,
-                                color: Color(0xFF8E8E93),
+                              child: Semantics(
+                                label: 'Hapus tanggal jatuh tempo',
+                                button: true,
+                                child: const Icon(
+                                  CupertinoIcons.clear_circled_solid,
+                                  size: 18,
+                                  color: AppColors.textSecondary,
+                                ),
                               ),
                             ),
                           const SizedBox(width: 4),

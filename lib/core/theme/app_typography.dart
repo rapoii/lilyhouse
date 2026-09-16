@@ -33,7 +33,7 @@ class AppTypography {
     fontSize: 13,
     fontWeight: FontWeight.w400,
     letterSpacing: -0.1,
-    color: Color(0xFF8E8E93), // iOS tertiaryLabel
+    color: AppColors.textSecondary, // iOS tertiaryLabel
   );
 
   /// Headline / Card Title
@@ -57,7 +57,7 @@ class AppTypography {
     fontSize: 13,
     fontWeight: FontWeight.w400,
     letterSpacing: -0.1,
-    color: Color(0xFF8E8E93),
+    color: AppColors.textSecondary,
   );
 
   /// Caption / Metadata
@@ -65,7 +65,7 @@ class AppTypography {
     fontSize: 11,
     fontWeight: FontWeight.w400,
     letterSpacing: 0.0,
-    color: Color(0xFF8E8E93),
+    color: AppColors.textSecondary,
   );
 
   /// Action Button Text (Header bar buttons: Smart Paste, Tambah, Ukuran)

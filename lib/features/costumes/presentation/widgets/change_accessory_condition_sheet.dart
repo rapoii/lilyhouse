@@ -110,7 +110,7 @@ class ChangeAccessoryConditionSheet extends StatelessWidget {
                               const SizedBox(height: 2),
                               Text(
                                 accessory.type,
-                                style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                               ),
                             ],
                           ),
@@ -128,7 +128,7 @@ class ChangeAccessoryConditionSheet extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF8E8E93),
+                      color: AppColors.textSecondary,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -188,7 +188,7 @@ class ChangeAccessoryConditionSheet extends StatelessWidget {
         break;
       case AccessoryCondition.minorDamage:
         bg = const Color(0xFFFFF4E5);
-        fg = const Color(0xFFD97706);
+        fg = AppColors.textAmber;
         break;
       case AccessoryCondition.needsRepair:
         bg = const Color(0xFFFFEBF0);
@@ -232,7 +232,7 @@ class ChangeAccessoryConditionSheet extends StatelessWidget {
       ),
       subtitle: Text(
         subtitle,
-        style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
       ),
       trailing: isSelected
           ? Icon(CupertinoIcons.checkmark_alt, size: 20, color: color)

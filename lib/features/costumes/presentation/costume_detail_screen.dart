@@ -198,7 +198,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                       Text(
                         'Cubit layar untuk zoom & geser foto',
                         style: TextStyle(
-                          color: Color(0xFF8E8E93),
+                          color: AppColors.textSecondary,
                           fontSize: 12,
                         ),
                       ),
@@ -218,7 +218,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       case CostumeStatus.available:
         return (const Color(0xFFE3F9EC), const Color(0xFF1E824C), 'Tersedia');
       case CostumeStatus.booked:
-        return (const Color(0xFFFFF4E5), const Color(0xFFD97706), 'Dibooking');
+        return (const Color(0xFFFFF4E5), AppColors.textAmber, 'Dibooking');
       case CostumeStatus.rented:
         return (const Color(0xFFFFEBF0), AppColors.deepPinkText, 'Disewa');
       case CostumeStatus.laundry:
@@ -443,7 +443,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                     title: const Text('Catatan', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                     subtitle: Text(
                       _costume.notes!,
-                      style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                     ),
                   ),
               ],
@@ -487,7 +487,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                           decoration: TextDecoration.none,
                           color: _history.totalRentals > 0
                               ? AppColors.deepPinkText
-                              : const Color(0xFF8E8E93),
+                              : AppColors.textSecondary,
                         ),
                       ),
                     ),
@@ -514,7 +514,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                             : FontWeight.w400,
                         color: _history.lastServiceDate != null
                             ? AppColors.textDark
-                            : const Color(0xFF8E8E93),
+                            : AppColors.textSecondary,
                       ),
                     ),
                   ),
@@ -533,7 +533,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                       ),
                       subtitle: Text(
                         _formatActivePeriod(_history.activeRental!),
-                        style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                       trailing: _buildActivePeriodBadge(_history.activeRental!),
                     ),
@@ -620,7 +620,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       case AccessoryCondition.good:
         return (bg: const Color(0xFFE3F9EC), text: const Color(0xFF1E824C));
       case AccessoryCondition.minorDamage:
-        return (bg: const Color(0xFFFFF4E5), text: const Color(0xFFD97706));
+        return (bg: const Color(0xFFFFF4E5), text: AppColors.textAmber);
       case AccessoryCondition.needsRepair:
         return (bg: const Color(0xFFFFEBF0), text: AppColors.dangerRose);
       case AccessoryCondition.lost:
@@ -644,7 +644,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
         : const Color(0xFFFFF4E5);
     final fg = isCurrentlyInUse
         ? const Color(0xFF1E824C)
-        : const Color(0xFFD97706);
+        : AppColors.textAmber;
     final label = isCurrentlyInUse ? 'Aktif' : 'Dijadwalkan';
 
     return Container(
@@ -686,7 +686,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       ),
       subtitle: Text(
         '${fmt.format(record.startDate)} – ${fmt.format(record.endDate)}',
-        style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+        style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
       ),
       additionalInfo: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -826,7 +826,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       ),
       subtitle: Text(
         type,
-        style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
       ),
       additionalInfo: GestureDetector(
         behavior: HitTestBehavior.opaque,

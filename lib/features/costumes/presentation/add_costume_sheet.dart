@@ -156,7 +156,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       case CostumeStatus.available:
         return const Color(0xFF1E824C);
       case CostumeStatus.booked:
-        return const Color(0xFFD97706);
+        return AppColors.textAmber;
       case CostumeStatus.rented:
         return AppColors.deepPinkText;
       case CostumeStatus.laundry:
@@ -425,7 +425,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
           const SizedBox(height: 2),
           const Text(
             'Format JPG atau PNG (Opsional)',
-            style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
           ),
         ],
       );
@@ -580,7 +580,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'INFORMASI UTAMA',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -761,7 +761,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'AKSESORI & KELENGKAPAN',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -777,7 +777,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                                 leading: const SquircleIcon(icon: CupertinoIcons.cube_box, color: Color(0xFF8E8E93)),
                                 title: const Text(
                                   'Belum ada aksesori terdaftar',
-                                  style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93), fontStyle: FontStyle.italic),
+                                  style: TextStyle(fontSize: 14, color: AppColors.textSecondary, fontStyle: FontStyle.italic),
                                 ),
                                 trailing: CupertinoButton(
                                   padding: EdgeInsets.zero,
@@ -822,7 +822,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'CATATAN TAMBAHAN',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -846,7 +846,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                   CupertinoListSection.insetGrouped(
                     header: const Text(
                       'ZONA BAHAYA',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                     ),
                     backgroundColor: AppColors.background,
                     margin: const EdgeInsets.fromLTRB(16, 20, 16, 0),

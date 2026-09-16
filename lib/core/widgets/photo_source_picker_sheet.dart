@@ -72,7 +72,7 @@ class PhotoSourcePickerSheet extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF8E8E93),
+                      color: AppColors.textSecondary,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -90,7 +90,7 @@ class PhotoSourcePickerSheet extends StatelessWidget {
                       ),
                       subtitle: const Text(
                         'Buka kamera HP untuk mengambil foto baru',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
                       onTap: () {
                         Navigator.of(context).pop();
@@ -108,7 +108,7 @@ class PhotoSourcePickerSheet extends StatelessWidget {
                       ),
                       subtitle: const Text(
                         'Pilih foto dari penyimpanan galeri perangkat',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
                       onTap: () {
                         Navigator.of(context).pop();

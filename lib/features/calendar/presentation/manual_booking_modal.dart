@@ -776,7 +776,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           fontSize: 15,
                           color: _ktpPhotoPath != null && File(_ktpPhotoPath!).existsSync()
                               ? AppColors.primaryPink
-                              : const Color(0xFF8E8E93),
+                              : AppColors.textSecondary,
                         ),
                       ),
                       trailing: _ktpPhotoPath != null && File(_ktpPhotoPath!).existsSync()
@@ -787,6 +787,8 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                                 width: 24,
                                 height: 24,
                                 fit: BoxFit.cover,
+                                cacheWidth: 400,
+                                cacheHeight: 400,
                               ),
                             )
                           : const Icon(
@@ -814,7 +816,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           fontSize: 15,
                           color: _selfieKtpPath != null && File(_selfieKtpPath!).existsSync()
                               ? AppColors.primaryPink
-                              : const Color(0xFF8E8E93),
+                              : AppColors.textSecondary,
                         ),
                       ),
                       trailing: _selfieKtpPath != null && File(_selfieKtpPath!).existsSync()
@@ -825,6 +827,8 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                                 width: 24,
                                 height: 24,
                                 fit: BoxFit.cover,
+                                cacheWidth: 400,
+                                cacheHeight: 400,
                               ),
                             )
                           : const Icon(
@@ -887,7 +891,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           fontSize: 15,
                           color: _selectedCostume != null
                               ? AppColors.textDark
-                              : const Color(0xFF8E8E93),
+                              : AppColors.textSecondary,
                         ),
                       ),
                       subtitle: _costumeError == null
@@ -1192,7 +1196,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         ),
                         subtitle: const Text(
                           'Perlu dilunasi saat serah terima kostum',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                         ),
                         trailing: Text(
                           _formatCurrency(_remainingBalance),
@@ -1229,7 +1233,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                                 'Tarif dasar 3 hari: ${_formatCurrency(_selectedCostume!.rentPrice3Days)} • Hari tambahan (+${_durationDays - 3} hari): ${_formatCurrency((_selectedCostume!.rentPrice3Days / 3.0) * (_durationDays - 3))} (${_formatCurrency(_selectedCostume!.rentPrice3Days / 3.0)}/hari)',
                                 style: const TextStyle(
                                   fontSize: 12,
-                                  color: Color(0xFF8E8E93),
+                                  color: AppColors.textSecondary,
                                   height: 1.25,
                                 ),
                               ),

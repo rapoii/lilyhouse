@@ -255,7 +255,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // A single release header per build — duplicates must be merged into one section.
-      expect(find.text('VERSI 1.0.91 (BUILD 126) - TERBARU'), findsOneWidget);
+      expect(find.text('VERSI 1.0.92 (BUILD 127) - TERBARU'), findsOneWidget);
       expect(find.text('VERSI 1.0.90 (BUILD 125)'), findsOneWidget);
 
       // Non-standard KBBI spellings must not survive in the changelog copy.

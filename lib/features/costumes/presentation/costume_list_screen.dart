@@ -6,6 +6,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/utils/debouncer.dart';
 import '../../../core/widgets/animated_list_item.dart';
+import '../../../core/widgets/error_state_view.dart';
 import '../../../core/widgets/header_action_button.dart';
 import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/state_crossfade.dart';
@@ -37,6 +38,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
 
   List<Costume> _costumes = [];
   bool _isLoading = true;
+  bool _hasError = false;
   UniqueKey _listKey = UniqueKey();
   CostumeStatus? _selectedStatus;
   String? _selectedSize;
@@ -70,20 +72,32 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
     // itself the debounced target the timer has already fired, so this is a
     // harmless no-op.
     _searchDebouncer.cancel();
-    setState(() => _isLoading = true);
-    final results = await _repository.searchCostumes(
-      query: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
-      status: _selectedStatus,
-      size: (_selectedSize == null || _selectedSize == 'All') ? null : _selectedSize,
-      series: _selectedSeries,
-      sortBy: _selectedSortBy,
-    );
-    if (mounted) {
-      setState(() {
-        _costumes = results;
-        _isLoading = false;
-        _listKey = UniqueKey();
-      });
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    try {
+      final results = await _repository.searchCostumes(
+        query: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
+        status: _selectedStatus,
+        size: (_selectedSize == null || _selectedSize == 'All') ? null : _selectedSize,
+        series: _selectedSeries,
+        sortBy: _selectedSortBy,
+      );
+      if (mounted) {
+        setState(() {
+          _costumes = results;
+          _isLoading = false;
+          _listKey = UniqueKey();
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -461,7 +475,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                         onChanged: _onSearchChanged,
                         placeholder: 'Cari kostum atau seri anime',
                         style: const TextStyle(fontSize: 15, color: Colors.black87),
-                        placeholderStyle: const TextStyle(color: Color(0xFF8E8E93), fontSize: 15),
+                        placeholderStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
                         onSuffixTap: () {
                           try {
                             HapticFeedback.lightImpact();
@@ -485,6 +499,13 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
             child: StateCrossfade(
               isLoading: _isLoading,
               isEmpty: _costumes.isEmpty,
+              hasError: _hasError,
+              errorChild: ErrorStateView(
+                message: 'Gagal memuat daftar kostum',
+                hint: 'Periksa penyimpanan atau koneksi lalu coba lagi.',
+                onRetry: _fetchCostumes,
+                retryKey: const Key('costume_list_retry'),
+              ),
               loadingChild: const SkeletonLoader(),
               emptyChild: Column(
                 // Flex-based optical centering: content at 1/3 from
@@ -531,7 +552,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                               hasFilterOrQuery
                                   ? 'Coba sesuaikan kata kunci atau filter pencarian'
                                   : 'Tambahkan kostum pertama ke katalog LilyHouse',
-                              style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 14),

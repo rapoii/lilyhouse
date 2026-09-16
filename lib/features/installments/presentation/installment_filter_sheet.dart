@@ -128,7 +128,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'STATUS CICILAN',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -158,7 +158,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'PRIORITAS',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -177,7 +177,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: _dueSoon ? AppColors.primaryPink : const Color(0xFF8E8E93),
+                          color: _dueSoon ? AppColors.primaryPink : AppColors.textSecondary,
                         ),
                       ),
                       trailing: CupertinoSwitch(
@@ -194,7 +194,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'URUTKAN BERDASARKAN',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),

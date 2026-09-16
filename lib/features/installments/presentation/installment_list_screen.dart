@@ -13,6 +13,7 @@ import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../../../core/widgets/animated_list_item.dart';
 import '../../../core/widgets/state_crossfade.dart';
+import '../../../core/widgets/error_state_view.dart';
 import '../data/installment_repository.dart';
 import '../domain/installment.dart';
 import '../domain/installment_log.dart';
@@ -41,6 +42,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
 
   List<Installment> _installments = [];
   bool _isLoading = true;
+  bool _hasError = false;
   InstallmentStatus? _selectedStatus;
   String _selectedSortBy = 'due_date_asc';
   bool _selectedDueSoon = false;
@@ -77,19 +79,31 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
     // A direct load supersedes any queued keystroke.  When this method is the
     // debounced target the timer already fired, so cancelling is a no-op.
     _searchDebouncer.cancel();
-    setState(() => _isLoading = true);
-    final items = await widget.repository.searchInstallments(
-      query: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
-      status: _selectedStatus,
-      sortBy: _selectedSortBy,
-      dueSoon: _selectedDueSoon,
-    );
-    if (mounted) {
-      setState(() {
-        _installments = items;
-        _isLoading = false;
-        _listKey = UniqueKey();
-      });
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    try {
+      final items = await widget.repository.searchInstallments(
+        query: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
+        status: _selectedStatus,
+        sortBy: _selectedSortBy,
+        dueSoon: _selectedDueSoon,
+      );
+      if (mounted) {
+        setState(() {
+          _installments = items;
+          _isLoading = false;
+          _listKey = UniqueKey();
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
     }
   }
 
@@ -153,7 +167,10 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
       padding: EdgeInsets.zero,
       minimumSize: const Size(44, 44),
       onPressed: _showFilterSheet,
-      child: Container(
+      child: Semantics(
+        label: 'Filter dan urutkan',
+        button: true,
+        child: Container(
         height: 38,
         width: 38,
         decoration: BoxDecoration(
@@ -183,6 +200,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                 ),
               ),
           ],
+        ),
         ),
       ),
     );
@@ -468,7 +486,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                 style: TextStyle(
                                   fontSize: 15,
                                   color: selectedDueDate == null
-                                      ? const Color(0xFF8E8E93)
+                                      ? AppColors.textSecondary
                                       : AppColors.textDark,
                                 ),
                               ),
@@ -582,7 +600,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
-                    color: Color(0xFF8E8E93),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -669,7 +687,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                         onChanged: _onSearchChanged,
                         placeholder: 'Cari cicilan atau nama toko',
                         style: const TextStyle(fontSize: 15, color: Colors.black87),
-                        placeholderStyle: const TextStyle(color: Color(0xFF8E8E93), fontSize: 15),
+                        placeholderStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 15),
                         onSuffixTap: () {
                           try {
                             HapticFeedback.lightImpact();
@@ -708,18 +726,22 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                 const SizedBox(width: 5),
                                 const Text(
                                   'Jatuh Tempo Dekat',
-                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFD97706)),
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textAmber),
                                 ),
                                 const SizedBox(width: 4),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    setState(() => _selectedDueSoon = false);
-                                    _loadInstallments();
-                                  },
-                                  child: const Padding(
-                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
-                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFFD97706)),
+                                Semantics(
+                                  label: 'Hapus filter jatuh tempo dekat',
+                                  button: true,
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      setState(() => _selectedDueSoon = false);
+                                      _loadInstallments();
+                                    },
+                                    child: const Padding(
+                                      padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                      child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFFD97706)),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -750,22 +772,26 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : const Color(0xFFD97706),
+                                    color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : AppColors.textAmber,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    setState(() => _selectedStatus = null);
-                                    _loadInstallments();
-                                  },
-                                  child: Padding(
-                                    padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
-                                    child: Icon(
-                                      CupertinoIcons.clear_circled_solid,
-                                      size: 14,
-                                      color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : const Color(0xFFD97706),
+                                Semantics(
+                                  label: 'Hapus filter status',
+                                  button: true,
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      setState(() => _selectedStatus = null);
+                                      _loadInstallments();
+                                    },
+                                    child: Padding(
+                                      padding: const EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                      child: Icon(
+                                        CupertinoIcons.clear_circled_solid,
+                                        size: 14,
+                                        color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : const Color(0xFFD97706),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -790,15 +816,19 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                   style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF555558)),
                                 ),
                                 const SizedBox(width: 4),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    setState(() => _selectedSortBy = 'due_date_asc');
-                                    _loadInstallments();
-                                  },
-                                  child: const Padding(
-                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
-                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF8E8E93)),
+                                Semantics(
+                                  label: 'Kembalikan urutan bawaan',
+                                  button: true,
+                                  child: GestureDetector(
+                                    behavior: HitTestBehavior.opaque,
+                                    onTap: () {
+                                      setState(() => _selectedSortBy = 'due_date_asc');
+                                      _loadInstallments();
+                                    },
+                                    child: const Padding(
+                                      padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                      child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: AppColors.textSecondary),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -816,6 +846,13 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
             child: StateCrossfade(
               isLoading: _isLoading,
               isEmpty: _installments.isEmpty,
+              hasError: _hasError,
+              errorChild: ErrorStateView(
+                message: 'Gagal memuat daftar cicilan',
+                hint: 'Periksa penyimpanan atau koneksi lalu coba lagi.',
+                onRetry: _loadInstallments,
+                retryKey: const Key('installment_list_retry'),
+              ),
               loadingChild: const SkeletonLoader(layout: SkeletonLayout.card),
               emptyChild: Column(
                 children: [
@@ -858,7 +895,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                               hasFilterOrQuery
                                   ? 'Coba sesuaikan filter atau kata kunci pencarian'
                                   : 'Catat cicilan kostum baru untuk memantau jatuh tempo',
-                              style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                              style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                               textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 14),
@@ -1188,7 +1225,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                             style: TextStyle(
                               fontSize: 12.5,
                               fontWeight: FontWeight.w700,
-                              color: inst.isOverdue ? const Color(0xFFC62828) : const Color(0xFFB26B00),
+                              color: inst.isOverdue ? const Color(0xFFC62828) : AppColors.textAmber,
                             ),
                           ),
                         ),
@@ -1324,7 +1361,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                       const CupertinoListTile(
                         title: Text(
                           'Belum ada catatan pembayaran cicilan.',
-                          style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
+                          style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                         ),
                       )
                     else
@@ -1348,7 +1385,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                                   log.notes!.trim(),
                                   style: const TextStyle(
                                     fontSize: 13,
-                                    color: Color(0xFF8E8E93),
+                                    color: AppColors.textSecondary,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 )
@@ -1357,17 +1394,21 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                             _formatDate(log.paymentDate),
                             style: const TextStyle(
                               fontSize: 13,
-                              color: Color(0xFF8E8E93),
+                              color: AppColors.textSecondary,
                             ),
                           ),
                           trailing: CupertinoButton(
                             padding: EdgeInsets.zero,
                             minimumSize: const Size(44, 44),
                             onPressed: () => _confirmDeleteLog(log),
-                            child: const Icon(
-                              CupertinoIcons.trash,
-                              size: 16,
-                              color: AppColors.dangerRose,
+                            child: Semantics(
+                              label: 'Hapus catatan pembayaran',
+                              button: true,
+                              child: const Icon(
+                                CupertinoIcons.trash,
+                                size: 16,
+                                color: AppColors.dangerRose,
+                              ),
                             ),
                           ),
                         );

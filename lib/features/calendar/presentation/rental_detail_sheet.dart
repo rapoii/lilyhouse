@@ -44,6 +44,8 @@ class RentalDetailSheet extends StatelessWidget {
       return Image.network(
         path,
         fit: BoxFit.cover,
+        cacheWidth: 400,
+        cacheHeight: 400,
         errorBuilder: (context, error, stackTrace) => const Center(
           child: Icon(
             CupertinoIcons.sparkles,
@@ -61,6 +63,8 @@ class RentalDetailSheet extends StatelessWidget {
       return Image.file(
         file,
         fit: BoxFit.cover,
+        cacheWidth: 400,
+        cacheHeight: 400,
         errorBuilder: (context, error, stackTrace) => const Center(
           child: Icon(
             CupertinoIcons.sparkles,
@@ -84,6 +88,8 @@ class RentalDetailSheet extends StatelessWidget {
       return Image.network(
         path,
         fit: BoxFit.cover,
+        cacheWidth: 400,
+        cacheHeight: 400,
         errorBuilder: (context, error, stackTrace) => const Center(
           child: Icon(CupertinoIcons.photo, size: 16, color: Color(0xFF8E8E93)),
         ),
@@ -97,6 +103,8 @@ class RentalDetailSheet extends StatelessWidget {
       return Image.file(
         file,
         fit: BoxFit.cover,
+        cacheWidth: 400,
+        cacheHeight: 400,
         errorBuilder: (context, error, stackTrace) => const Center(
           child: Icon(CupertinoIcons.photo, size: 16, color: Color(0xFF8E8E93)),
         ),
@@ -112,6 +120,8 @@ class RentalDetailSheet extends StatelessWidget {
       return Image.network(
         path,
         fit: BoxFit.contain,
+        cacheWidth: 1000,
+        cacheHeight: 1000,
         loadingBuilder: (context, child, loadingProgress) {
           if (loadingProgress == null) return child;
           return const Center(
@@ -145,6 +155,8 @@ class RentalDetailSheet extends StatelessWidget {
       return Image.file(
         file,
         fit: BoxFit.contain,
+        cacheWidth: 1000,
+        cacheHeight: 1000,
         errorBuilder: (context, error, stackTrace) => const Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -256,7 +268,7 @@ class RentalDetailSheet extends StatelessWidget {
                       Text(
                         'Cubit layar untuk zoom & geser foto',
                         style: TextStyle(
-                          color: Color(0xFF8E8E93),
+                          color: Color(0xFF636366),
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
                         ),
@@ -292,7 +304,7 @@ class RentalDetailSheet extends StatelessWidget {
         hasPhoto ? 'Tersimpan • Ketuk untuk melihat foto' : emptyLabel,
         style: TextStyle(
           fontSize: 12,
-          color: hasPhoto ? const Color(0xFF34C759) : const Color(0xFF8E8E93),
+          color: hasPhoto ? const Color(0xFF34C759) : const Color(0xFF636366),
           fontWeight: hasPhoto ? FontWeight.w500 : FontWeight.normal,
         ),
       ),
@@ -326,7 +338,7 @@ class RentalDetailSheet extends StatelessWidget {
             )
           : const Text(
               'Tidak ada',
-              style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+              style: TextStyle(fontSize: 13, color: Color(0xFF636366)),
             ),
       onTap: hasPhoto
           ? () => _showPhotoPreviewModal(
@@ -591,7 +603,7 @@ class RentalDetailSheet extends StatelessWidget {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF8E8E93),
+                color: Color(0xFF636366),
               ),
             ),
             const SizedBox(height: 2),
@@ -626,7 +638,7 @@ class RentalDetailSheet extends StatelessWidget {
                   'DP: Rp ${currencyFormat.format(rental.dpAmount.toInt())}',
                   style: const TextStyle(
                     fontSize: 11,
-                    color: Color(0xFF8E8E93),
+                    color: Color(0xFF636366),
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -634,7 +646,7 @@ class RentalDetailSheet extends StatelessWidget {
                   'Total: Rp ${currencyFormat.format(rental.totalPrice.toInt())}',
                   style: const TextStyle(
                     fontSize: 11,
-                    color: Color(0xFF8E8E93),
+                    color: Color(0xFF636366),
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -692,7 +704,7 @@ class RentalDetailSheet extends StatelessWidget {
 
     final Color bannerColor = isOverdue
         ? AppColors.dangerRose
-        : (isDueToday ? AppColors.dangerRose : const Color(0xFFD97706));
+        : (isDueToday ? AppColors.dangerRose : AppColors.textAmber);
     final Color bannerBg = isOverdue || isDueToday
         ? AppColors.dangerRose.withValues(alpha: 0.10)
         : const Color(0xFFFF9500).withValues(alpha: 0.10);
@@ -745,7 +757,7 @@ class RentalDetailSheet extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
-                    color: bannerColor,
+                    color: AppColors.textAmber,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -754,7 +766,7 @@ class RentalDetailSheet extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: bannerColor,
+                    color: AppColors.textAmber,
                   ),
                 ),
               ],
@@ -783,7 +795,7 @@ class RentalDetailSheet extends StatelessWidget {
         hasAddress
             ? 'Ketuk untuk menyalin alamat tujuan pengiriman'
             : 'Alamat pengiriman belum ditambahkan',
-        style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+        style: const TextStyle(fontSize: 12, color: Color(0xFF636366)),
       ),
       trailing: hasAddress
           ? Container(
@@ -797,7 +809,7 @@ class RentalDetailSheet extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFFD97706),
+                  color: AppColors.textAmber,
                 ),
               ),
             )
@@ -1485,7 +1497,7 @@ class RentalDetailSheet extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF8E8E93),
+                      color: Color(0xFF636366),
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -1508,7 +1520,7 @@ class RentalDetailSheet extends StatelessWidget {
                         'Nama Lengkap Penyewa',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF8E8E93),
+                          color: Color(0xFF636366),
                         ),
                       ),
                     ),
@@ -1530,7 +1542,7 @@ class RentalDetailSheet extends StatelessWidget {
                             : 'Nomor Telepon / HP',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF8E8E93),
+                          color: Color(0xFF636366),
                         ),
                       ),
                       onTap: (custPhone != '-')
@@ -1602,7 +1614,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Nomor HP Orang Tua',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                         onTap: () {
@@ -1664,7 +1676,7 @@ class RentalDetailSheet extends StatelessWidget {
                         'Akun Media Sosial',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF8E8E93),
+                          color: Color(0xFF636366),
                         ),
                       ),
                       onTap: (custSosmed != '-')
@@ -1736,7 +1748,7 @@ class RentalDetailSheet extends StatelessWidget {
                         'Alamat Pengiriman / Domisili',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF8E8E93),
+                          color: Color(0xFF636366),
                         ),
                       ),
                     ),
@@ -1758,7 +1770,7 @@ class RentalDetailSheet extends StatelessWidget {
                         'Template rincian sewa & aturan rental untuk dikirim via DM Instagram',
                         style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF8E8E93),
+                          color: Color(0xFF636366),
                         ),
                       ),
                       onTap: () {
@@ -1836,7 +1848,7 @@ class RentalDetailSheet extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF8E8E93),
+                      color: Color(0xFF636366),
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -1869,7 +1881,7 @@ class RentalDetailSheet extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF8E8E93),
+                      color: Color(0xFF636366),
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -1892,7 +1904,7 @@ class RentalDetailSheet extends StatelessWidget {
                         'Tarif sewa untuk ${rental.durationDays} hari',
                         style: const TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF8E8E93),
+                          color: Color(0xFF636366),
                         ),
                       ),
                       trailing: Text(
@@ -1921,7 +1933,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Pembayaran awal yang telah diterima',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                         trailing: Text(
@@ -1951,7 +1963,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Perlu dilunasi saat serah terima kostum',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                         trailing: Text(
@@ -1981,7 +1993,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Catatan Tambahan',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                       ),
@@ -1995,7 +2007,7 @@ class RentalDetailSheet extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF8E8E93),
+                      color: Color(0xFF636366),
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -2024,7 +2036,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Kostum telah diserahkan atau dikirim ke penyewa',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                         onTap: () async {
@@ -2066,7 +2078,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Kostum telah diterima kembali dari penyewa',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                         onTap: () => _showReturnDialog(
@@ -2096,7 +2108,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Catat bahwa seluruh biaya sewa telah dilunasi',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                         onTap: () async {
@@ -2159,7 +2171,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Kostum sudah dicek lengkap dan sewa dinyatakan tuntas',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                         onTap: () async {
@@ -2214,14 +2226,14 @@ class RentalDetailSheet extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                         subtitle: Text(
                           'Jadwal sewa ini tidak lagi aktif',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                       ),
@@ -2244,7 +2256,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Transaksi rental ini telah sukses terselesaikan',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                       ),
@@ -2285,7 +2297,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Batalkan reservasi dan kosongkan slot tanggal',
                           style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF8E8E93),
+                            color: Color(0xFF636366),
                           ),
                         ),
                         onTap: () => _confirmCancelBooking(context),

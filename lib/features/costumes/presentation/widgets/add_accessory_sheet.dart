@@ -173,7 +173,7 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF8E8E93),
+                      color: AppColors.textSecondary,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -197,7 +197,7 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
                       ),
                       subtitle: const Text(
                         'Nama item atau perlengkapan kostum',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -210,7 +210,7 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF8E8E93),
+                        color: AppColors.textSecondary,
                         letterSpacing: 0.5,
                       ),
                     ),
@@ -277,7 +277,7 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
       ),
       subtitle: Text(
         subtitle,
-        style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
       ),
       trailing: isSelected
           ? Icon(CupertinoIcons.checkmark_alt, size: 20, color: color)

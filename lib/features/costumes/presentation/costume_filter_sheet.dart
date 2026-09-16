@@ -158,7 +158,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'KATEGORI / SERI ANIME',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
@@ -202,7 +202,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'STATUS KETERSEDIAAN',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -230,7 +230,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                       title: const Text('Sedang Disewa', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       subtitle: const Text(
                         'Kostum sedang dalam masa sewa aktif',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
                       trailing: _buildCheckmark(_selectedStatus == CostumeStatus.rented),
                       onTap: () => _select(() => _selectedStatus = CostumeStatus.rented),
@@ -254,7 +254,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'UKURAN KOSTUM',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -288,7 +288,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'URUTKAN BERDASARKAN',
-                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: AppColors.textSecondary),
                   ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),

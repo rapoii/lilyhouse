@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/ios_toast.dart';
+import '../../../../core/widgets/error_state_view.dart';
 import '../../../../core/widgets/squircle_icon.dart';
 import '../data/installment_repository.dart';
 import '../domain/installment.dart';
@@ -27,6 +28,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
   Installment? _installment;
   List<InstallmentLog> _logs = [];
   bool _isLoading = true;
+  bool _hasError = false;
 
   @override
   void initState() {
@@ -35,15 +37,28 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
   }
 
   Future<void> _fetchDetails() async {
-    final updated = await widget.repository.recalculateInstallment(widget.installmentId);
-    final inst = updated ?? await widget.repository.getInstallmentById(widget.installmentId);
-    final logs = await widget.repository.getLogsForInstallment(widget.installmentId);
-    if (mounted) {
-      setState(() {
-        _installment = inst;
-        _logs = logs;
-        _isLoading = false;
-      });
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    try {
+      final updated = await widget.repository.recalculateInstallment(widget.installmentId);
+      final inst = updated ?? await widget.repository.getInstallmentById(widget.installmentId);
+      final logs = await widget.repository.getLogsForInstallment(widget.installmentId);
+      if (mounted) {
+        setState(() {
+          _installment = inst;
+          _logs = logs;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+          _hasError = true;
+        });
+      }
     }
   }
 
@@ -146,6 +161,30 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
       return const CupertinoPageScaffold(
         backgroundColor: AppColors.background,
         child: Center(child: CupertinoActivityIndicator(radius: 14)),
+      );
+    }
+
+    if (_hasError) {
+      return CupertinoPageScaffold(
+        backgroundColor: AppColors.background,
+        navigationBar: CupertinoNavigationBar(
+          backgroundColor: AppColors.background,
+          middle: const Text('Rincian Cicilan', style: AppTypography.navTitle),
+          leading: CupertinoButton(
+            padding: EdgeInsets.zero,
+            onPressed: () => Navigator.maybePop(context),
+            child: Semantics(
+              label: 'Kembali',
+              child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
+            ),
+          ),
+        ),
+        child: ErrorStateView(
+          message: 'Gagal memuat rincian cicilan',
+          hint: 'Periksa penyimpanan atau koneksi lalu coba lagi.',
+          onRetry: _fetchDetails,
+          retryKey: const Key('installment_detail_retry'),
+        ),
       );
     }
 
@@ -301,7 +340,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: inst.isOverdue ? const Color(0xFFC62828) : const Color(0xFFB26B00),
+                            color: inst.isOverdue ? const Color(0xFFC62828) : AppColors.textAmber,
                           ),
                         ),
                       ),
@@ -483,7 +522,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                 const CupertinoListTile(
                   title: Text(
                     'Belum ada riwayat pembayaran.',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
+                    style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 )
               else
@@ -507,7 +546,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                             log.notes!.trim(),
                             style: const TextStyle(
                               fontSize: 13,
-                              color: Color(0xFF8E8E93),
+                              color: AppColors.textSecondary,
                               fontWeight: FontWeight.w500,
                             ),
                           )
@@ -516,17 +555,21 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                       _formatDate(log.paymentDate),
                       style: const TextStyle(
                         fontSize: 13,
-                        color: Color(0xFF8E8E93),
+                        color: AppColors.textSecondary,
                       ),
                     ),
                     trailing: CupertinoButton(
                       padding: EdgeInsets.zero,
                       minimumSize: const Size(44, 44),
                       onPressed: () => _confirmDeleteLog(log),
-                      child: const Icon(
-                        CupertinoIcons.trash,
-                        size: 16,
-                        color: AppColors.dangerRose,
+                      child: Semantics(
+                        label: 'Hapus catatan pembayaran',
+                        button: true,
+                        child: const Icon(
+                          CupertinoIcons.trash,
+                          size: 16,
+                          color: AppColors.dangerRose,
+                        ),
                       ),
                     ),
                   );

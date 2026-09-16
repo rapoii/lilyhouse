@@ -121,7 +121,7 @@ class InstallmentCard extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
-                          color: isOverdue ? const Color(0xFFC62828) : const Color(0xFFB26B00),
+                          color: isOverdue ? const Color(0xFFC62828) : AppColors.textAmber,
                         ),
                       ),
                     ),
@@ -148,7 +148,7 @@ class InstallmentCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF8E8E93),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],

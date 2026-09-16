@@ -9,6 +9,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/animated_list_item.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
+import '../../../core/widgets/error_state_view.dart';
 import '../../../core/widgets/header_action_button.dart';
 import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/pressable_card.dart';
@@ -51,6 +52,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Map<String, Customer> _customerCache = {};
   Map<String, Costume> _costumeCache = {};
   bool _isLoading = true;
+  bool _hasError = false;
   UniqueKey _slotsKey = UniqueKey();
 
   @override
@@ -79,28 +81,40 @@ class _CalendarScreenState extends State<CalendarScreen> {
   }
 
   Future<void> _loadData() async {
-    setState(() => _isLoading = true);
-    final rentals = await _repository.getAllRentals();
-    final customers = await _repository.getAllCustomers();
-    final costumes = await _costumeRepository.getAllCostumes();
+    setState(() {
+      _isLoading = true;
+      _hasError = false;
+    });
+    try {
+      final rentals = await _repository.getAllRentals();
+      final customers = await _repository.getAllCustomers();
+      final costumes = await _costumeRepository.getAllCostumes();
 
-    final cache = <String, Customer>{};
-    for (final c in customers) {
-      cache[c.id] = c;
-    }
+      final cache = <String, Customer>{};
+      for (final c in customers) {
+        cache[c.id] = c;
+      }
 
-    final costCache = <String, Costume>{};
-    for (final c in costumes) {
-      costCache[c.id] = c;
-    }
+      final costCache = <String, Costume>{};
+      for (final c in costumes) {
+        costCache[c.id] = c;
+      }
 
-    if (mounted) {
-      setState(() {
-        _allRentals = rentals;
-        _customerCache = cache;
-        _costumeCache = costCache;
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _allRentals = rentals;
+          _customerCache = cache;
+          _costumeCache = costCache;
+          _isLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _hasError = true;
+          _isLoading = false;
+        });
+      }
     }
   }
 
@@ -192,7 +206,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF8E8E93),
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -207,7 +221,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           title: const Text('Smart Paste', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                           subtitle: const Text(
                             'Deteksi otomatis format sewa DM Instagram',
-                            style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
                           trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                           onTap: () {
@@ -224,7 +238,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           title: const Text('Input Manual', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                           subtitle: const Text(
                             'Ketik data pesanan satu per satu lewat form',
-                            style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
                           trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                           onTap: () {
@@ -300,7 +314,14 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ? const Center(
               child: CupertinoActivityIndicator(radius: 14),
             )
-          : SingleChildScrollView(
+          : _hasError
+              ? ErrorStateView(
+                  message: 'Gagal memuat jadwal',
+                  hint: 'Periksa penyimpanan atau koneksi lalu coba lagi.',
+                  onRetry: _loadData,
+                  retryKey: const Key('calendar_retry'),
+                )
+              : SingleChildScrollView(
               keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
               physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
@@ -479,7 +500,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               'Belum ada pesanan rental di tanggal ini',
                               style: TextStyle(
                                 fontSize: 13,
-                                color: Color(0xFF8E8E93),
+                                color: AppColors.textSecondary,
                               ),
                               textAlign: TextAlign.center,
                             ),
@@ -589,7 +610,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
-                    color: Color(0xFF8E8E93),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ),
@@ -604,7 +625,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: dueToday > 0 ? const Color(0xFFD97706) : const Color(0xFF1E824C),
+                    color: dueToday > 0 ? AppColors.textAmber : const Color(0xFF1E824C),
                   ),
                 ),
               ),
@@ -688,7 +709,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           style: const TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w500,
-            color: Color(0xFF8E8E93),
+            color: AppColors.textSecondary,
           ),
         ),
       ],
@@ -779,7 +800,7 @@ class _RentalSlotCard extends StatelessWidget {
             SizedBox(width: 4),
             Text(
               'Hari Ambil / Mulai Sewa',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF007AFF)),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textBlue),
             ),
           ],
         ),
@@ -799,7 +820,7 @@ class _RentalSlotCard extends StatelessWidget {
             SizedBox(width: 4),
             Text(
               'Jatuh Tempo Pengembalian',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFFD97706)),
+              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textAmber),
             ),
           ],
         ),
@@ -918,7 +939,7 @@ class _RentalSlotCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xFF8E8E93),
+                    color: AppColors.textSecondary,
                   ),
                 ),
               ],
@@ -1166,7 +1187,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                 children: [
                 const Text(
                   'Tempel format sewa DM Instagram di bawah ini untuk deteksi jadwal dan isi formulir otomatis.',
-                  style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93), height: 1.3),
+                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.3),
                 ),
                 const SizedBox(height: 12),
                 // Header row with "Tempel Klip" quick paste button
@@ -1178,7 +1199,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF8E8E93),
+                        color: AppColors.textSecondary,
                         letterSpacing: 0.4,
                       ),
                     ),
@@ -1220,7 +1241,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                     expands: true,
                     style: const TextStyle(fontSize: 13, color: AppColors.textDark),
                     placeholder: 'Tempel format sewa DM Instagram di sini...',
-                    placeholderStyle: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                    placeholderStyle: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                     padding: const EdgeInsets.all(12),
                     decoration: null,
                   ),
@@ -1288,7 +1309,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                   CupertinoListSection.insetGrouped(
                     header: const Text(
                       'DATA HASIL DETEKSI',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF8E8E93)),
+                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
                     ),
                     margin: EdgeInsets.zero,
                     backgroundColor: Colors.transparent,

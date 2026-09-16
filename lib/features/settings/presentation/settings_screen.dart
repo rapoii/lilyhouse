@@ -213,7 +213,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Color(0xFF8E8E93),
+                              color: AppColors.textSecondary,
                               height: 1.4,
                             ),
                           ),
@@ -249,11 +249,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           subtitle: Text(
                             'ID: ${item['record_id'] ?? '-'}',
-                            style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary),
                           ),
                           additionalInfo: Text(
                             formattedTime,
-                            style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
                         );
                       }).toList(),
@@ -338,7 +338,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           title: const Text('Katalog Kostum', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                           additionalInfo: Text(
                             '${counts['costumes'] ?? 0} item',
-                            style: const TextStyle(fontSize: 15, color: Color(0xFF8E8E93)),
+                            style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
                           ),
                         ),
                         CupertinoListTile(
@@ -349,7 +349,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           title: const Text('Pesanan Rental', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                           additionalInfo: Text(
                             '${counts['rentals'] ?? 0} pesanan',
-                            style: const TextStyle(fontSize: 15, color: Color(0xFF8E8E93)),
+                            style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
                           ),
                         ),
                         CupertinoListTile(
@@ -360,7 +360,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           title: const Text('Pelanggan Terdaftar', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                           additionalInfo: Text(
                             '${counts['customers'] ?? 0} orang',
-                            style: const TextStyle(fontSize: 15, color: Color(0xFF8E8E93)),
+                            style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
                           ),
                         ),
                         CupertinoListTile(
@@ -371,7 +371,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           title: const Text('Transaksi Cicilan', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                           additionalInfo: Text(
                             '${counts['installments'] ?? 0} tagihan',
-                            style: const TextStyle(fontSize: 15, color: Color(0xFF8E8E93)),
+                            style: const TextStyle(fontSize: 15, color: AppColors.textSecondary),
                           ),
                         ),
                       ],
@@ -387,7 +387,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             color: Color(0xFF5856D6),
                           ),
                           title: Text('Database Engine', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                          additionalInfo: Text('SQLite v3.x', style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93))),
+                          additionalInfo: Text('SQLite v3.x', style: TextStyle(fontSize: 15, color: AppColors.textSecondary)),
                         ),
                         const CupertinoListTile(
                           leading: SquircleIcon(
@@ -395,7 +395,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             color: Color(0xFF8E8E93),
                           ),
                           title: Text('Nama Berkas', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                          additionalInfo: Text('lilyhouse.db', style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93))),
+                          additionalInfo: Text('lilyhouse.db', style: TextStyle(fontSize: 15, color: AppColors.textSecondary)),
                         ),
                         CupertinoListTile(
                           leading: const SquircleIcon(
@@ -403,7 +403,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             color: Color(0xFF34C759),
                           ),
                           title: const Text('Ukuran Berkas', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                          additionalInfo: Text(_formatBytes(dbBytes), style: const TextStyle(fontSize: 15, color: Color(0xFF8E8E93))),
+                          additionalInfo: Text(_formatBytes(dbBytes), style: const TextStyle(fontSize: 15, color: AppColors.textSecondary)),
                         ),
                       ],
                     ),
@@ -525,8 +525,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.91',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
+                    'Versi 1.0.92',
+                    style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -567,7 +567,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       Text(
                         'Rafi Permana',
-                        style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93), fontWeight: FontWeight.w500),
+                        style: TextStyle(fontSize: 15, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                       ),
                     ],
                   ),
@@ -622,7 +622,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         color: Color(0xFF5856D6),
                       ),
                       title: Text('Tipografi Native', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                      subtitle: Text('.SF Pro Text & Display dengan dynamic leading', style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93))),
+                      subtitle: Text('.SF Pro Text & Display dengan dynamic leading', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                     ),
                     CupertinoListTile(
                       leading: SquircleIcon(
@@ -630,7 +630,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         color: AppColors.primaryPink,
                       ),
                       title: Text('Warna Utama', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                      subtitle: Text('Primary Pink (#FF85A1) dengan iOS Vibrant accents', style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93))),
+                      subtitle: Text('Primary Pink (#FF85A1) dengan iOS Vibrant accents', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                     ),
                     CupertinoListTile(
                       leading: SquircleIcon(
@@ -638,7 +638,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         color: Color(0xFF34C759),
                       ),
                       title: Text('Komponen Cupertino', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                      subtitle: Text('Modal popup, inset grouped list, squircle 6.5px', style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93))),
+                      subtitle: Text('Modal popup, inset grouped list, squircle 6.5px', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                     ),
                     CupertinoListTile(
                       leading: SquircleIcon(
@@ -646,7 +646,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         color: Color(0xFFFF9500),
                       ),
                       title: Text('60 FPS Transitions', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                      subtitle: Text('Deferred wheel slider dengan HarfBuzz pre-warming', style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93))),
+                      subtitle: Text('Deferred wheel slider dengan HarfBuzz pre-warming', style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                     ),
                   ],
                 ),
@@ -690,7 +690,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.91 (BUILD 126) - TERBARU'),
+                  header: const Text('VERSI 1.0.92 (BUILD 127) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.eye_fill,
+                        color: Color(0xFF5856D6),
+                      ),
+                      title: Text('Kontras Teks Sesuai WCAG AA', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Seluruh teks sekunder, peringatan, dan tautan kini memakai warna yang lolos rasio kontras minimal 4,5 banding 1 di setiap latar, sehingga tetap terbaca jelas di bawah sinar matahari maupun saat mata lelah.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.arrow_clockwise_circle_fill,
+                        color: Color(0xFF1E824C),
+                      ),
+                      title: Text('Pemulihan Gagal Muat & Thumbnail Hemat Memori', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Bila data gagal dimuat, layar kini menampilkan pesan ramah dengan tombol Coba Lagi alih-alih berputar tanpa henti. Thumbnail foto juga dimuat pada resolusi wajar agar aplikasi tetap ringan dengan ratusan foto kostum.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.91 (BUILD 126)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -702,7 +731,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Proteksi Perubahan Belum Tersimpan', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Form kostum, booking manual, dan ubah cicilan kini menampilkan konfirmasi Apple HIG sebelum ditutup saat masih ada isian yang belum disimpan, sehingga data tidak hilang tanpa sengaja.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -713,7 +742,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Pencarian Tanggap & Skeleton Loading', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Pencarian katalog dan cicilan kini memakai jeda 300 milidetik, indikator jumlah hasil, serta kerangka pemuatan agar daftar tidak berkedip saat mengetik.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -724,7 +753,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Label Aksesibilitas & Bahasa Seragam', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Tombol ikon kini memiliki label pembaca layar, catatan rilis duplikat digabung, dan istilah non-baku diselaraskan ke ejaan resmi.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -742,7 +771,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Ringkasan Operasional Harian', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Kartu ringkasan di kalender kini menampilkan booking aktif, DP belum lunas, dan sewa yang jatuh tempo pada hari yang dipilih, kartu Sisa Tagihan dan banner jatuh tempo di rincian rental, serta ringkasan pembayaran berjalan di form cicilan.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -753,7 +782,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Filter "Sedang Disewa" & Status Kostum Real-time', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Filter katalog kini menyertakan opsi "Sedang Disewa" dengan sublabel keterangan, dan status ketersediaan kostum otomatis tersinkron saat rental ditandai disewa, dikembalikan, atau dibatalkan.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -764,7 +793,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Peringatan Jatuh Tempo Cicilan', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Filter Jatuh Tempo Dekat (7 hari atau sudah lewat), badge keterlambatan di kartu cicilan, dan sinkronisasi otomatis status kostum dari siklus sewa.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -775,7 +804,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Riwayat Penyewaan Kostum', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Badge Disewa berkali-kali, tanggal servis terakhir, indikator periode sewa aktif, dan daftar riwayat penyewa per kostum tanpa migrasi skema.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -793,7 +822,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Status Pembayaran & Nominal DP', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Form booking kini mendukung status pembayaran Belum Bayar, DP, atau Lunas, lengkap dengan input nominal DP dan kalkulasi sisa pelunasan otomatis.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -804,7 +833,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Ringkasan Utang & Template Konfirmasi', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Kartu ringkasan total utang cicilan, sanitasi pemisah ribuan, filter chip interaktif katalog kostum, dan template pesan konfirmasi pelanggan.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -822,7 +851,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Waktu Sinkron Relatif & Humanis', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Indikator sinkronisasi menampilkan format relatif yang mudah dibaca (Baru saja, X menit lalu, Hari ini, Kemarin) lengkap dengan stempel waktu absolut.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -833,7 +862,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Proteksi Dialog Pengaturan Krusial', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Konfirmasi pembersihan cache gambar dan pemulihan cloud kini diproteksi dengan aksi batal default dan teks peringatan yang transparan.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -851,7 +880,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Kelola Aksesori & Fitur Ubah Cicilan', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Aksesori kostum kini dapat dikelola saat mode edit, penambahan aksi Ubah Cicilan di lembar rincian, dan proporsi modal sheet yang lebih pas.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -862,7 +891,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Kalkulasi Ekstra Hari & Peringatan Telat', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Rekomendasi tarif otomatis untuk durasi sewa lebih dari 3 hari beserta rinciannya, serta badge peringatan keterlambatan pengembalian kostum.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -880,7 +909,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Validasi Finansial & Integritas Data', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Validasi ketat DP non-negatif pada cicilan baru, tarif sewa minimum Rp 1.000, serta penutupan siklus rental ke status Selesai & Lunas.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -891,7 +920,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Ergonomi Apple HIG & Feedback Ramah', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Keyboard dismiss onDrag pada form cicilan, touch target tombol filter 44pt, nama pelanggan pada peringatan konflik, dan pesan kesalahan koneksi cloud yang manusiawi.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -909,7 +938,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Deteksi Konflik Sewa & Rincian Jadwal', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Dialog peringatan tabrakan booking kini mencantumkan nama penyewa yang bertabrakan dan rentang tanggal sewa secara langsung.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -920,7 +949,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Aksesibilitas Kontras WCAG AA & Input Form', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Peningkatan kontras teks status Disewa/Belum Lunas ke Deep Pink (5.8:1), prefix mata uang pada tarif kostum, tinggi modal bayar cicilan lebih ringkas, dan sanitasi string menyeluruh.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -938,7 +967,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Booking Smarter & Validasi Harga', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Pencocokan nama kostum otomatis menoleransi spasi/garis bawah, auto-fill tarif sewa, validasi wajib harga sewa minimal, dan pencegahan booking Rp 0.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -949,7 +978,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Penyempurnaan Modal & Diagnostik SQLite', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Eliminasi tombol navigasi ganda di semua modal settings, pemisahan zona bahaya pada lembar rental, diagnostik ukuran file database aktual, dan tinggi modal cicilan ergonomis.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -967,7 +996,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Sanitasi String & Filter Kategori', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Pembersihan format teks snake_case pada katalog dan cicilan, serta normalisasi filter seri anime agar pencarian lebih akurat.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -978,7 +1007,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Konteks Finansial & Aksesibilitas WCAG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Kartu cicilan kini menampilkan total harga barang, sinkronisasi live kalkulasi log pembayaran, indikator ukuran cache disk, dan peningkatan kontras tombol.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -996,7 +1025,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Kalender & Smart Paste Cepat', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Kartu booking kini menampilkan rentang tanggal sewa & durasi lengkap, indikator hari sewa berjalan, dan tombol cepat Tempel Klip untuk format sewa otomatis.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1007,7 +1036,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Penyempurnaan UX Apple HIG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Peningkatan kontras teks status cicilan, eliminasi checkmark ganda pada aksi rental, scroll margin bawah 180pt, dan perbaikan hierarki dialog iOS.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1025,7 +1054,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Booking Conflict Exemption', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Kostum yang sudah berstatus kembali atau selesai tidak lagi memicu bentrok jadwal sewa baru di kalender.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1036,7 +1065,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Presisi Pelunasan & Proteksi Data', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Toleransi floating point pada buku cicilan agar pelunasan 100% akurat, proteksi hapus pelanggan aktif, dan kueri rentang kalender langsung pada database.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1054,7 +1083,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Integritas Data & Proteksi Rental Aktif', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Pencegahan penghapusan kostum yang sedang memiliki jadwal sewa aktif atau booking kalender guna menjaga keutuhan relasi data.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1065,7 +1094,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Performa Database & Navigasi Cepat', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Indeks pencarian SQLite untuk kalender dan katalog, navigasi langsung dari detail sewa ke kostum, serta eliminasi stutter rendering gambar.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1083,7 +1112,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Sanitasi Pemisah Ribuan & Guard Overpayment', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Format titik dan koma nominal rupiah (Rp) kini diproses sempurna tanpa terpotong desimal. Perlindungan kelebihan bayar cicilan dengan dialog konfirmasi.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1094,7 +1123,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Konteks Operasional Jadwal Kalender', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Lencana dinamis Apple HIG memperjelas status jadwal hari ini: Hari Ambil / Mulai Sewa vs Jatuh Tempo Pengembalian kostum.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1112,7 +1141,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Proteksi Data Finansial & Konfirmasi', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Pencegahan dobel simpan pembayaran cicilan, proteksi modal overlay settings, dan dialog konfirmasi untuk pelunasan serta pengembalian sewa.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1123,7 +1152,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Penyempurnaan Taktil & Touch Target', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Touch target tombol hapus dan chip filter diperluas hingga 44pt Apple HIG, kurva animasi ProMotion 240fps, dan penanganan ramah izin kamera.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1141,7 +1170,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Deteksi Pelanggan Berulang Cerdas', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Saat memasukkan nomor telepon pelanggan lama, sistem otomatis mengisi identitas, alamat, akun sosmed, dan menghubungkan KTP terverifikasi tanpa duplikasi data.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1152,7 +1181,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Penyelarasan Scroll Margin Detail', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Layar Detail Kostum dan Detail Cicilan kini memiliki bottom padding lapang 96pt agar nyaman dibaca dan tidak mepet dengan bilah gestur sistem Android.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1170,7 +1199,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Alur Kerja Cepat Pemilik Rental', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Tombol salin satu ketukan untuk alamat pengiriman dan akun media sosial penyewa memudahkan pemesanan kurir (GoSend/JNE) tanpa ketik ulang.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1181,7 +1210,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Auto-Fill Tarif Sewa & Notifikasi Presisi', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Memilih kostum pada booking kini otomatis mengisi total tarif sewa, serta konfirmasi perubahan status dan pelunasan sewa muncul tepat waktu.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1199,7 +1228,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Empty State Cerdas & Interaktif', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Layar kosong pada Katalog, Cicilan, dan Kalender kini kontekstual dengan tombol aksi instan untuk menambah data atau mengatur ulang filter pencarian.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1210,7 +1239,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Keyboard Dismiss on Drag & Smart Paste Polish', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Keyboard otomatis tertutup saat menggulir form dan daftar sesuai standar iOS, serta form Smart Paste kini dilengkapi validasi input dan auto-unfocus.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1228,7 +1257,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Umpan Balik Taktil & Haptik Lintas Fitur', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Pilihan filter, pemilihan tanggal kalender, aksi batal/selesai picker wheel, dan tombol hapus pencarian kini memberikan sensasi haptik iOS yang presisi.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1239,7 +1268,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Pencegahan Glitch Keyboard & Toast Robust', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Keyboard otomatis ditutup sebelum modal picker terbuka untuk mencegah benturan tampilan, dan notifikasi toast kini bertahan mulus melintasi penutupan sheet.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1257,7 +1286,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Animasi 240fps++ Super Halus', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Overhaul animasi tingkat hardware di seluruh screen: Staggered entry list, PressableCard scale feedback, StateCrossfade, dan toast slide down.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1268,7 +1297,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Tap-to-Zoom Foto & UX Polish', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Foto cover kostum kini mendukung pinch-to-zoom layar penuh, margin bawah 160pt konsisten di semua tab, dan toast validasi responsif.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1286,7 +1315,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Snug Fit Entry Chooser & Aksesori HIG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Pilihan metode input pesanan kalender proporsional pas (snug fit) dengan tombol Tutup, dan list aksesori kostum seragam Inset Grouped.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1297,7 +1326,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Detail Cicilan & Riwayat Apple HIG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Standardisasi modal sheet Buku Cicilan ke Inset Grouped, nominal pembayaran presisi di tengah vertikal saat tanpa catatan, dan konfirmasi hapus aman.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1308,7 +1337,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Dokumen Identitas & Aksi Salin', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Preview foto KTP dan selfie jaminan dengan viewer zoom/pinch interaktif, serta tombol circular copy HIG.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1326,7 +1355,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Full Two-Way Auto Sync', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Push pending queue dan Pull data cloud otomatis secara reaktif saat online tanpa tombol manual.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1344,7 +1373,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Transisi Wheel Halus 60 FPS', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Wheel picker tanggal dan ukuran menggunakan arsitektur deferred slide & engine prewarming tanpa drop frame.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1355,7 +1384,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Perombakan Menu Pengaturan', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Eliminasi chevron mati. Setiap baris interaktif membuka sheet Apple HIG yang responsif dan informatif.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                     CupertinoListTile(
@@ -1366,7 +1395,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Google Apps Script Serverless', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Sinkronisasi dua arah ke Google Sheets dan Google Drive tanpa perlu sewa server.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -1389,7 +1418,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     if (!syncState.isOnline) {
       statusBadge = 'Offline';
-      statusColor = const Color(0xFFFF9500);
+      statusColor = AppColors.textAmber;
       statusIcon = CupertinoIcons.wifi_slash;
     } else {
       switch (syncState.status) {
@@ -1400,7 +1429,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             statusIcon = CupertinoIcons.cloud;
           } else if (syncState.pendingCount > 0) {
             statusBadge = 'Antrean (${syncState.pendingCount})';
-            statusColor = const Color(0xFFFF9500);
+            statusColor = AppColors.textAmber;
             statusIcon = CupertinoIcons.cloud_fill;
           } else {
             statusBadge = 'Tersinkron';
@@ -1499,7 +1528,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 additionalInfo: Text(
                   '${syncState.pendingCount} item',
                   style: const TextStyle(
-                    color: Color(0xFF8E8E93),
+                    color: AppColors.textSecondary,
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
                   ),
@@ -1518,13 +1547,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 subtitle: absoluteLastSync != null
                     ? Text(
                         absoluteLastSync,
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       )
                     : null,
                 additionalInfo: Text(
                   formattedLastSync,
                   style: const TextStyle(
-                    color: Color(0xFF8E8E93),
+                    color: AppColors.textSecondary,
                     fontSize: 15,
                     fontWeight: FontWeight.w400,
                   ),
@@ -1575,7 +1604,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: Text(
                     'Pulihkan dari Cloud',
                     style: TextStyle(
-                      color: Color(0xFF007AFF),
+                      color: AppColors.textBlue,
                       fontWeight: FontWeight.w600,
                       fontSize: 16,
                     ),
@@ -1619,7 +1648,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 title: const Text('Bersihkan Cache Gambar', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                 additionalInfo: _cacheSizeText.isNotEmpty
-                    ? Text(_cacheSizeText, style: const TextStyle(fontSize: 15, color: Color(0xFF8E8E93)))
+                    ? Text(_cacheSizeText, style: const TextStyle(fontSize: 15, color: AppColors.textSecondary))
                     : null,
                 onTap: _showClearCacheDialog,
               ),
@@ -1647,7 +1676,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.91', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.92', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),
@@ -1659,7 +1688,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: Color(0xFF5856D6),
                 ),
                 title: const Text('Design System', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('Apple HIG / iOS 18', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('Apple HIG / iOS 18', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showDesignSystemSheet,
               ),

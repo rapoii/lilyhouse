@@ -14,6 +14,11 @@ class StateCrossfade extends StatelessWidget {
   final Widget contentChild;
   final Duration duration;
 
+  /// When true the [errorChild] is shown instead of [emptyChild]/[contentChild].
+  /// Defaults to false so every existing call site keeps working unchanged.
+  final bool hasError;
+  final Widget? errorChild;
+
   const StateCrossfade({
     super.key,
     required this.isLoading,
@@ -22,6 +27,8 @@ class StateCrossfade extends StatelessWidget {
     required this.emptyChild,
     required this.contentChild,
     this.duration = const Duration(milliseconds: 220),
+    this.hasError = false,
+    this.errorChild,
   });
 
   @override
@@ -32,6 +39,10 @@ class StateCrossfade extends StatelessWidget {
     if (isLoading) {
       active = loadingChild;
       stateKey = const ValueKey('loading');
+    } else if (hasError && errorChild != null) {
+      // Error wins over empty: a failed read must not masquerade as "no data".
+      active = errorChild!;
+      stateKey = const ValueKey('error');
     } else if (isEmpty) {
       active = emptyChild;
       stateKey = const ValueKey('empty');
