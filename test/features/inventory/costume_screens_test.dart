@@ -265,4 +265,51 @@ void main() {
     final updated = await repository.getCostumeById('cos-1');
     expect(updated?.name, 'Hatsune Miku NT');
   });
+
+  testWidgets('AddCostumeSheet in edit mode displays and manages accessories', (tester) async {
+    final costume = await repository.getCostumeById('cos-2');
+    expect(costume, isNotNull);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: Scaffold(
+          body: AddCostumeSheet(
+            repository: repository,
+            initialCostume: costume,
+            onSaved: () {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Section Aksesori & Kelengkapan harus ada di edit mode
+    expect(find.text('AKSESORI & KELENGKAPAN'), findsOneWidget);
+    // Aksesori yang ada di DB ('Tie & Badge') harus terlihat
+    expect(find.text('Tie & Badge'), findsOneWidget);
+    expect(find.text('Tambah Aksesori'), findsOneWidget);
+
+    // Hapus aksesori 'Tie & Badge'
+    final minusBtn = find.widgetWithIcon(CupertinoButton, CupertinoIcons.minus_circle_fill);
+    expect(minusBtn, findsOneWidget);
+    await tester.ensureVisible(minusBtn);
+    await tester.pumpAndSettle();
+    await tester.tap(minusBtn);
+    await tester.pumpAndSettle();
+
+    // Setelah dihapus dari daftar di form
+    expect(find.text('Tie & Badge'), findsNothing);
+    expect(find.text('Belum ada aksesori terdaftar'), findsOneWidget);
+
+    // Simpan
+    final saveButton = find.widgetWithText(CupertinoButton, 'Simpan');
+    await tester.tap(saveButton);
+    await tester.pumpAndSettle();
+
+    // Pastikan di repository aksesori ikut terhapus
+    final accs = await repository.getAccessoriesByCostumeId('cos-2');
+    expect(accs, isEmpty);
+  });
 }

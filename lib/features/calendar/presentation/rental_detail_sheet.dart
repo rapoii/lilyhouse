@@ -290,6 +290,35 @@ class RentalDetailSheet extends StatelessWidget {
     );
   }
 
+  Widget _buildLateReturnBadge(int lateDays) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+      decoration: BoxDecoration(
+        color: AppColors.dangerRose.withValues(alpha: 0.14),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(
+            CupertinoIcons.exclamationmark_circle_fill,
+            size: 12,
+            color: AppColors.dangerRose,
+          ),
+          const SizedBox(width: 4),
+          Text(
+            'Terlambat $lateDays Hari',
+            style: const TextStyle(
+              color: AppColors.dangerRose,
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildItemStatusBadge(RentalItemStatus status) {
     Color bg;
     Color fg;
@@ -482,6 +511,16 @@ class RentalDetailSheet extends StatelessWidget {
 
     final sisaTagihan = (rental.totalPrice - rental.dpAmount).clamp(0.0, double.infinity);
 
+    final isLateReturn = rental.itemStatus == RentalItemStatus.rented &&
+        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).isAfter(
+          DateTime(rental.endDate.year, rental.endDate.month, rental.endDate.day),
+        );
+    final lateDays = isLateReturn
+        ? DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
+            .difference(DateTime(rental.endDate.year, rental.endDate.month, rental.endDate.day))
+            .inDays
+        : 0;
+
     return DraggableSheetContainer(
       backgroundColor: AppColors.background,
       onDismissed: () => Navigator.of(context).pop(),
@@ -614,6 +653,8 @@ class RentalDetailSheet extends StatelessWidget {
                                     runSpacing: 4,
                                     children: [
                                       _buildItemStatusBadge(rental.itemStatus),
+                                      if (isLateReturn)
+                                        _buildLateReturnBadge(lateDays),
                                       _buildPaymentStatusBadge(rental.paymentStatus),
                                       if (rental.purpose.isNotEmpty)
                                         Container(
@@ -643,28 +684,57 @@ class RentalDetailSheet extends StatelessWidget {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
                           decoration: BoxDecoration(
-                            color: AppColors.background,
+                            color: isLateReturn ? AppColors.dangerRose.withValues(alpha: 0.08) : AppColors.background,
                             borderRadius: BorderRadius.circular(10),
+                            border: isLateReturn
+                                ? Border.all(color: AppColors.dangerRose.withValues(alpha: 0.3), width: 0.8)
+                                : null,
                           ),
                           child: Row(
                             children: [
-                              const Icon(CupertinoIcons.calendar, size: 15, color: AppColors.primaryPink),
+                              Icon(
+                                isLateReturn ? CupertinoIcons.exclamationmark_circle_fill : CupertinoIcons.calendar,
+                                size: 15,
+                                color: isLateReturn ? AppColors.dangerRose : AppColors.primaryPink,
+                              ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
                                   '$startDateFormatted – $endDateFormatted',
-                                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textDark),
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: isLateReturn ? AppColors.dangerRose : AppColors.textDark,
+                                  ),
                                 ),
                               ),
+                              if (isLateReturn) ...[
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.dangerRose.withValues(alpha: 0.15),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    'Telat $lateDays Hari',
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.dangerRose),
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                              ],
                               Container(
                                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: AppColors.softPinkBg,
+                                  color: isLateReturn ? AppColors.dangerRose.withValues(alpha: 0.12) : AppColors.softPinkBg,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
                                   '${rental.durationDays} Hari',
-                                  style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primaryPink),
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: isLateReturn ? AppColors.dangerRose : AppColors.primaryPink,
+                                  ),
                                 ),
                               ),
                             ],

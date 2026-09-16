@@ -517,7 +517,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.85',
+                    'Versi 1.0.86',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -682,7 +682,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.85 (BUILD 120) - TERBARU'),
+                  header: const Text('VERSI 1.0.86 (BUILD 121) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.sparkles,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: Text('Kelola Aksesori & Fitur Ubah Cicilan', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Aksesori kostum kini dapat dikelola saat mode edit, penambahan aksi Ubah Cicilan di lembar rincian, dan proporsi modal sheet yang lebih pas.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.calendar_badge_plus,
+                        color: Color(0xFF5856D6),
+                      ),
+                      title: Text('Kalkulasi Ekstra Hari & Peringatan Telat', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Rekomendasi tarif otomatis untuk durasi sewa lebih dari 3 hari beserta rinciannya, serta badge peringatan keterlambatan pengembalian kostum.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.85 (BUILD 120)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1355,7 +1384,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             Text(
                               'Menyinkronkan...',
                               style: TextStyle(
-                                color: AppColors.primaryPink,
+                                color: AppColors.deepPinkText,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                               ),
@@ -1454,7 +1483,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.85', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.86', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),

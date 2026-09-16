@@ -44,7 +44,8 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
   late String _selectedSize;
   late CostumeStatus _selectedStatus;
   String? _selectedImagePath;
-  final List<String> _accessories = [];
+  List<String> _accessories = [];
+  bool _isLoadingAccessories = false;
   bool _isSaving = false;
 
   final ImagePicker _picker = ImagePicker();
@@ -65,6 +66,8 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       _selectedSize = c.size;
       _selectedStatus = c.status;
       _selectedImagePath = c.coverPhoto;
+      _accessories = List<String>.from(c.includedAccessories);
+      _loadExistingAccessories(c.id);
     } else {
       _nameController = TextEditingController();
       _seriesController = TextEditingController();
@@ -73,6 +76,28 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       _selectedSize = 'M';
       _selectedStatus = CostumeStatus.available;
       _selectedImagePath = null;
+    }
+  }
+
+  Future<void> _loadExistingAccessories(String costumeId) async {
+    setState(() => _isLoadingAccessories = true);
+    try {
+      final dbAccessories = await widget.repository.getAccessoriesByCostumeId(costumeId);
+      if (!mounted) return;
+      final Set<String> merged = Set<String>.from(_accessories);
+      for (final a in dbAccessories) {
+        if (a.name.trim().isNotEmpty) {
+          merged.add(a.name.trim());
+        }
+      }
+      setState(() {
+        _accessories = merged.toList();
+        _isLoadingAccessories = false;
+      });
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingAccessories = false);
+      }
     }
   }
 
@@ -179,6 +204,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
     setState(() => _isSaving = true);
     try {
       if (_isEditing) {
+        final costumeId = widget.initialCostume!.id;
         final updatedCostume = widget.initialCostume!.copyWith(
           name: name,
           animeSeries: _seriesController.text.trim().isEmpty ? '-' : _seriesController.text.trim(),
@@ -186,9 +212,35 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
           rentPrice3Days: price,
           status: _selectedStatus,
           coverPhoto: _selectedImagePath,
+          includedAccessories: List<String>.from(_accessories),
           notes: _notesController.text.trim().isEmpty ? null : _notesController.text.trim(),
         );
         await widget.repository.updateCostume(updatedCostume);
+
+        // Sinkronkan aksesori di tabel accessories
+        final existingAccessories = await widget.repository.getAccessoriesByCostumeId(costumeId);
+        final existingNamesLower = existingAccessories.map((a) => a.name.trim().toLowerCase()).toSet();
+
+        // 1. Hapus aksesori di DB yang sudah tidak ada lagi di list _accessories
+        final currentNamesLower = _accessories.map((a) => a.trim().toLowerCase()).toSet();
+        for (final existingAcc in existingAccessories) {
+          if (!currentNamesLower.contains(existingAcc.name.trim().toLowerCase())) {
+            await widget.repository.deleteAccessory(existingAcc.id);
+          }
+        }
+
+        // 2. Tambahkan aksesori baru yang belum ada di DB
+        for (final accName in _accessories) {
+          if (!existingNamesLower.contains(accName.trim().toLowerCase())) {
+            final acc = Accessory(
+              id: 'acc_${DateTime.now().millisecondsSinceEpoch}_${accName.hashCode.abs()}',
+              name: accName,
+              type: 'Aksesori & Properti',
+              relatedCostumeId: costumeId,
+            );
+            await widget.repository.addAccessory(acc);
+          }
+        }
       } else {
         final costume = Costume(
           id: 'cost_${DateTime.now().millisecondsSinceEpoch}',
@@ -659,61 +711,65 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                   ],
                 ),
 
-                if (!_isEditing) ...[
-                  // Section 2: Daftar Aksesori Termasuk (Saat tambah baru)
-                  CupertinoListSection.insetGrouped(
-                    header: const Text(
-                      'AKSESORI & KELENGKAPAN',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
-                    ),
-                    backgroundColor: AppColors.background,
-                    margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    children: _accessories.isEmpty
-                        ? [
-                            CupertinoListTile(
-                              leading: const SquircleIcon(icon: CupertinoIcons.cube_box, color: Color(0xFF8E8E93)),
-                              title: const Text(
-                                'Belum ada aksesori terdaftar',
-                                style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93), fontStyle: FontStyle.italic),
-                              ),
-                              trailing: CupertinoButton(
-                                padding: EdgeInsets.zero,
-                                minimumSize: Size.zero,
-                                onPressed: _showAddAccessoryDialog,
-                                child: const Icon(CupertinoIcons.plus_circle_fill, color: AppColors.primaryPink, size: 22),
-                              ),
-                              onTap: _showAddAccessoryDialog,
-                            ),
-                          ]
-                        : [
-                            ..._accessories.asMap().entries.map((entry) {
-                              final idx = entry.key;
-                              final acc = entry.value;
-                              return CupertinoListTile(
-                                leading: const SquircleIcon(icon: CupertinoIcons.check_mark_circled_solid, color: Color(0xFF34C759)),
-                                title: Text(acc, style: const TextStyle(fontSize: 15, color: AppColors.textDark, fontWeight: FontWeight.w500)),
+                // Section 2: Daftar Aksesori & Kelengkapan
+                CupertinoListSection.insetGrouped(
+                  header: const Text(
+                    'AKSESORI & KELENGKAPAN',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                  ),
+                  backgroundColor: AppColors.background,
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  children: _isLoadingAccessories
+                      ? const [
+                          CupertinoListTile(
+                            title: Center(child: CupertinoActivityIndicator(radius: 10)),
+                          ),
+                        ]
+                      : _accessories.isEmpty
+                          ? [
+                              CupertinoListTile(
+                                leading: const SquircleIcon(icon: CupertinoIcons.cube_box, color: Color(0xFF8E8E93)),
+                                title: const Text(
+                                  'Belum ada aksesori terdaftar',
+                                  style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93), fontStyle: FontStyle.italic),
+                                ),
                                 trailing: CupertinoButton(
                                   padding: EdgeInsets.zero,
-                                  minimumSize: const Size(44, 44),
-                                  onPressed: () {
-                                    HapticFeedback.lightImpact();
-                                    setState(() => _accessories.removeAt(idx));
-                                  },
-                                  child: const Icon(CupertinoIcons.minus_circle_fill, color: Color(0xFFFF3B30), size: 22),
+                                  minimumSize: Size.zero,
+                                  onPressed: _showAddAccessoryDialog,
+                                  child: const Icon(CupertinoIcons.plus_circle_fill, color: AppColors.primaryPink, size: 22),
                                 ),
-                              );
-                            }),
-                            CupertinoListTile(
-                              leading: const SquircleIcon(icon: CupertinoIcons.add, color: AppColors.primaryPink),
-                              title: const Text(
-                                'Tambah Aksesori',
-                                style: TextStyle(fontSize: 15, color: AppColors.primaryPink, fontWeight: FontWeight.w500),
+                                onTap: _showAddAccessoryDialog,
                               ),
-                              onTap: _showAddAccessoryDialog,
-                            ),
-                          ],
-                  ),
-                ],
+                            ]
+                          : [
+                              ..._accessories.asMap().entries.map((entry) {
+                                final idx = entry.key;
+                                final acc = entry.value;
+                                return CupertinoListTile(
+                                  leading: const SquircleIcon(icon: CupertinoIcons.check_mark_circled_solid, color: Color(0xFF34C759)),
+                                  title: Text(acc, style: const TextStyle(fontSize: 15, color: AppColors.textDark, fontWeight: FontWeight.w500)),
+                                  trailing: CupertinoButton(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: const Size(44, 44),
+                                    onPressed: () {
+                                      HapticFeedback.lightImpact();
+                                      setState(() => _accessories.removeAt(idx));
+                                    },
+                                    child: const Icon(CupertinoIcons.minus_circle_fill, color: Color(0xFFFF3B30), size: 22),
+                                  ),
+                                );
+                              }),
+                              CupertinoListTile(
+                                leading: const SquircleIcon(icon: CupertinoIcons.add, color: AppColors.primaryPink),
+                                title: const Text(
+                                  'Tambah Aksesori',
+                                  style: TextStyle(fontSize: 15, color: AppColors.primaryPink, fontWeight: FontWeight.w500),
+                                ),
+                                onTap: _showAddAccessoryDialog,
+                              ),
+                            ],
+                ),
 
                 // Section 3: Catatan Khusus
                 CupertinoListSection.insetGrouped(

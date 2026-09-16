@@ -7,6 +7,7 @@ import '../data/installment_repository.dart';
 import '../domain/installment.dart';
 import '../domain/installment_log.dart';
 import 'widgets/add_payment_sheet.dart';
+import 'widgets/edit_installment_sheet.dart';
 
 class InstallmentDetailScreen extends StatefulWidget {
   final String installmentId;
@@ -64,6 +65,19 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
     await showCupertinoModalPopup<void>(
       context: context,
       builder: (ctx) => AddPaymentSheet(
+        installment: inst,
+        repository: widget.repository,
+        onSaved: _fetchDetails,
+      ),
+    );
+  }
+
+  Future<void> _showEditInstallmentSheet() async {
+    final inst = _installment;
+    if (inst == null) return;
+    await showCupertinoModalPopup<void>(
+      context: context,
+      builder: (ctx) => EditInstallmentSheet(
         installment: inst,
         repository: widget.repository,
         onSaved: _fetchDetails,
@@ -171,10 +185,22 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
             child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
           ),
           middle: const Text('Detail Cicilan', style: AppTypography.navTitle),
-          trailing: CupertinoButton(
-            padding: EdgeInsets.zero,
-            onPressed: () => _confirmDeleteInstallment(inst),
-            child: const Icon(CupertinoIcons.trash, color: AppColors.dangerRose, size: 20),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CupertinoButton(
+                key: const Key('edit_installment_button'),
+                padding: EdgeInsets.zero,
+                onPressed: _showEditInstallmentSheet,
+                child: const Text('Ubah', style: AppTypography.actionButton),
+              ),
+              const SizedBox(width: 8),
+              CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () => _confirmDeleteInstallment(inst),
+                child: const Icon(CupertinoIcons.trash, color: AppColors.dangerRose, size: 20),
+              ),
+            ],
           ),
         ),
         child: SafeArea(

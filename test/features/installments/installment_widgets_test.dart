@@ -6,6 +6,7 @@ import 'package:lilyhouse/features/installments/data/installment_repository.dart
 import 'package:lilyhouse/features/installments/domain/installment.dart';
 import 'package:lilyhouse/features/installments/domain/installment_log.dart';
 import 'package:lilyhouse/features/installments/presentation/installment_list_screen.dart';
+import 'package:lilyhouse/features/installments/presentation/installment_detail_screen.dart';
 import 'package:lilyhouse/features/installments/presentation/widgets/add_payment_sheet.dart';
 import 'package:lilyhouse/features/installments/presentation/widgets/installment_card.dart';
 
@@ -410,6 +411,78 @@ void main() {
       expect(saved, isTrue);
       expect(repo._logs.length, 1);
       expect(repo._logs.first.amountPaid, 50000.0);
+    });
+
+    testWidgets('InstallmentDetailScreen renders Ubah button and opens EditInstallmentSheet to update details', (tester) async {
+      final initialInstallment = Installment(
+        id: 'inst_edit_1',
+        itemName: 'Staff of Homa',
+        storeName: 'Mihoyo Shop',
+        totalCost: 500000.0,
+        totalPaid: 100000.0,
+        remainingBalance: 400000.0,
+        dueDate: DateTime(2026, 10, 15),
+        status: InstallmentStatus.ongoing,
+      );
+
+      final repo = MockInstallmentRepository(
+        installments: [initialInstallment],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: InstallmentDetailScreen(
+            installmentId: 'inst_edit_1',
+            repository: repo,
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      // Verify item details shown on detail screen
+      expect(find.text('Staff of Homa'), findsOneWidget);
+      expect(find.text('Mihoyo Shop'), findsOneWidget);
+
+      // Verify "Ubah" button exists in header bar
+      final editButton = find.byKey(const Key('edit_installment_button'));
+      expect(editButton, findsOneWidget);
+
+      // Tap Ubah
+      await tester.tap(editButton);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Verify EditInstallmentSheet is displayed
+      expect(find.text('Ubah Cicilan'), findsOneWidget);
+      expect(find.byKey(const Key('edit_installment_name_input')), findsOneWidget);
+      expect(find.byKey(const Key('edit_installment_store_input')), findsOneWidget);
+      expect(find.byKey(const Key('edit_installment_due_date_row')), findsOneWidget);
+
+      // Modify item name and store name
+      await tester.enterText(find.byKey(const Key('edit_installment_name_input')), 'Staff of Homa R5');
+      await tester.enterText(find.byKey(const Key('edit_installment_store_input')), 'Official Genshin Store');
+      await tester.pump();
+
+      // Clear due date
+      await tester.tap(find.byKey(const Key('clear_due_date_button')));
+      await tester.pump();
+
+      // Tap Simpan in modal sheet
+      await tester.tap(find.text('Simpan'));
+      await tester.pumpAndSettle();
+
+      // Verify data updated in repository
+      final updated = await repo.getInstallmentById('inst_edit_1');
+      expect(updated, isNotNull);
+      expect(updated!.itemName, 'Staff of Homa R5');
+      expect(updated.storeName, 'Official Genshin Store');
+      expect(updated.dueDate, isNull);
+
+      // Verify screen reflects updated data
+      expect(find.text('Staff of Homa R5'), findsOneWidget);
+      expect(find.text('Official Genshin Store'), findsOneWidget);
     });
   });
 }

@@ -343,4 +343,73 @@ void main() {
     expect(updatedCalled, isTrue);
     expect(repo.lastUpdatedRental?.itemStatus, RentalItemStatus.cancelled);
   });
+
+  testWidgets('RentalDetailSheet shows late return indicator when rented and past endDate', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repo = MockRentalRepo();
+    final pastEndDate = DateTime.now().subtract(const Duration(days: 3));
+    final startDate = pastEndDate.subtract(const Duration(days: 3));
+
+    final lateRental = Rental(
+      id: 'rent-late',
+      costumeId: 'cos-1',
+      customerId: 'cust-1',
+      startDate: startDate,
+      endDate: pastEndDate,
+      durationDays: 3,
+      purpose: 'Event Cosplay',
+      totalPrice: 150000.0,
+      paymentStatus: RentalPaymentStatus.paid,
+      itemStatus: RentalItemStatus.rented,
+    );
+
+    await tester.pumpWidget(createTestWidget(rental: lateRental, repo: repo));
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+
+    // Verify late return badge in status Wrap
+    expect(find.text('Terlambat 3 Hari'), findsOneWidget);
+    // Verify late return text in schedule bar
+    expect(find.text('Telat 3 Hari'), findsOneWidget);
+  });
+
+  testWidgets('RentalDetailSheet does NOT show late return indicator when returned or completed', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repo = MockRentalRepo();
+    final pastEndDate = DateTime.now().subtract(const Duration(days: 3));
+    final startDate = pastEndDate.subtract(const Duration(days: 3));
+
+    final returnedRental = Rental(
+      id: 'rent-returned',
+      costumeId: 'cos-1',
+      customerId: 'cust-1',
+      startDate: startDate,
+      endDate: pastEndDate,
+      durationDays: 3,
+      purpose: 'Event Cosplay',
+      totalPrice: 150000.0,
+      paymentStatus: RentalPaymentStatus.paid,
+      itemStatus: RentalItemStatus.returned,
+    );
+
+    await tester.pumpWidget(createTestWidget(rental: returnedRental, repo: repo));
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+
+    // Indicator must NOT be shown
+    expect(find.textContaining('Terlambat'), findsNothing);
+    expect(find.textContaining('Telat'), findsNothing);
+  });
 }

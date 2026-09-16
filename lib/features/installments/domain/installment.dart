@@ -83,6 +83,7 @@ class Installment {
     double? totalPaid,
     double? remainingBalance,
     DateTime? dueDate,
+    bool clearDueDate = false,
     InstallmentStatus? status,
     String? syncStatus,
   }) {
@@ -93,7 +94,7 @@ class Installment {
       totalCost: totalCost ?? this.totalCost,
       totalPaid: totalPaid ?? this.totalPaid,
       remainingBalance: remainingBalance ?? this.remainingBalance,
-      dueDate: dueDate ?? this.dueDate,
+      dueDate: clearDueDate ? null : (dueDate ?? this.dueDate),
       status: status ?? this.status,
       syncStatus: syncStatus ?? this.syncStatus,
     );

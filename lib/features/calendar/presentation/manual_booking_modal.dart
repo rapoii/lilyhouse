@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
@@ -65,6 +66,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   String _purpose = 'homecos';
   bool _isLoadingCostumes = true;
   bool _isSaving = false;
+  bool _isPriceManuallyEdited = false;
   String? _costumeError;
   String? _dateError;
 
@@ -201,8 +203,8 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
             }
           }
           _selectedCostume = match;
-          if (_selectedCostume != null && _totalPriceController.text.isEmpty && _selectedCostume!.rentPrice3Days > 0) {
-            _totalPriceController.text = _selectedCostume!.rentPrice3Days.toInt().toString();
+          if (_selectedCostume != null) {
+            _syncPriceWithDates();
           }
         }
       });
@@ -245,6 +247,39 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       onCamera: () => _pickImage(ImageSource.camera, isKtp),
       onGallery: () => _pickImage(ImageSource.gallery, isKtp),
     );
+  }
+
+  int get _durationDays => _endDate.difference(_startDate).inDays + 1;
+
+  double? get _recommendedPrice {
+    if (_selectedCostume == null || _selectedCostume!.rentPrice3Days <= 0) {
+      return null;
+    }
+    final basePrice = _selectedCostume!.rentPrice3Days;
+    if (_durationDays <= 3) {
+      return basePrice;
+    }
+    final extraDays = _durationDays - 3;
+    final dailyRate = basePrice / 3.0;
+    return basePrice + (extraDays * dailyRate);
+  }
+
+  void _syncPriceWithDates({bool force = false}) {
+    if (_selectedCostume == null || _selectedCostume!.rentPrice3Days <= 0) return;
+    if (force || !_isPriceManuallyEdited || _totalPriceController.text.isEmpty || _totalPriceController.text == '0') {
+      final rec = _recommendedPrice;
+      if (rec != null) {
+        _totalPriceController.text = rec.round().toString();
+      }
+    }
+  }
+
+  String _formatCurrency(double amount) {
+    final parts = amount.round().toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]}.',
+        );
+    return 'Rp $parts';
   }
 
   String get _purposeLabel {
@@ -706,15 +741,17 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: AppColors.softPinkBg,
+                          color: _durationDays > 3 ? const Color(0xFFFFF3E0) : AppColors.softPinkBg,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          '${_endDate.difference(_startDate).inDays + 1} hari sewa',
-                          style: const TextStyle(
+                          _durationDays > 3
+                              ? '$_durationDays hari sewa (+${_durationDays - 3} hari)'
+                              : '$_durationDays hari sewa',
+                          style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: AppColors.primaryPink,
+                            color: _durationDays > 3 ? AppColors.warningOrange : AppColors.primaryPink,
                           ),
                         ),
                       ),
@@ -784,9 +821,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                                 setState(() {
                                   _selectedCostume = c;
                                   _costumeError = null;
-                                  if ((_totalPriceController.text.isEmpty || _totalPriceController.text == '0') && c.rentPrice3Days > 0) {
-                                    _totalPriceController.text = c.rentPrice3Days.toInt().toString();
-                                  }
+                                  _syncPriceWithDates();
                                 });
                               }
                             },
@@ -830,6 +865,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                               _endDate = _startDate.add(const Duration(days: 3));
                             }
                             _dateError = null;
+                            _syncPriceWithDates();
                           });
                         }
                       },
@@ -880,6 +916,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           setState(() {
                             _endDate = d;
                             _dateError = null;
+                            _syncPriceWithDates();
                           });
                         }
                       },
@@ -945,6 +982,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         color: Color(0xFF34C759),
                       ),
                       title: CupertinoTextField(
+                        key: const Key('manual_total_price_field'),
                         controller: _totalPriceController,
                         placeholder: 'Total harga (opsional)',
                         placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
@@ -953,8 +991,88 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         decoration: null,
                         keyboardType: TextInputType.number,
                         textInputAction: TextInputAction.done,
+                        onChanged: (_) {
+                          _isPriceManuallyEdited = true;
+                          setState(() {});
+                        },
                       ),
                     ),
+                    if (_selectedCostume != null && _selectedCostume!.rentPrice3Days > 0) ...[
+                      if (_durationDays > 3)
+                        CupertinoListTile(
+                          key: const Key('manual_extended_duration_hint'),
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          leading: const SquircleIcon(
+                            icon: CupertinoIcons.info_circle_fill,
+                            color: AppColors.warningOrange,
+                          ),
+                          title: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Durasi $_durationDays Hari (+${_durationDays - 3} hari tambahan)',
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.textDark,
+                                ),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                'Tarif dasar 3 hari: ${_formatCurrency(_selectedCostume!.rentPrice3Days)} • Hari tambahan (+${_durationDays - 3} hari): ${_formatCurrency((_selectedCostume!.rentPrice3Days / 3.0) * (_durationDays - 3))} (${_formatCurrency(_selectedCostume!.rentPrice3Days / 3.0)}/hari)',
+                                style: const TextStyle(
+                                  fontSize: 12,
+                                  color: Color(0xFF8E8E93),
+                                  height: 1.25,
+                                ),
+                              ),
+                              if (_recommendedPrice != null) ...[
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    const Text(
+                                      'Rekomendasi Total: ',
+                                      style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                                    ),
+                                    Text(
+                                      _formatCurrency(_recommendedPrice!),
+                                      style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.w700,
+                                        color: AppColors.deepPinkText,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ],
+                          ),
+                          trailing: _isPriceManuallyEdited
+                              ? CupertinoButton(
+                                  key: const Key('manual_apply_recommended_price_btn'),
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  minimumSize: const Size(44, 32),
+                                  color: AppColors.softPinkBg,
+                                  borderRadius: BorderRadius.circular(8),
+                                  onPressed: () {
+                                    HapticFeedback.selectionClick();
+                                    setState(() {
+                                      _isPriceManuallyEdited = false;
+                                      _syncPriceWithDates(force: true);
+                                    });
+                                  },
+                                  child: const Text(
+                                    'Pakai',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.deepPinkText,
+                                    ),
+                                  ),
+                                )
+                              : null,
+                        ),
+                    ],
                   ],
                 ),
                 ),
