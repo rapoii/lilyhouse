@@ -431,6 +431,39 @@ class RentalDetailSheet extends StatelessWidget {
     );
   }
 
+  String _formatDisplayPhone(String raw) {
+    if (raw == '-' || raw.isEmpty) return raw;
+    final digits = raw.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return raw;
+    String clean = digits;
+    if (clean.startsWith('62')) {
+      clean = '0${clean.substring(2)}';
+    } else if (!clean.startsWith('0')) {
+      clean = '0$clean';
+    }
+    if (clean.length > 8) {
+      if (clean.length <= 11) {
+        return '${clean.substring(0, 4)}-${clean.substring(4, 7)}-${clean.substring(7)}';
+      } else {
+        return '${clean.substring(0, 4)}-${clean.substring(4, 8)}-${clean.substring(8)}';
+      }
+    }
+    return clean;
+  }
+
+  String _normalizePhoneForCopy(String raw) {
+    if (raw == '-' || raw.isEmpty) return raw;
+    final digits = raw.replaceAll(RegExp(r'\D'), '');
+    if (digits.isEmpty) return raw;
+    if (digits.startsWith('62')) {
+      return '0${digits.substring(2)}';
+    }
+    if (!digits.startsWith('0')) {
+      return '0$digits';
+    }
+    return digits;
+  }
+
   @override
   Widget build(BuildContext context) {
     final custName = (customer?.fullName.isNotEmpty == true ? customer!.fullName : (rental.customerId.isNotEmpty ? rental.customerId : 'Penyewa')).replaceAll('_', ' ');
@@ -481,7 +514,7 @@ class RentalDetailSheet extends StatelessWidget {
             top: false,
             child: ListView(
               physics: const BouncingScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(0, 14, 0, 180),
+              padding: const EdgeInsets.fromLTRB(0, 14, 0, 40),
               children: [
                 // 1. Hero Card
                 Padding(
@@ -711,11 +744,14 @@ class RentalDetailSheet extends StatelessWidget {
                         custPhone,
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                       ),
-                      subtitle: const Text('Nomor WhatsApp / HP', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                      subtitle: Text(
+                        custPhone != '-' ? 'Nomor WhatsApp / HP • ${_formatDisplayPhone(custPhone)}' : 'Nomor WhatsApp / HP',
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                      ),
                       onTap: (custPhone != '-')
                           ? () {
                               HapticFeedback.lightImpact();
-                              Clipboard.setData(ClipboardData(text: custPhone));
+                              Clipboard.setData(ClipboardData(text: _normalizePhoneForCopy(custPhone)));
                               IosToast.show(context, 'Nomor HP disalin ke clipboard');
                             }
                           : null,
@@ -725,7 +761,7 @@ class RentalDetailSheet extends StatelessWidget {
                               minimumSize: const Size(32, 32),
                               onPressed: () {
                                 HapticFeedback.lightImpact();
-                                Clipboard.setData(ClipboardData(text: custPhone));
+                                Clipboard.setData(ClipboardData(text: _normalizePhoneForCopy(custPhone)));
                                 IosToast.show(context, 'Nomor HP disalin ke clipboard');
                               },
                               child: Container(
@@ -1041,13 +1077,13 @@ class RentalDetailSheet extends StatelessWidget {
                               content: const Text('Tandai kostum ini sudah dikembalikan oleh penyewa?'),
                               actions: [
                                 CupertinoDialogAction(
-                                  child: const Text('Ya, Sudah Kembali'),
-                                  onPressed: () => Navigator.pop(dialogCtx, true),
-                                ),
-                                CupertinoDialogAction(
                                   isDefaultAction: true,
                                   child: const Text('Batal'),
                                   onPressed: () => Navigator.pop(dialogCtx, false),
+                                ),
+                                CupertinoDialogAction(
+                                  child: const Text('Ya, Sudah Kembali'),
+                                  onPressed: () => Navigator.pop(dialogCtx, true),
                                 ),
                               ],
                             ),
@@ -1085,13 +1121,13 @@ class RentalDetailSheet extends StatelessWidget {
                               content: const Text('Tandai seluruh biaya sewa telah dilunasi?'),
                               actions: [
                                 CupertinoDialogAction(
-                                  child: const Text('Ya, Sudah Lunas'),
-                                  onPressed: () => Navigator.pop(dialogCtx, true),
-                                ),
-                                CupertinoDialogAction(
                                   isDefaultAction: true,
                                   child: const Text('Batal'),
                                   onPressed: () => Navigator.pop(dialogCtx, false),
+                                ),
+                                CupertinoDialogAction(
+                                  child: const Text('Ya, Sudah Lunas'),
+                                  onPressed: () => Navigator.pop(dialogCtx, true),
                                 ),
                               ],
                             ),
@@ -1106,22 +1142,6 @@ class RentalDetailSheet extends StatelessWidget {
                           IosToast.show(context, 'Pembayaran rental berhasil ditandai Lunas');
                           Navigator.pop(context);
                         },
-                      ),
-
-                    // Aksi 4: Batalkan Booking (Membuka dialog konfirmasi)
-                    if (rental.itemStatus != RentalItemStatus.cancelled &&
-                        rental.itemStatus != RentalItemStatus.completed)
-                      CupertinoListTile(
-                        leading: const SquircleIcon(
-                          icon: CupertinoIcons.xmark_circle_fill,
-                          color: AppColors.dangerRose,
-                        ),
-                        title: const Text(
-                          'Batalkan Booking',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.dangerRose),
-                        ),
-                        subtitle: const Text('Batalkan reservasi dan kosongkan slot tanggal', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
-                        onTap: () => _confirmCancelBooking(context),
                       ),
 
                     // Status Info jika sudah selesai / dibatalkan
@@ -1154,6 +1174,38 @@ class RentalDetailSheet extends StatelessWidget {
                       ),
                   ],
                 ),
+
+                // 5. Zona Bahaya (Batalkan Booking)
+                if (rental.itemStatus != RentalItemStatus.cancelled &&
+                    rental.itemStatus != RentalItemStatus.completed &&
+                    rental.itemStatus != RentalItemStatus.returned)
+                  CupertinoListSection.insetGrouped(
+                    header: const Text(
+                      'ZONA BAHAYA',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.dangerRose,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                    backgroundColor: Colors.transparent,
+                    margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    children: [
+                      CupertinoListTile(
+                        leading: const SquircleIcon(
+                          icon: CupertinoIcons.xmark_circle_fill,
+                          color: AppColors.dangerRose,
+                        ),
+                        title: const Text(
+                          'Batalkan Booking',
+                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.dangerRose),
+                        ),
+                        subtitle: const Text('Batalkan reservasi dan kosongkan slot tanggal', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        onTap: () => _confirmCancelBooking(context),
+                      ),
+                    ],
+                  ),
               ],
             ),
           ),

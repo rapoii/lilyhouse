@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
 import 'tables.dart';
@@ -180,6 +181,18 @@ class DatabaseHelper {
         'installments': 0,
       };
     }
+  }
+
+  Future<int> getDatabaseFileSize() async {
+    try {
+      final dbPath = await getDatabasesPath();
+      final fullPath = join(dbPath, _dbName);
+      final file = File(fullPath);
+      if (await file.exists()) {
+        return await file.length();
+      }
+    } catch (_) {}
+    return 0;
   }
 
   static const Map<String, Set<String>> _restoreColumns = {

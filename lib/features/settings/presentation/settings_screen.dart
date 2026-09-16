@@ -30,11 +30,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _calculateCacheSize();
   }
 
+  String _formatBytes(int totalBytes) {
+    if (totalBytes <= 0) return '0 B';
+    if (totalBytes < 1024) {
+      return '$totalBytes B';
+    } else if (totalBytes < 1024 * 1024) {
+      return '${(totalBytes / 1024).toStringAsFixed(1)} KB';
+    } else {
+      return '${(totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    }
+  }
+
   Future<void> _calculateCacheSize() async {
     try {
       final tempDir = await getTemporaryDirectory();
       if (!tempDir.existsSync()) {
-        if (mounted) setState(() => _cacheSizeText = '0 KB');
+        if (mounted) setState(() => _cacheSizeText = '0 B');
         return;
       }
       int totalBytes = 0;
@@ -46,17 +57,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
       if (mounted) {
         setState(() {
-          if (totalBytes < 1024) {
-            _cacheSizeText = '$totalBytes B';
-          } else if (totalBytes < 1024 * 1024) {
-            _cacheSizeText = '${(totalBytes / 1024).toStringAsFixed(1)} KB';
-          } else {
-            _cacheSizeText = '${(totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
-          }
+          _cacheSizeText = _formatBytes(totalBytes);
         });
       }
     } catch (_) {
-      if (mounted) setState(() => _cacheSizeText = '0 KB');
+      if (mounted) setState(() => _cacheSizeText = '0 B');
     }
   }
 
@@ -89,19 +94,20 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Pulihkan dari Cloud?'),
         content: const Text(
-          'Seluruh data lokal akan diganti dengan data dari Google Sheets. '
+          'Seluruh data lokal akan diganti dengan data dari cloud. '
+          'Data offline yang belum disinkronkan akan hilang. '
           'Gunakan ini setelah install ulang aplikasi.',
         ),
         actions: [
           CupertinoDialogAction(
-            isDestructiveAction: true,
-            onPressed: () => Navigator.pop(ctx, true),
-            child: const Text('Pulihkan Data'),
-          ),
-          CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.pop(ctx, false),
             child: const Text('Batal'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Pulihkan Data'),
           ),
         ],
       ),
@@ -140,6 +146,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: CupertinoPageScaffold(
             backgroundColor: AppColors.background,
             navigationBar: CupertinoNavigationBar(
+              automaticallyImplyLeading: false,
               backgroundColor: AppColors.background,
               border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
               middle: const Text('Antrean Offline', style: AppTypography.navTitle),
@@ -274,6 +281,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: CupertinoPageScaffold(
             backgroundColor: AppColors.background,
             navigationBar: CupertinoNavigationBar(
+              automaticallyImplyLeading: false,
               backgroundColor: AppColors.background,
               border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
               middle: const Text('Statistik Database', style: AppTypography.navTitle),
@@ -283,13 +291,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 child: const Text('Tutup', style: AppTypography.actionButton),
               ),
             ),
-            child: FutureBuilder<Map<String, int>>(
-              future: DatabaseHelper.instance.getTableCounts(),
+            child: FutureBuilder<Map<String, dynamic>>(
+              future: () async {
+                final counts = await DatabaseHelper.instance.getTableCounts();
+                final dbBytes = await DatabaseHelper.instance.getDatabaseFileSize();
+                return {
+                  'counts': counts,
+                  'dbBytes': dbBytes,
+                };
+              }(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CupertinoActivityIndicator());
                 }
-                final counts = snapshot.data ?? {};
+                final data = snapshot.data ?? {};
+                final counts = (data['counts'] as Map<String, int>?) ?? {};
+                final dbBytes = (data['dbBytes'] as int?) ?? 0;
                 return ListView(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   children: [
@@ -316,7 +333,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                           title: const Text('Pesanan Rental', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                           additionalInfo: Text(
-                            '${counts['rentals'] ?? 0} booking',
+                            '${counts['rentals'] ?? 0} pesanan',
                             style: const TextStyle(fontSize: 15, color: Color(0xFF8E8E93)),
                           ),
                         ),
@@ -348,8 +365,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       header: const Text('INFORMASI FILE STORAGE'),
                       backgroundColor: Colors.transparent,
                       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                      children: const [
-                        CupertinoListTile(
+                      children: [
+                        const CupertinoListTile(
                           leading: SquircleIcon(
                             icon: CupertinoIcons.circle_grid_hex_fill,
                             color: Color(0xFF5856D6),
@@ -357,13 +374,21 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           title: Text('Database Engine', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                           additionalInfo: Text('SQLite v3.x', style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93))),
                         ),
-                        CupertinoListTile(
+                        const CupertinoListTile(
                           leading: SquircleIcon(
                             icon: CupertinoIcons.folder_fill,
                             color: Color(0xFF8E8E93),
                           ),
                           title: Text('Nama Berkas', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                           additionalInfo: Text('lilyhouse.db', style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93))),
+                        ),
+                        CupertinoListTile(
+                          leading: const SquircleIcon(
+                            icon: CupertinoIcons.tray_full_fill,
+                            color: Color(0xFF34C759),
+                          ),
+                          title: const Text('Ukuran Berkas', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                          additionalInfo: Text(_formatBytes(dbBytes), style: const TextStyle(fontSize: 15, color: Color(0xFF8E8E93))),
                         ),
                       ],
                     ),
@@ -438,6 +463,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: CupertinoPageScaffold(
             backgroundColor: AppColors.background,
             navigationBar: CupertinoNavigationBar(
+              automaticallyImplyLeading: false,
               backgroundColor: AppColors.background,
               border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
               middle: const Text('Tentang Aplikasi', style: AppTypography.navTitle),
@@ -484,7 +510,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.82',
+                    'Versi 1.0.83',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -557,6 +583,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: CupertinoPageScaffold(
             backgroundColor: AppColors.background,
             navigationBar: CupertinoNavigationBar(
+              automaticallyImplyLeading: false,
               backgroundColor: AppColors.background,
               border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
               middle: const Text('Apple HIG Specs', style: AppTypography.navTitle),
@@ -634,6 +661,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: CupertinoPageScaffold(
             backgroundColor: AppColors.background,
             navigationBar: CupertinoNavigationBar(
+              automaticallyImplyLeading: false,
               backgroundColor: AppColors.background,
               border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
               middle: const Text('Catatan Rilis', style: AppTypography.navTitle),
@@ -647,7 +675,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.82 (BUILD 117) - TERBARU'),
+                  header: const Text('VERSI 1.0.83 (BUILD 118) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.sparkles,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: Text('Booking Smarter & Validasi Harga', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Pencocokan nama kostum otomatis menoleransi spasi/garis bawah, auto-fill tarif sewa, validasi wajib harga sewa minimal, dan pencegahan booking Rp 0.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.slider_horizontal_3,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Penyempurnaan Modal & Diagnostik SQLite', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Eliminasi tombol navigasi ganda di semua modal settings, pemisahan zona bahaya pada lembar rental, diagnostik ukuran file database aktual, dan tinggi modal cicilan ergonomis.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.82 (BUILD 117)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1332,7 +1389,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.82', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.83', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
                 onTap: _showAboutSheet,
               ),

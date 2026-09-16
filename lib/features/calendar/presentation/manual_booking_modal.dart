@@ -191,10 +191,10 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         // Try to match parsed costume name to a Costume in the catalogue.
         final wanted = widget.initialParsedData?.costumeName;
         if (wanted != null && wanted.isNotEmpty && _selectedCostume == null) {
-          final needle = wanted.toLowerCase().trim();
+          final needle = wanted.toLowerCase().replaceAll('_', ' ').replaceAll('-', ' ').trim();
           Costume? match;
           for (final c in _costumes) {
-            final n = c.name.toLowerCase().trim();
+            final n = c.name.toLowerCase().replaceAll('_', ' ').replaceAll('-', ' ').trim();
             if (n == needle || n.contains(needle) || needle.contains(n)) {
               match = c;
               break;
@@ -273,8 +273,8 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     final okCostume = _selectedCostume != null;
     final okDate = !_endDate.isBefore(_startDate);
     final rawPrice = _totalPriceController.text.replaceAll('.', '').replaceAll(',', '').trim();
-    final parsedPrice = rawPrice.isEmpty ? 0.0 : double.tryParse(rawPrice);
-    final okPrice = parsedPrice != null && parsedPrice >= 0;
+    final parsedPrice = double.tryParse(rawPrice);
+    final okPrice = parsedPrice != null && parsedPrice > 0;
 
     setState(() {
       _costumeError = okCostume ? null : 'Pilih kostum dulu';
@@ -308,7 +308,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       return false;
     }
     if (!okPrice) {
-      _showErrorSnack('Total harga sewa tidak boleh bernilai negatif');
+      _showErrorSnack('Total harga sewa wajib diisi (minimal Rp 1.000)');
       return false;
     }
     return true;
@@ -765,7 +765,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                                 setState(() {
                                   _selectedCostume = c;
                                   _costumeError = null;
-                                  if (_totalPriceController.text.isEmpty && c.rentPrice3Days > 0) {
+                                  if ((_totalPriceController.text.isEmpty || _totalPriceController.text == '0') && c.rentPrice3Days > 0) {
                                     _totalPriceController.text = c.rentPrice3Days.toInt().toString();
                                   }
                                 });

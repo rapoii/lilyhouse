@@ -200,6 +200,8 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
           builder: (context, setSheetState) {
             return DraggableSheetContainer(
               backgroundColor: AppColors.background,
+              initialHeightFraction: 0.65,
+              maxHeightFraction: 0.92,
               onDismissed: () => Navigator.of(ctx).pop(),
               builder: (context) => DefaultTextStyle(
                 style: const TextStyle(
