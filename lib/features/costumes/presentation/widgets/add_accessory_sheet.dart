@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/draggable_sheet_container.dart';
@@ -9,12 +10,14 @@ import '../../domain/accessory.dart';
 
 class AddAccessorySheet extends StatefulWidget {
   final String? costumeId;
+  final List<String> existingAccessoryNames;
   final Future<void> Function(Accessory accessory)? onSaveAccessory;
   final void Function(String name)? onAddNameOnly;
 
   const AddAccessorySheet({
     super.key,
     this.costumeId,
+    this.existingAccessoryNames = const [],
     this.onSaveAccessory,
     this.onAddNameOnly,
   });
@@ -22,6 +25,7 @@ class AddAccessorySheet extends StatefulWidget {
   static Future<void> show({
     required BuildContext context,
     String? costumeId,
+    List<String> existingAccessoryNames = const [],
     Future<void> Function(Accessory accessory)? onSaveAccessory,
     void Function(String name)? onAddNameOnly,
   }) {
@@ -29,6 +33,7 @@ class AddAccessorySheet extends StatefulWidget {
       context: context,
       builder: (ctx) => AddAccessorySheet(
         costumeId: costumeId,
+        existingAccessoryNames: existingAccessoryNames,
         onSaveAccessory: onSaveAccessory,
         onAddNameOnly: onAddNameOnly,
       ),
@@ -53,7 +58,27 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
   Future<void> _submit() async {
     final name = _nameController.text.trim();
     if (name.isEmpty) {
-      IosToast.show(context, 'Nama aksesori wajib diisi');
+      HapticFeedback.lightImpact();
+      IosToast.show(
+        context,
+        'Nama aksesori wajib diisi',
+        icon: CupertinoIcons.exclamationmark_circle_fill,
+        iconColor: AppColors.warningOrange,
+      );
+      return;
+    }
+
+    final isDuplicate = widget.existingAccessoryNames.any(
+      (existing) => existing.trim().toLowerCase() == name.toLowerCase(),
+    );
+    if (isDuplicate) {
+      HapticFeedback.lightImpact();
+      IosToast.show(
+        context,
+        'Aksesori "$name" sudah ada di kostum ini',
+        icon: CupertinoIcons.exclamationmark_circle_fill,
+        iconColor: AppColors.warningOrange,
+      );
       return;
     }
 
@@ -75,13 +100,24 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
       }
 
       if (mounted) {
+        HapticFeedback.mediumImpact();
         Navigator.of(context).pop();
-        IosToast.show(context, 'Aksesori "$name" berhasil ditambahkan');
+        IosToast.show(
+          context,
+          'Aksesori "$name" berhasil ditambahkan',
+          icon: CupertinoIcons.checkmark_circle_fill,
+          iconColor: const Color(0xFF34C759),
+        );
       }
     } catch (_) {
       if (mounted) {
         setState(() => _isSubmitting = false);
-        IosToast.show(context, 'Gagal menyimpan aksesori');
+        IosToast.show(
+          context,
+          'Gagal menyimpan aksesori',
+          icon: CupertinoIcons.exclamationmark_circle_fill,
+          iconColor: AppColors.dangerRose,
+        );
       }
     }
   }
@@ -110,12 +146,14 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Batal', style: TextStyle(fontSize: 15, color: AppColors.primaryPink)),
             ),
             middle: const Text('Tambah Aksesori', style: AppTypography.navTitle),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: _isSubmitting ? null : _submit,
               child: _isSubmitting
                   ? const CupertinoActivityIndicator(radius: 10)
@@ -245,6 +283,7 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
           ? Icon(CupertinoIcons.checkmark_alt, size: 20, color: color)
           : null,
       onTap: () {
+        HapticFeedback.selectionClick();
         setState(() => _selectedCondition = condition);
       },
     );

@@ -170,6 +170,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
   void _showAddAccessoryDialog() {
     AddAccessorySheet.show(
       context: context,
+      existingAccessoryNames: _accessories,
       onAddNameOnly: (name) {
         setState(() => _accessories.add(name));
       },

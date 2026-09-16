@@ -461,6 +461,98 @@ class RentalDetailSheet extends StatelessWidget {
     );
   }
 
+  void _showReturnDialog(BuildContext context, {required bool isLate, required int lateDays}) {
+    final noteController = TextEditingController();
+    final penaltyController = TextEditingController();
+    final currencyFormat = NumberFormat('#,###', 'id_ID');
+
+    showCupertinoDialog<void>(
+      context: context,
+      builder: (dialogCtx) => CupertinoAlertDialog(
+        title: const Text('Konfirmasi Pengembalian Kostum'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 10),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                isLate
+                    ? 'Kostum terlambat $lateDays hari. Pastikan cek kelengkapan dan kondisi fisik kostum.'
+                    : 'Periksa kelengkapan kostum, wig, dan aksesoris sebelum menandai selesai.',
+                style: const TextStyle(fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              CupertinoTextField(
+                controller: penaltyController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [
+                  FilteringTextInputFormatter.digitsOnly,
+                ],
+                placeholder: isLate ? 'Denda keterlambatan / rusak (Rp)' : 'Denda jika ada kerusakan (opsional)',
+                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 13),
+                style: const TextStyle(fontSize: 13, color: AppColors.textDark),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+              ),
+              const SizedBox(height: 8),
+              CupertinoTextField(
+                controller: noteController,
+                placeholder: 'Catatan kondisi / kelengkapan (opsional)',
+                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 13),
+                style: const TextStyle(fontSize: 13, color: AppColors.textDark),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                maxLines: 2,
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            child: const Text('Batal'),
+            onPressed: () => Navigator.pop(dialogCtx),
+          ),
+          CupertinoDialogAction(
+            child: const Text('Simpan & Selesai'),
+            onPressed: () async {
+              Navigator.pop(dialogCtx);
+              if (repository != null) {
+                final rawPenalty = penaltyController.text.trim();
+                final penaltyAmount = double.tryParse(rawPenalty) ?? 0.0;
+                final inputNotes = noteController.text.trim();
+
+                final List<String> notesParts = [];
+                if (rental.notes != null && rental.notes!.trim().isNotEmpty) {
+                  notesParts.add(rental.notes!.trim());
+                }
+                if (penaltyAmount > 0) {
+                  notesParts.add('Denda: Rp ${currencyFormat.format(penaltyAmount.toInt())}');
+                }
+                if (inputNotes.isNotEmpty) {
+                  notesParts.add('Kondisi: $inputNotes');
+                }
+
+                final updatedNotes = notesParts.isNotEmpty ? notesParts.join(' | ') : null;
+                final newTotalPrice = rental.totalPrice + penaltyAmount;
+
+                final updated = rental.copyWith(
+                  itemStatus: RentalItemStatus.returned,
+                  totalPrice: newTotalPrice,
+                  notes: updatedNotes,
+                );
+                await repository!.updateRental(updated);
+                onRentalUpdated?.call();
+              }
+              if (!context.mounted) return;
+              IosToast.show(context, 'Status rental diubah ke "Sudah Dikembalikan"');
+              Navigator.pop(context);
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   String _formatDisplayPhone(String raw) {
     if (raw == '-' || raw.isEmpty) return raw;
     final digits = raw.replaceAll(RegExp(r'\D'), '');
@@ -1150,35 +1242,7 @@ class RentalDetailSheet extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.primaryPink),
                         ),
                         subtitle: const Text('Kostum telah diterima kembali dari penyewa', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
-                        onTap: () async {
-                          final confirm = await showCupertinoDialog<bool>(
-                            context: context,
-                            builder: (dialogCtx) => CupertinoAlertDialog(
-                              title: const Text('Konfirmasi Pengembalian'),
-                              content: const Text('Tandai kostum ini sudah dikembalikan oleh penyewa?'),
-                              actions: [
-                                CupertinoDialogAction(
-                                  isDefaultAction: true,
-                                  child: const Text('Batal'),
-                                  onPressed: () => Navigator.pop(dialogCtx, false),
-                                ),
-                                CupertinoDialogAction(
-                                  child: const Text('Ya, Sudah Kembali'),
-                                  onPressed: () => Navigator.pop(dialogCtx, true),
-                                ),
-                              ],
-                            ),
-                          );
-                          if (confirm != true) return;
-                          if (repository != null) {
-                            final updated = rental.copyWith(itemStatus: RentalItemStatus.returned);
-                            await repository!.updateRental(updated);
-                            onRentalUpdated?.call();
-                          }
-                          if (!context.mounted) return;
-                          IosToast.show(context, 'Status rental diubah ke "Sudah Dikembalikan"');
-                          Navigator.pop(context);
-                        },
+                        onTap: () => _showReturnDialog(context, isLate: isLateReturn, lateDays: lateDays),
                       ),
 
                     // Aksi 3: Tandai Pembayaran Lunas

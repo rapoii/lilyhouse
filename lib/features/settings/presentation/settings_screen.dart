@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -10,6 +11,7 @@ import '../../../core/database/db_helper.dart';
 import '../../../core/sync/sync_state_notifier.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/date_time_utils.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/squircle_icon.dart';
@@ -27,6 +29,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void initState() {
     super.initState();
+    initializeDateFormatting('id_ID', null);
     _calculateCacheSize();
   }
 
@@ -39,6 +42,11 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     } else {
       return '${(totalBytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     }
+  }
+
+  /// Format human-readable relative/contextual sync time in Indonesian
+  String _formatSyncTime(DateTime? timestamp, {DateTime? now}) {
+    return DateTimeUtils.formatSyncRelative(timestamp, now: now);
   }
 
   Future<void> _calculateCacheSize() async {
@@ -102,14 +110,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         title: const Text('Pulihkan dari Cloud?'),
         content: const Text(
           'Seluruh data lokal akan diganti dengan data dari cloud. '
-          'Data offline yang belum disinkronkan akan hilang. '
-          'Gunakan ini setelah install ulang aplikasi.',
+          'Data offline yang belum disinkronkan akan hilang secara permanen. '
+          'Lanjutkan hanya jika Anda yakin atau baru selesai menginstall ulang aplikasi.',
         ),
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Batal'),
+            child: const Text('Batal', style: TextStyle(color: AppColors.textDark)),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -416,10 +424,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Bersihkan Cache Gambar?'),
         content: const Text(
-          'File cache thumbnail dan memori sementara akan dibersihkan. '
-          'Data kostum, foto tersimpan, dan catatan booking tidak akan terhapus.',
+          'File thumbnail sementara di penyimpanan perangkat akan dibersihkan untuk menghemat ruang memori. '
+          'Seluruh data kostum, riwayat rental, foto katalog, dan catatan pembayaran cicilan tetap aman tersimpan.',
         ),
         actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal', style: TextStyle(color: AppColors.textDark)),
+          ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
@@ -441,11 +454,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               }
             },
             child: const Text('Bersihkan Cache'),
-          ),
-          CupertinoDialogAction(
-            isDefaultAction: true,
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
           ),
         ],
       ),
@@ -517,7 +525,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.86',
+                    'Versi 1.0.87',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -682,7 +690,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.86 (BUILD 121) - TERBARU'),
+                  header: const Text('VERSI 1.0.87 (BUILD 122) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.clock_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Waktu Sinkron Relatif & Humanis', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Indikator sinkronisasi menampilkan format relatif yang mudah dibaca (Baru saja, X menit lalu, Hari ini, Kemarin) lengkap dengan stempel waktu absolut.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.shield_fill,
+                        color: Color(0xFF007AFF),
+                      ),
+                      title: Text('Proteksi Dialog Pengaturan Krusial', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Konfirmasi pembersihan cache gambar dan pemulihan cloud kini diproteksi dengan aksi batal default dan teks peringatan yang transparan.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.86 (BUILD 121)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1269,9 +1306,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       }
     }
 
-    final formattedLastSync = syncState.lastSyncedAt != null
-        ? DateFormat('d MMM yyyy, HH:mm').format(syncState.lastSyncedAt!)
-        : 'Belum pernah';
+    final formattedLastSync = _formatSyncTime(syncState.lastSyncedAt);
+    final absoluteLastSync = syncState.lastSyncedAt != null
+        ? DateFormat('d MMM yyyy, HH:mm', 'id_ID').format(syncState.lastSyncedAt!)
+        : null;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -1350,13 +1388,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onTap: _showPendingQueueSheet,
               ),
 
-              // Row 3: Terakhir Sinkron (NO chevron — purely informational timestamp)
+              // Row 3: Terakhir Sinkron (NO chevron — purely informational timestamp with tooltip/subtitle)
               CupertinoListTile(
                 leading: const SquircleIcon(
                   icon: CupertinoIcons.clock_fill,
                   color: Color(0xFF34C759),
                 ),
                 title: const Text('Terakhir Sinkron', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                subtitle: absoluteLastSync != null
+                    ? Text(
+                        absoluteLastSync,
+                        style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                      )
+                    : null,
                 additionalInfo: Text(
                   formattedLastSync,
                   style: const TextStyle(
@@ -1483,7 +1527,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.86', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.87', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),

@@ -412,4 +412,72 @@ void main() {
     expect(find.textContaining('Terlambat'), findsNothing);
     expect(find.textContaining('Telat'), findsNothing);
   });
+
+  testWidgets('Tapping Tandai Sudah Dikembalikan shows return dialog with penalty and condition notes', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repo = MockRentalRepo();
+    bool updatedCalled = false;
+    final pastEndDate = DateTime.now().subtract(const Duration(days: 2));
+    final startDate = pastEndDate.subtract(const Duration(days: 3));
+
+    final rental = Rental(
+      id: 'rent-return-test',
+      costumeId: 'cos-1',
+      customerId: 'cust-1',
+      startDate: startDate,
+      endDate: pastEndDate,
+      durationDays: 3,
+      purpose: 'Photoshoot',
+      totalPrice: 150000.0,
+      paymentStatus: RentalPaymentStatus.paid,
+      itemStatus: RentalItemStatus.rented,
+      notes: 'Bawa wig net cadangan',
+    );
+
+    await tester.pumpWidget(createTestWidget(
+      rental: rental,
+      repo: repo,
+      onUpdated: () => updatedCalled = true,
+    ));
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+
+    final kembalikanTile = find.text('Tandai Sudah Dikembalikan');
+    await tester.scrollUntilVisible(kembalikanTile, 200, scrollable: find.byType(Scrollable).last);
+    await tester.tap(kembalikanTile);
+    await tester.pumpAndSettle();
+
+    // Verify Return Dialog appears
+    expect(find.text('Konfirmasi Pengembalian Kostum'), findsOneWidget);
+    expect(find.textContaining('terlambat 2 hari'), findsOneWidget);
+
+    // Enter penalty 50000 and notes
+    final textFields = find.byType(CupertinoTextField);
+    expect(textFields, findsNWidgets(2));
+
+    await tester.enterText(textFields.first, '50000');
+    await tester.enterText(textFields.last, 'Wig sedikit kusut tapi aman');
+    await tester.pumpAndSettle();
+
+    // Tap Simpan & Selesai
+    await tester.tap(find.text('Simpan & Selesai'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    expect(updatedCalled, isTrue);
+    expect(repo.lastUpdatedRental?.itemStatus, RentalItemStatus.returned);
+    // Total price should increase by penalty (150.000 + 50.000 = 200.000)
+    expect(repo.lastUpdatedRental?.totalPrice, 200000.0);
+    // Notes should combine existing notes + Denda + Kondisi
+    expect(repo.lastUpdatedRental?.notes, contains('Bawa wig net cadangan'));
+    expect(repo.lastUpdatedRental?.notes, contains('Denda: Rp 50.000'));
+    expect(repo.lastUpdatedRental?.notes, contains('Kondisi: Wig sedikit kusut tapi aman'));
+  });
 }

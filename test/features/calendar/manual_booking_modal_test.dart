@@ -280,4 +280,89 @@ void main() {
     // Extended duration card should not be displayed
     expect(find.byKey(const Key('manual_extended_duration_hint')), findsNothing);
   });
+
+  testWidgets('ManualBookingModal sanitizes phone input (+62/spaces/hyphens) on save', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(buildModal(
+      initialParsedData: ParsedRentalData(
+        costumeName: 'Furina Archon',
+        startDate: DateTime(2026, 9, 1),
+        endDate: DateTime(2026, 9, 3),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Modal'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    // Fill Nama
+    await tester.enterText(find.byKey(const Key('manual_name_input')), 'Budi Cosplayer');
+
+    // Fill Phone with messy format (+62 812-3456-7890)
+    await tester.enterText(find.byKey(const Key('manual_phone_input')), '+62 812-3456-7890');
+
+    // Fill Parent Phone with messy format (+62 898-7654-3210)
+    await tester.enterText(find.byKey(const Key('manual_parent_phone_input')), '+62 898-7654-3210');
+
+    // Tap Simpan
+    final saveButton = find.byKey(const Key('manual_save_booking_button'));
+    await tester.tap(saveButton);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    // Verify Customer saved with sanitized phone numbers
+    expect(rentalRepo.customers.length, 1);
+    final savedCustomer = rentalRepo.customers.first;
+    expect(savedCustomer.phone, '081234567890');
+    expect(savedCustomer.parentPhone, '089876543210');
+  });
+
+  testWidgets('ManualBookingModal blocks phone numbers with less than 8 digits', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(buildModal(
+      initialParsedData: ParsedRentalData(
+        costumeName: 'Furina Archon',
+        startDate: DateTime(2026, 9, 1),
+        endDate: DateTime(2026, 9, 3),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Modal'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    // Fill Nama
+    await tester.enterText(find.byKey(const Key('manual_name_input')), 'Budi Cosplayer');
+
+    // Fill Short Phone (less than 8 digits: "12345")
+    await tester.enterText(find.byKey(const Key('manual_phone_input')), '12345');
+
+    // Tap Simpan
+    final saveButton = find.byKey(const Key('manual_save_booking_button'));
+    await tester.tap(saveButton);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+
+    // Toast error shown & nothing saved
+    expect(find.text('Nomor WhatsApp tidak valid (minimal 8 digit)'), findsOneWidget);
+    expect(rentalRepo.customers, isEmpty);
+    expect(rentalRepo.rentals, isEmpty);
+  });
 }

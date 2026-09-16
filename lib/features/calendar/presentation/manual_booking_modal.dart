@@ -140,12 +140,24 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     super.dispose();
   }
 
+  static String sanitizePhone(String input) {
+    var cleaned = input.trim().replaceAll(RegExp(r'[^\d+]'), '');
+    if (cleaned.startsWith('+62')) {
+      cleaned = '0${cleaned.substring(3)}';
+    } else if (cleaned.startsWith('62')) {
+      cleaned = '0${cleaned.substring(2)}';
+    } else if (cleaned.startsWith('+')) {
+      cleaned = cleaned.substring(1);
+    }
+    return cleaned.replaceAll('+', '');
+  }
+
   void _onPhoneChanged() {
     _matchExistingCustomer();
   }
 
   void _matchExistingCustomer() {
-    final rawPhone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+    final rawPhone = sanitizePhone(_phoneController.text).replaceAll(RegExp(r'\D'), '');
     if (rawPhone.length < 8) return;
 
     Customer? match;
@@ -303,7 +315,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   // State, which is preserved across rebuilds.
   bool _validate() {
     final okName = _nameController.text.trim().isNotEmpty;
-    final rawPhone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+    final rawPhone = sanitizePhone(_phoneController.text);
     final okPhone = rawPhone.length >= 8 && rawPhone.length <= 15;
     final okCostume = _selectedCostume != null;
     final okDate = !_endDate.isBefore(_startDate);
@@ -328,7 +340,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       return false;
     }
     if (_parentPhoneController.text.trim().isNotEmpty) {
-      final parentDigits = _parentPhoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+      final parentDigits = sanitizePhone(_parentPhoneController.text);
       if (parentDigits.length < 8 || parentDigits.length > 15) {
         _showErrorSnack('Nomor HP orang tua tidak valid (minimal 8 digit)');
         return false;
@@ -376,10 +388,10 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         }
       }
 
-      final rawPhone = _phoneController.text.trim().replaceAll(RegExp(r'\D'), '');
+      final rawPhone = sanitizePhone(_phoneController.text);
       Customer? existingCustomer;
       for (final c in _existingCustomers) {
-        final cDigits = c.phone.replaceAll(RegExp(r'\D'), '');
+        final cDigits = sanitizePhone(c.phone).replaceAll(RegExp(r'\D'), '');
         if (cDigits.isNotEmpty && (cDigits == rawPhone || cDigits.endsWith(rawPhone) || rawPhone.endsWith(cDigits))) {
           existingCustomer = c;
           break;
@@ -387,16 +399,18 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       }
 
       final custId = existingCustomer?.id ?? 'cust_${DateTime.now().millisecondsSinceEpoch}';
+      final cleanPhone = sanitizePhone(_phoneController.text);
+      final cleanParentPhone = _parentPhoneController.text.trim().isEmpty
+          ? existingCustomer?.parentPhone
+          : sanitizePhone(_parentPhoneController.text);
       final customer = Customer(
         id: custId,
         fullName: _nameController.text.trim(),
-        phone: _phoneController.text.trim(),
+        phone: cleanPhone,
         address: _addressController.text.trim().isEmpty
             ? (existingCustomer?.address.isNotEmpty == true ? existingCustomer!.address : '-')
             : _addressController.text.trim(),
-        parentPhone: _parentPhoneController.text.trim().isEmpty
-            ? existingCustomer?.parentPhone
-            : _parentPhoneController.text.trim(),
+        parentPhone: cleanParentPhone,
         socialMedia: _socialMediaController.text.trim().isEmpty
             ? existingCustomer?.socialMedia
             : _socialMediaController.text.trim(),
@@ -533,6 +547,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
               ),
             ),
             trailing: CupertinoButton(
+              key: const Key('manual_save_booking_button'),
               padding: EdgeInsets.zero,
               onPressed: _isSaving ? null : _save,
               child: _isSaving
@@ -580,12 +595,15 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       title: CupertinoTextField(
                         key: const Key('manual_phone_input'),
                         controller: _phoneController,
-                        placeholder: 'No HP / WhatsApp',
+                        placeholder: 'No HP / WhatsApp (cth: 081234567890)',
                         placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
                         keyboardType: TextInputType.phone,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[\d+\-\s]')),
+                        ],
                         textInputAction: TextInputAction.next,
                       ),
                     ),
@@ -621,6 +639,9 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
                         keyboardType: TextInputType.phone,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[\d+\-\s]')),
+                        ],
                         textInputAction: TextInputAction.next,
                       ),
                     ),

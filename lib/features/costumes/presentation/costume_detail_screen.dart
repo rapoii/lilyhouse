@@ -511,19 +511,41 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       context: context,
       accessory: acc,
       onSelectCondition: (newCondition) async {
-        await _repository.updateAccessory(acc.copyWith(conditionStatus: newCondition));
-        await _loadAccessories();
-        if (mounted) {
-          IosToast.show(context, 'Kondisi diubah ke "${newCondition.displayName}"');
+        try {
+          await _repository.updateAccessory(acc.copyWith(conditionStatus: newCondition));
+          await _loadAccessories();
+          if (mounted) {
+            IosToast.show(
+              context,
+              'Kondisi diubah ke "${newCondition.displayName}"',
+              icon: CupertinoIcons.checkmark_circle_fill,
+              iconColor: const Color(0xFF34C759),
+            );
+          }
+        } catch (_) {
+          if (mounted) {
+            IosToast.show(
+              context,
+              'Gagal mengubah kondisi aksesori',
+              icon: CupertinoIcons.exclamationmark_circle_fill,
+              iconColor: AppColors.dangerRose,
+            );
+          }
         }
       },
     );
   }
 
   void _showAddAccessoryDialog() {
+    final existingNames = [
+      ..._accessories.map((a) => a.name),
+      ..._costume.includedAccessories,
+    ];
+
     AddAccessorySheet.show(
       context: context,
       costumeId: _costume.id,
+      existingAccessoryNames: existingNames,
       onSaveAccessory: (acc) async {
         await _repository.addAccessory(acc);
         await _loadAccessories();
@@ -545,11 +567,17 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
+              HapticFeedback.mediumImpact();
               Navigator.pop(ctx);
               await _repository.deleteAccessory(id);
               await _loadAccessories();
               if (mounted) {
-                IosToast.show(context, 'Aksesori berhasil dihapus');
+                IosToast.show(
+                  context,
+                  'Aksesori berhasil dihapus',
+                  icon: CupertinoIcons.trash,
+                  iconColor: AppColors.dangerRose,
+                );
               }
             },
             child: const Text('Hapus'),
@@ -581,31 +609,37 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
         style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
       ),
       additionalInfo: GestureDetector(
+        behavior: HitTestBehavior.opaque,
         onTap: accessory != null ? () => _showChangeConditionSheet(accessory) : null,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(
-            color: colors.bg,
-            borderRadius: BorderRadius.circular(14),
-            border: Border.all(color: colors.text.withValues(alpha: 0.3)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                condition.displayName.toUpperCase(),
-                style: TextStyle(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.none,
-                  color: colors.text,
-                ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: colors.bg,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: colors.text.withValues(alpha: 0.3)),
               ),
-              if (accessory != null) ...[
-                const SizedBox(width: 4),
-                Icon(CupertinoIcons.chevron_down, size: 10, color: colors.text),
-              ],
-            ],
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    condition.displayName.toUpperCase(),
+                    style: TextStyle(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      decoration: TextDecoration.none,
+                      color: colors.text,
+                    ),
+                  ),
+                  if (accessory != null) ...[
+                    const SizedBox(width: 4),
+                    Icon(CupertinoIcons.chevron_down, size: 10, color: colors.text),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ),

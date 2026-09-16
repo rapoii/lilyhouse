@@ -413,6 +413,179 @@ void main() {
       expect(repo._logs.first.amountPaid, 50000.0);
     });
 
+    testWidgets('AddPaymentSheet prevents overpayment when amount exceeds remaining balance', (tester) async {
+      final inst = Installment(
+        id: 'inst_overpay',
+        itemName: 'Wig Hu Tao',
+        totalCost: 500000.0,
+        totalPaid: 300000.0,
+        remainingBalance: 200000.0,
+        status: InstallmentStatus.ongoing,
+      );
+      final repo = MockInstallmentRepository(installments: [inst]);
+      bool saved = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => CupertinoButton(
+                child: const Text('Open'),
+                onPressed: () {
+                  showCupertinoModalPopup<void>(
+                    context: ctx,
+                    builder: (_) => AddPaymentSheet(
+                      installment: inst,
+                      repository: repo,
+                      onSaved: () => saved = true,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Try paying 500.000 when remaining is only 200.000
+      await tester.enterText(find.byKey(const Key('payment_amount_input')), '500.000');
+      await tester.pump();
+
+      // Tap Simpan
+      await tester.tap(find.text('Simpan'));
+      await tester.pump();
+
+      // Verify validation error is displayed and not saved
+      expect(find.byKey(const Key('payment_error_message')), findsOneWidget);
+      expect(find.textContaining('Nominal melebihi sisa hutang (Rp 200.000)'), findsOneWidget);
+      expect(saved, isFalse);
+      expect(repo._logs.isEmpty, isTrue);
+    });
+
+    testWidgets('AddPaymentSheet Bayar Lunas shortcut fills remaining balance directly', (tester) async {
+      final inst = Installment(
+        id: 'inst_shortcut',
+        itemName: 'Sepatu Boots Cosplay',
+        totalCost: 350000.0,
+        totalPaid: 150000.0,
+        remainingBalance: 200000.0,
+        status: InstallmentStatus.ongoing,
+      );
+      final repo = MockInstallmentRepository(installments: [inst]);
+      bool saved = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => CupertinoButton(
+                child: const Text('Open'),
+                onPressed: () {
+                  showCupertinoModalPopup<void>(
+                    context: ctx,
+                    builder: (_) => AddPaymentSheet(
+                      installment: inst,
+                      repository: repo,
+                      onSaved: () => saved = true,
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Verify Bayar Lunas button exists
+      final shortcutButton = find.byKey(const Key('shortcut_pay_in_full_button'));
+      expect(shortcutButton, findsOneWidget);
+
+      // Tap Bayar Lunas
+      await tester.tap(shortcutButton);
+      await tester.pump();
+
+      // Input should now be formatted with 200.000
+      final textField = tester.widget<CupertinoTextField>(find.byKey(const Key('payment_amount_input')));
+      expect(textField.controller!.text, '200.000');
+
+      // Tap Simpan and verify payment successful
+      await tester.tap(find.text('Simpan'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(saved, isTrue);
+      expect(repo._logs.length, 1);
+      expect(repo._logs.first.amountPaid, 200000.0);
+    });
+
+    testWidgets('AddPaymentSheet displays payment date row with default today and opens date picker', (tester) async {
+      final inst = Installment(
+        id: 'inst_date_test',
+        itemName: 'Pedang Nichirin',
+        totalCost: 250000.0,
+        totalPaid: 0.0,
+        remainingBalance: 250000.0,
+        status: InstallmentStatus.ongoing,
+      );
+      final repo = MockInstallmentRepository(installments: [inst]);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: Builder(
+              builder: (ctx) => CupertinoButton(
+                child: const Text('Open'),
+                onPressed: () {
+                  showCupertinoModalPopup<void>(
+                    context: ctx,
+                    builder: (_) => AddPaymentSheet(
+                      installment: inst,
+                      repository: repo,
+                      onSaved: () {},
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.tap(find.text('Open'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Verify Tanggal Bayar label and "(Hari ini)" display
+      expect(find.text('Tanggal Bayar'), findsOneWidget);
+      expect(find.byKey(const Key('payment_date_value_text')), findsOneWidget);
+      expect(find.textContaining('(Hari ini)'), findsOneWidget);
+
+      // Tap date picker row
+      await tester.tap(find.byKey(const Key('payment_date_picker_button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Verify date picker modal sheet appears
+      expect(find.text('Pilih Tanggal Bayar'), findsOneWidget);
+      expect(find.text('Selesai'), findsOneWidget);
+      expect(find.text('Batal'), findsNWidgets(2)); // 1 in AddPaymentSheet header, 1 in date picker sheet
+
+      // Tap Selesai in picker
+      await tester.tap(find.text('Selesai'));
+      await tester.pumpAndSettle();
+    });
+
     testWidgets('InstallmentDetailScreen renders Ubah button and opens EditInstallmentSheet to update details', (tester) async {
       final initialInstallment = Installment(
         id: 'inst_edit_1',
