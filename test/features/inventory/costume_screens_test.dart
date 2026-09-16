@@ -481,4 +481,68 @@ void main() {
     expect(find.text('Hatsune Miku'), findsOneWidget);
     expect(find.text('Makima Suit'), findsOneWidget);
   });
+
+  testWidgets('CostumeListScreen shows a retry surface when the first load fails, then recovers',
+      (tester) async {
+    final flaky = _FlakyCostumeRepository();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: CostumeListScreen(repository: flaky),
+      ),
+    );
+    await tester.pump();
+    await tester.pump();
+
+    // Failure must NOT masquerade as an empty catalog.
+    expect(find.text('Tidak ada hasil yang cocok'), findsNothing);
+    expect(find.text('Gagal memuat daftar kostum'), findsOneWidget);
+    expect(find.text('Coba Lagi'), findsOneWidget);
+
+    // Tapping retry re-queries the repository and renders the data.
+    flaky.failNext = false;
+    await tester.tap(find.text('Coba Lagi'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Gagal memuat daftar kostum'), findsNothing);
+    expect(find.text('Hatsune Miku'), findsOneWidget);
+  });
+}
+
+/// Fails the first `searchCostumes` call, then succeeds — models a transient
+/// read error (locked DB, disk hiccup) that the retry button must recover from.
+class _FlakyCostumeRepository extends MockCostumeRepository {
+  _FlakyCostumeRepository() : super(costumes: [
+    Costume(
+      id: 'cos-flaky',
+      name: 'Hatsune Miku',
+      animeSeries: 'Vocaloid',
+      size: 'M',
+      rentPrice3Days: 150000,
+      status: CostumeStatus.available,
+    ),
+  ]);
+
+  bool failNext = true;
+
+  @override
+  Future<List<Costume>> searchCostumes({
+    String? query,
+    CostumeStatus? status,
+    String? size,
+    String? series,
+    String? sortBy,
+  }) async {
+    if (failNext) {
+      failNext = false;
+      throw Exception('simulated read failure');
+    }
+    return super.searchCostumes(
+      query: query,
+      status: status,
+      size: size,
+      series: series,
+      sortBy: sortBy,
+    );
+  }
 }
