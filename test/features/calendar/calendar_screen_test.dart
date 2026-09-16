@@ -282,6 +282,8 @@ void main() {
       expect(find.text('Jihan Fatin'), findsOneWidget);
       expect(find.text('Dibooking'), findsWidgets);
       expect(find.text('Rp 150.000'), findsWidgets);
+      expect(find.text('Hari ke-2 dari 3 hari sewa'), findsOneWidget);
+      expect(find.text('5 Sep – 7 Sep 2026 • 3 hari'), findsOneWidget);
     });
 
     testWidgets('opening Smart Paste dialog allows input and shows conflict warning', (tester) async {
@@ -325,6 +327,8 @@ void main() {
 
       // Verify dialog appears
       expect(find.text('Smart Rent Form Parser'), findsOneWidget);
+      expect(find.text('Tempel Klip'), findsOneWidget);
+      expect(find.text('PESAN FORMAT SEWA'), findsOneWidget);
       expect(find.byKey(const Key('smart_paste_input')), findsOneWidget);
 
       // Enter overlapping WhatsApp text

@@ -610,6 +610,35 @@ class _RentalSlotCard extends StatelessWidget {
           ],
         ),
       );
+    } else {
+      final startDay = DateTime(rental.startDate.year, rental.startDate.month, rental.startDate.day);
+      final targetDay = DateTime(day.year, day.month, day.day);
+      final currentDayIndex = targetDay.difference(startDay).inDays + 1;
+      final totalDays = rental.durationDays > 0
+          ? rental.durationDays
+          : (rental.endDate.difference(rental.startDate).inDays + 1);
+
+      if (currentDayIndex > 0 && currentDayIndex <= totalDays) {
+        return Container(
+          margin: const EdgeInsets.only(bottom: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: AppColors.softPinkBg,
+            borderRadius: BorderRadius.circular(6),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(CupertinoIcons.clock_fill, size: 12, color: AppColors.primaryPink),
+              const SizedBox(width: 4),
+              Text(
+                'Hari ke-$currentDayIndex dari $totalDays hari sewa',
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPink),
+              ),
+            ],
+          ),
+        );
+      }
     }
     return null;
   }
@@ -673,7 +702,7 @@ class _RentalSlotCard extends StatelessWidget {
               children: [
                 Expanded(
                   child: Text(
-                    costume?.name ?? rental.costumeId,
+                    (costume?.name ?? rental.costumeId).replaceAll('_', ' '),
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w600,
@@ -684,6 +713,22 @@ class _RentalSlotCard extends StatelessWidget {
                 _buildItemStatusPill(rental.itemStatus),
               ],
             ),
+            const SizedBox(height: 6),
+            // Rental date range & duration line
+            Row(
+              children: [
+                const Icon(CupertinoIcons.calendar, size: 13, color: Color(0xFF8E8E93)),
+                const SizedBox(width: 4),
+                Text(
+                  '${DateFormat('d MMM').format(rental.startDate)} – ${DateFormat('d MMM yyyy').format(rental.endDate)} • ${rental.durationDays} hari',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF8E8E93),
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 8),
             Row(
               children: [
@@ -691,7 +736,7 @@ class _RentalSlotCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Expanded(
                   child: Text(
-                    customer?.fullName ?? rental.customerId,
+                    (customer?.fullName ?? rental.customerId).replaceAll('_', ' '),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -805,6 +850,23 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
     super.dispose();
   }
 
+  Future<void> _pasteFromClipboard() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    final text = data?.text?.trim() ?? '';
+    if (text.isEmpty) {
+      if (!mounted) return;
+      IosToast.show(
+        context,
+        'Papan klip kosong atau tidak berisi teks',
+        icon: CupertinoIcons.info_circle_fill,
+        iconColor: const Color(0xFF8E8E93),
+      );
+      return;
+    }
+    _textController.text = text;
+    await _handleParse();
+  }
+
   Future<void> _handleParse() async {
     final rawText = _textController.text.trim();
     if (rawText.isEmpty) {
@@ -877,6 +939,8 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
     return DraggableSheetContainer(
+      initialHeightFraction: 0.68,
+      maxHeightFraction: 0.94,
       backgroundColor: AppColors.background,
       onDismissed: () => Navigator.of(context).pop(),
       builder: (sheetCtx) => DefaultTextStyle(
@@ -907,10 +971,46 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                 const Text(
-                  'Paste pesan WhatsApp format sewa di bawah untuk otomatisasi data booking & cek tabrakan jadwal.',
+                  'Tempel pesan format sewa WhatsApp di bawah ini untuk deteksi jadwal dan isi formulir otomatis.',
                   style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93), height: 1.3),
                 ),
                 const SizedBox(height: 12),
+                // Header row with "Tempel Klip" quick paste button
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      'PESAN FORMAT SEWA',
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF8E8E93),
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                    CupertinoButton(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      minimumSize: const Size(28, 28),
+                      onPressed: _pasteFromClipboard,
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(CupertinoIcons.doc_on_clipboard, size: 13, color: AppColors.primaryPink),
+                          SizedBox(width: 4),
+                          Text(
+                            'Tempel Klip',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primaryPink,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
                 // Input field
                 Container(
                   height: 110,
@@ -925,7 +1025,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                     maxLines: null,
                     expands: true,
                     style: const TextStyle(fontSize: 13, color: AppColors.textDark),
-                    placeholder: 'Paste pesan form rent WhatsApp di sini...',
+                    placeholder: 'Tempel pesan form sewa WhatsApp di sini...',
                     placeholderStyle: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
                     padding: const EdgeInsets.all(12),
                     decoration: null,
@@ -941,10 +1041,10 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(CupertinoIcons.search, size: 16, color: Colors.white),
+                      Icon(CupertinoIcons.sparkles, size: 16, color: Colors.white),
                       SizedBox(width: 6),
                       Text(
-                        'Periksa & Deteksi Konflik',
+                        'Periksa & Deteksi Jadwal',
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 14),
                       ),
                     ],

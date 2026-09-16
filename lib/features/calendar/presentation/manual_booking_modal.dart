@@ -680,7 +680,27 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                 // ====== Section 3: KOSTUM & JADWAL ======
                 RepaintBoundary(
                   child: CupertinoListSection.insetGrouped(
-                  header: const Text('KOSTUM & JADWAL'),
+                  header: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('KOSTUM & JADWAL'),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppColors.softPinkBg,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '${_endDate.difference(_startDate).inDays + 1} hari sewa',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.primaryPink,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   backgroundColor: AppColors.background,
                   margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                   children: [
@@ -698,7 +718,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         _isLoadingCostumes
                             ? 'Memuat...'
                             : (_selectedCostume != null
-                                ? '${_selectedCostume!.name} (${_selectedCostume!.size})'
+                                ? '${_selectedCostume!.name.replaceAll('_', ' ')} (${_selectedCostume!.size})'
                                 : 'Pilih kostum'),
                         style: TextStyle(
                           fontSize: 15,

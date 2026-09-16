@@ -433,12 +433,12 @@ class RentalDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final custName = customer?.fullName.isNotEmpty == true ? customer!.fullName : (rental.customerId.isNotEmpty ? rental.customerId : 'Penyewa');
+    final custName = (customer?.fullName.isNotEmpty == true ? customer!.fullName : (rental.customerId.isNotEmpty ? rental.customerId : 'Penyewa')).replaceAll('_', ' ');
     final custPhone = customer?.phone.isNotEmpty == true ? customer!.phone : '-';
     final custAddr = customer?.address.isNotEmpty == true ? customer!.address : '-';
     final custSosmed = customer?.socialMedia?.isNotEmpty == true ? customer!.socialMedia! : '-';
-    final costName = costume?.name ?? (rental.costumeId.isNotEmpty ? rental.costumeId : 'Kostum');
-    final costSeries = costume?.animeSeries.isNotEmpty == true ? costume!.animeSeries : 'Kostum Rental';
+    final costName = (costume?.name ?? (rental.costumeId.isNotEmpty ? rental.costumeId : 'Kostum')).replaceAll('_', ' ');
+    final costSeries = (costume?.animeSeries.isNotEmpty == true ? costume!.animeSeries : 'Kostum Rental').replaceAll('_', ' ');
 
     final hasCover = costume?.coverPhoto != null && costume!.coverPhoto!.trim().isNotEmpty;
     final currencyFormat = NumberFormat('#,###', 'id_ID');
@@ -1007,7 +1007,6 @@ class RentalDetailSheet extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF1E824C)),
                         ),
                         subtitle: const Text('Kostum telah diserahkan atau dikirim ke penyewa', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
-                        trailing: const Icon(CupertinoIcons.checkmark_alt, size: 18, color: Color(0xFF289868)),
                         onTap: () async {
                           if (repository != null) {
                             final updated = rental.copyWith(itemStatus: RentalItemStatus.rented);
@@ -1034,7 +1033,6 @@ class RentalDetailSheet extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.primaryPink),
                         ),
                         subtitle: const Text('Kostum telah diterima kembali dari penyewa', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
-                        trailing: const Icon(CupertinoIcons.checkmark_alt, size: 18, color: AppColors.primaryPink),
                         onTap: () async {
                           final confirm = await showCupertinoDialog<bool>(
                             context: context,
@@ -1043,13 +1041,13 @@ class RentalDetailSheet extends StatelessWidget {
                               content: const Text('Tandai kostum ini sudah dikembalikan oleh penyewa?'),
                               actions: [
                                 CupertinoDialogAction(
+                                  child: const Text('Ya, Sudah Kembali'),
+                                  onPressed: () => Navigator.pop(dialogCtx, true),
+                                ),
+                                CupertinoDialogAction(
                                   isDefaultAction: true,
                                   child: const Text('Batal'),
                                   onPressed: () => Navigator.pop(dialogCtx, false),
-                                ),
-                                CupertinoDialogAction(
-                                  child: const Text('Ya, Sudah Kembali'),
-                                  onPressed: () => Navigator.pop(dialogCtx, true),
                                 ),
                               ],
                             ),
@@ -1079,7 +1077,6 @@ class RentalDetailSheet extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF289868)),
                         ),
                         subtitle: const Text('Catat bahwa seluruh biaya sewa telah dilunasi', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
-                        trailing: const Icon(CupertinoIcons.checkmark_alt, size: 18, color: Color(0xFF289868)),
                         onTap: () async {
                           final confirm = await showCupertinoDialog<bool>(
                             context: context,
@@ -1088,13 +1085,13 @@ class RentalDetailSheet extends StatelessWidget {
                               content: const Text('Tandai seluruh biaya sewa telah dilunasi?'),
                               actions: [
                                 CupertinoDialogAction(
+                                  child: const Text('Ya, Sudah Lunas'),
+                                  onPressed: () => Navigator.pop(dialogCtx, true),
+                                ),
+                                CupertinoDialogAction(
                                   isDefaultAction: true,
                                   child: const Text('Batal'),
                                   onPressed: () => Navigator.pop(dialogCtx, false),
-                                ),
-                                CupertinoDialogAction(
-                                  child: const Text('Ya, Sudah Lunas'),
-                                  onPressed: () => Navigator.pop(dialogCtx, true),
                                 ),
                               ],
                             ),
@@ -1123,8 +1120,7 @@ class RentalDetailSheet extends StatelessWidget {
                           'Batalkan Booking',
                           style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.dangerRose),
                         ),
-                        subtitle: const Text('Buka dialog konfirmasi pembatalan reservasi ini', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
-                        trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                        subtitle: const Text('Batalkan reservasi dan kosongkan slot tanggal', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                         onTap: () => _confirmCancelBooking(context),
                       ),
 

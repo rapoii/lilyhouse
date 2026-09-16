@@ -93,7 +93,7 @@ class InstallmentCard extends StatelessWidget {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: isDone ? AppColors.successMint : AppColors.primaryPink,
+                color: isDone ? const Color(0xFF1E824C) : AppColors.primaryPink,
               ),
             ),
             const SizedBox(height: 8),
