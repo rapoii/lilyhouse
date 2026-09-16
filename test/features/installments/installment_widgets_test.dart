@@ -53,10 +53,20 @@ class MockInstallmentRepository implements IInstallmentRepository {
     String? query,
     InstallmentStatus? status,
     String sortBy = 'due_date_asc',
+    bool dueSoon = false,
+    DateTime? now,
   }) async {
     List<Installment> list = status != null
         ? _installments.where((i) => i.status == status).toList()
         : List.from(_installments);
+    if (dueSoon) {
+      final ref = now ?? DateTime.now();
+      list = list.where((i) {
+        if (i.isPaidOff || i.dueDate == null) return false;
+        final days = i.daysUntilDue(now: ref);
+        return days != null && days <= 7;
+      }).toList();
+    }
     if (query != null && query.trim().isNotEmpty) {
       final q = query.trim().toLowerCase();
       list = list.where((i) =>
@@ -760,6 +770,189 @@ void main() {
       expect(find.byKey(const Key('installment_summary_card')), findsOneWidget);
       expect(find.text('Rp 1.000.000'), findsWidgets);
       expect(find.text('1 Aktif'), findsOneWidget);
+    });
+  });
+
+  group('Jatuh Tempo Dekat Badge Tests', () {
+
+    Widget harness(Installment installment) => MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: InstallmentCard(installment: installment),
+          ),
+        );
+
+    testWidgets('Renders overdue badge with "Terlambat X hari" for past due dates', (tester) async {
+      await tester.pumpWidget(
+        harness(Installment(
+          id: 'late-1',
+          itemName: 'Nahida Cosplay',
+          totalCost: 1000000.0,
+          totalPaid: 400000.0,
+          dueDate: DateTime(2026, 9, 9),
+          status: InstallmentStatus.ongoing,
+        )),
+      );
+
+      expect(find.byKey(const Key('installment_due_soon_badge')), findsOneWidget);
+      expect(find.text('Terlambat 7 hari'), findsOneWidget);
+    });
+
+    testWidgets('Renders due-soon badge with "X hari lagi" within 7 days', (tester) async {
+      await tester.pumpWidget(
+        harness(Installment(
+          id: 'soon-1',
+          itemName: 'Nahida Cosplay',
+          totalCost: 1000000.0,
+          totalPaid: 400000.0,
+          dueDate: DateTime(2026, 9, 23),
+          status: InstallmentStatus.ongoing,
+        )),
+      );
+
+      expect(find.byKey(const Key('installment_due_soon_badge')), findsOneWidget);
+      expect(find.text('7 hari lagi'), findsOneWidget);
+    });
+
+    testWidgets('Hides the badge when due date is more than 7 days away', (tester) async {
+      await tester.pumpWidget(
+        harness(Installment(
+          id: 'far-1',
+          itemName: 'Nahida Cosplay',
+          totalCost: 1000000.0,
+          totalPaid: 400000.0,
+          dueDate: DateTime(2026, 10, 30),
+          status: InstallmentStatus.ongoing,
+        )),
+      );
+
+      expect(find.byKey(const Key('installment_due_soon_badge')), findsNothing);
+    });
+
+    testWidgets('Hides the badge when there is no due date', (tester) async {
+      await tester.pumpWidget(
+        harness(Installment(
+          id: 'nodate-1',
+          itemName: 'Nahida Cosplay',
+          totalCost: 1000000.0,
+          totalPaid: 400000.0,
+          status: InstallmentStatus.ongoing,
+        )),
+      );
+
+      expect(find.byKey(const Key('installment_due_soon_badge')), findsNothing);
+    });
+
+    testWidgets('Hides the badge when the installment is paid off', (tester) async {
+      await tester.pumpWidget(
+        harness(Installment(
+          id: 'paid-1',
+          itemName: 'Nahida Cosplay',
+          totalCost: 1000000.0,
+          totalPaid: 1000000.0,
+          dueDate: DateTime(2020, 1, 1),
+          status: InstallmentStatus.paidOff,
+        )),
+      );
+
+      expect(find.byKey(const Key('installment_due_soon_badge')), findsNothing);
+    });
+  });
+
+  group('AddPaymentSheet Running Summary Tests', () {
+    testWidgets('Shows overdue warning, progress, and payment stats', (tester) async {
+      final installment = Installment(
+        id: 'inst-pay-late',
+        itemName: 'Furina Gown',
+        totalCost: 1000000.0,
+        totalPaid: 400000.0,
+        dueDate: DateTime(2026, 9, 9),
+        status: InstallmentStatus.ongoing,
+      );
+      final repo = MockInstallmentRepository(
+        installments: [
+          Installment(
+            id: 'inst-pay-late',
+            itemName: 'Furina Gown',
+            totalCost: 1000000.0,
+            totalPaid: 400000.0,
+            dueDate: DateTime(2026, 9, 9),
+            status: InstallmentStatus.ongoing,
+          ),
+        ],
+        logs: [
+          InstallmentLog(id: 'l1', installmentId: 'inst-pay-late', paymentDate: DateTime(2026, 8, 1), amountPaid: 200000),
+          InstallmentLog(id: 'l2', installmentId: 'inst-pay-late', paymentDate: DateTime(2026, 9, 1), amountPaid: 200000),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: AddPaymentSheet(
+              installment: installment,
+              repository: repo,
+              onSaved: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('add_payment_overdue_warning')), findsOneWidget);
+      expect(find.byKey(const Key('add_payment_progress_bar')), findsOneWidget);
+      expect(find.byKey(const Key('add_payment_last_payment')), findsOneWidget);
+      expect(find.byKey(const Key('add_payment_average')), findsOneWidget);
+      expect(find.byKey(const Key('add_payment_estimated_remaining')), findsOneWidget);
+      expect(find.text('Terlambat 7 hari'), findsOneWidget);
+      expect(find.text('2x pembayaran'), findsOneWidget);
+      // Rata-rata 200000, sisa 600000 -> 3x lagi
+      expect(find.text('3x lagi'), findsOneWidget);
+    });
+
+    testWidgets('Hides overdue warning and stats when paid on time', (tester) async {
+      final installment = Installment(
+        id: 'inst-pay-ok',
+        itemName: 'Furina Gown',
+        totalCost: 1000000.0,
+        totalPaid: 400000.0,
+        dueDate: DateTime(2027, 1, 1),
+        status: InstallmentStatus.ongoing,
+      );
+      final repo = MockInstallmentRepository(
+        installments: [
+          Installment(
+            id: 'inst-pay-ok',
+            itemName: 'Furina Gown',
+            totalCost: 1000000.0,
+            totalPaid: 400000.0,
+            dueDate: DateTime(2027, 1, 1),
+            status: InstallmentStatus.ongoing,
+          ),
+        ],
+        logs: [
+          InstallmentLog(id: 'l1', installmentId: 'inst-pay-ok', paymentDate: DateTime(2026, 9, 1), amountPaid: 400000),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: AddPaymentSheet(
+              installment: installment,
+              repository: repo,
+              onSaved: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('add_payment_overdue_warning')), findsNothing);
+      expect(find.byKey(const Key('add_payment_last_payment')), findsOneWidget);
+      expect(find.text('1x pembayaran'), findsOneWidget);
     });
   });
 }

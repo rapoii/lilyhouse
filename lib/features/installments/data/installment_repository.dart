@@ -22,10 +22,20 @@ abstract class IInstallmentRepository {
     String? query,
     InstallmentStatus? status,
     String sortBy = 'due_date_asc',
+    bool dueSoon = false,
+    DateTime? now,
   }) async {
     List<Installment> list = status != null
         ? await getInstallmentsByStatus(status)
         : await getAllInstallments();
+    if (dueSoon) {
+      final ref = now ?? DateTime.now();
+      list = list.where((i) {
+        if (i.isPaidOff || i.dueDate == null) return false;
+        final days = i.daysUntilDue(now: ref);
+        return days != null && days <= 7;
+      }).toList();
+    }
     if (query != null && query.trim().isNotEmpty) {
       final q = query.trim().toLowerCase();
       list = list.where((i) =>
@@ -136,6 +146,8 @@ class InstallmentRepository implements IInstallmentRepository {
     String? query,
     InstallmentStatus? status,
     String sortBy = 'due_date_asc',
+    bool dueSoon = false,
+    DateTime? now,
   }) async {
     final database = await _db;
     final List<String> whereClauses = [];
@@ -153,10 +165,24 @@ class InstallmentRepository implements IInstallmentRepository {
       whereArgs.add(status == InstallmentStatus.paidOff ? 'paid_off' : 'ongoing');
     }
 
-    String orderBy = 'CASE WHEN due_date IS NULL OR due_date = "" THEN 1 ELSE 0 END, due_date ASC, item_name ASC';
+    // Filter "Jatuh Tempo Dekat": belum lunas, memiliki tanggal jatuh tempo, dan
+    // jatuh tempo <= 7 hari dari sekarang (termasuk yang sudah terlambat).
+    if (dueSoon) {
+      final reference = (now ?? DateTime.now());
+      final today = DateTime(reference.year, reference.month, reference.day);
+      // Akhir hari ke-7 -> semua tanggal jatuh tempo <= H+7 masuk.
+      final cutoff = today.add(const Duration(days: 7, hours: 23, minutes: 59, seconds: 59));
+      whereClauses.add('status != ?');
+      whereArgs.add('paid_off');
+      whereClauses.add('(due_date IS NOT NULL AND due_date != \'\')');
+      whereClauses.add('due_date <= ?');
+      whereArgs.add(cutoff.toIso8601String());
+    }
+
+    String orderBy = 'CASE WHEN due_date IS NULL OR due_date = \'\' THEN 1 ELSE 0 END, due_date ASC, item_name ASC';
     switch (sortBy) {
       case 'due_date_desc':
-        orderBy = 'CASE WHEN due_date IS NULL OR due_date = "" THEN 1 ELSE 0 END, due_date DESC, item_name ASC';
+        orderBy = 'CASE WHEN due_date IS NULL OR due_date = \'\' THEN 1 ELSE 0 END, due_date DESC, item_name ASC';
         break;
       case 'balance_desc':
         orderBy = 'remaining_balance DESC, item_name ASC';
@@ -169,7 +195,7 @@ class InstallmentRepository implements IInstallmentRepository {
         break;
       case 'due_date_asc':
       default:
-        orderBy = 'CASE WHEN due_date IS NULL OR due_date = "" THEN 1 ELSE 0 END, due_date ASC, item_name ASC';
+        orderBy = 'CASE WHEN due_date IS NULL OR due_date = \'\' THEN 1 ELSE 0 END, due_date ASC, item_name ASC';
         break;
     }
 

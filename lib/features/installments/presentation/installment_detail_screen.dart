@@ -263,18 +263,82 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
               ),
               if (inst.dueDate != null)
                 CupertinoListTile(
-                  leading: const SquircleIcon(
-                    icon: CupertinoIcons.calendar,
-                    color: Color(0xFF5856D6),
+                  leading: SquircleIcon(
+                    icon: inst.isOverdue ? CupertinoIcons.exclamationmark_triangle_fill : CupertinoIcons.calendar,
+                    color: inst.isOverdue ? const Color(0xFFFF3B30) : const Color(0xFF5856D6),
                   ),
                   title: const Text('Jatuh Tempo', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
-                  additionalInfo: Text(
-                    _formatDate(inst.dueDate!),
-                    style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                  additionalInfo: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _formatDate(inst.dueDate!),
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: inst.isOverdue ? FontWeight.w700 : FontWeight.w400,
+                          color: inst.isOverdue ? const Color(0xFFFF3B30) : AppColors.textDark,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: inst.isOverdue ? const Color(0xFFFFEFEF) : const Color(0xFFFFF4E0),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          inst.dueLabel(),
+                          key: const Key('detail_due_label'),
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            color: inst.isOverdue ? const Color(0xFFC62828) : const Color(0xFFB26B00),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
             ],
           ),
+
+          // Peringatan keterlambatan
+          if (inst.isOverdue)
+            Padding(
+              key: const Key('detail_overdue_warning'),
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFFEFEF),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: const Color(0xFFFF3B30), width: 1),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(CupertinoIcons.exclamationmark_triangle_fill, size: 16, color: Color(0xFFFF3B30)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Terlambat ${inst.daysUntilDue()?.abs() ?? 0} hari',
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFFC62828)),
+                          ),
+                          const SizedBox(height: 2),
+                          const Text(
+                            'Tanggal jatuh tempo telah terlewati. Segera lunasi sisa tagihan untuk menghindari denda.',
+                            style: TextStyle(fontSize: 12.5, color: Color(0xFFC62828)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
 
           // Section 2: RINGKASAN PEMBAYARAN
           CupertinoListSection.insetGrouped(

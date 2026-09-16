@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:lilyhouse/core/theme/app_theme.dart';
 import 'package:lilyhouse/features/costumes/domain/costume.dart';
 import 'package:lilyhouse/features/costumes/domain/accessory.dart';
+import 'package:lilyhouse/features/costumes/domain/costume_rental_history.dart';
 import 'package:lilyhouse/features/costumes/data/costume_repository.dart';
 import 'package:lilyhouse/features/costumes/presentation/costume_list_screen.dart';
 import 'package:lilyhouse/features/costumes/presentation/costume_detail_screen.dart';
@@ -12,8 +13,13 @@ import 'package:lilyhouse/features/costumes/presentation/add_costume_sheet.dart'
 class MockCostumeRepository implements ICostumeRepository {
   final List<Costume> _costumes = [];
   final List<Accessory> _accessories = [];
+  CostumeRentalHistory rentalHistory = const CostumeRentalHistory();
 
-  MockCostumeRepository({List<Costume>? costumes, List<Accessory>? accessories}) {
+  MockCostumeRepository({
+    List<Costume>? costumes,
+    List<Accessory>? accessories,
+    CostumeRentalHistory? rentalHistory,
+  }) : rentalHistory = rentalHistory ?? const CostumeRentalHistory() {
     if (costumes != null) _costumes.addAll(costumes);
     if (accessories != null) _accessories.addAll(accessories);
   }
@@ -126,6 +132,10 @@ class MockCostumeRepository implements ICostumeRepository {
 
   @override
   Future<int> getActiveRentalsCount(String costumeId) async => 0;
+
+  @override
+  Future<CostumeRentalHistory> getRentalHistory(String costumeId) async =>
+      rentalHistory;
 }
 
 void main() {

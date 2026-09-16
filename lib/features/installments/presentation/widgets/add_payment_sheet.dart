@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../../core/theme/app_colors.dart';
@@ -34,10 +35,30 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
   bool _isSaving = false;
   String? _errorMessage;
 
+  List<InstallmentLog> _logs = const [];
+  bool _isLoadingLogs = true;
+
   @override
   void initState() {
     super.initState();
     _amountController.addListener(_onAmountChanged);
+    _loadPaymentHistory();
+  }
+
+  Future<void> _loadPaymentHistory() async {
+    try {
+      final logs = await widget.repository.getLogsForInstallment(widget.installment.id);
+      if (mounted) {
+        setState(() {
+          _logs = logs..sort((a, b) => b.paymentDate.compareTo(a.paymentDate));
+          _isLoadingLogs = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() => _isLoadingLogs = false);
+      }
+    }
   }
 
   @override
@@ -74,6 +95,48 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
       return '$formatted (Hari ini)';
     }
     return formatted;
+  }
+
+  Widget _buildSummaryRow(String label, String value, IconData icon, Color color, {Key? key}) {
+    return Row(
+      key: key,
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Flexible(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 14, color: color),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12.5,
+                    color: AppColors.textMuted,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(width: 10),
+        Flexible(
+          child: Text(
+            value,
+            style: const TextStyle(
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+              color: AppColors.textDark,
+            ),
+            textAlign: TextAlign.right,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    );
   }
 
   Future<void> _pickDate() async {
@@ -167,6 +230,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
     final remaining = widget.installment.remainingBalance;
+    final isOverdue = widget.installment.isOverdue;
 
     return Container(
       decoration: const BoxDecoration(
@@ -249,8 +313,10 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                           color: AppColors.cardBg,
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: AppColors.borderSubtle,
-                            width: 0.5,
+                            color: isOverdue
+                                ? const Color(0xFFFF3B30).withValues(alpha: 0.5)
+                                : AppColors.borderSubtle,
+                            width: isOverdue ? 1.2 : 0.5,
                           ),
                         ),
                         child: Column(
@@ -280,14 +346,141 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                                 Text(
                                   _formatCurrency(remaining),
                                   key: const Key('add_payment_remaining_text'),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: AppColors.primaryPink,
+                                    color: isOverdue ? const Color(0xFFFF3B30) : AppColors.primaryPink,
                                   ),
                                 ),
                               ],
                             ),
+                            const SizedBox(height: 10),
+
+                            // Progress bar pembayaran berjalan
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(3),
+                              child: LinearProgressIndicator(
+                                key: const Key('add_payment_progress_bar'),
+                                value: widget.installment.progress.clamp(0.0, 1.0),
+                                minHeight: 6,
+                                backgroundColor: AppColors.softPinkBg,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  widget.installment.isPaidOff
+                                      ? AppColors.successMint
+                                      : AppColors.primaryPink,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 6),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'Sudah dibayar ${(widget.installment.progress * 100).clamp(0, 100).round()}% dari total',
+                                  key: const Key('add_payment_progress_label'),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textMuted,
+                                  ),
+                                ),
+                                Text(
+                                  '${_logs.length}x pembayaran',
+                                  key: const Key('add_payment_log_count'),
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.textMuted,
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            // Peringatan keterlambatan
+                            if (widget.installment.isOverdue) ...[
+                              const SizedBox(height: 12),
+                              Container(
+                                key: const Key('add_payment_overdue_warning'),
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFFFEFEF),
+                                  borderRadius: BorderRadius.circular(10),
+                                  border: Border.all(color: const Color(0xFFFF3B30), width: 1),
+                                ),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(
+                                      CupertinoIcons.exclamationmark_triangle_fill,
+                                      size: 15,
+                                      color: Color(0xFFFF3B30),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'Terlambat ${widget.installment.daysUntilDue()?.abs() ?? 0} hari',
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.w700,
+                                              color: Color(0xFFC62828),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          const Text(
+                                            'Tanggal jatuh tempo telah terlewati. Segera catat pembayaran untuk menghindari denda.',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Color(0xFFC62828),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+
+                            // Ringkasan pembayaran berjalan
+                            if (_isLoadingLogs)
+                              const Padding(
+                                padding: EdgeInsets.only(top: 12),
+                                child: Center(
+                                  child: CupertinoActivityIndicator(radius: 10),
+                                ),
+                              )
+                            else if (_logs.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              const Divider(height: 1, color: AppColors.borderSubtle),
+                              const SizedBox(height: 10),
+                              _buildSummaryRow(
+                                'Pembayaran Terakhir',
+                                '${_formatCurrency(_logs.first.amountPaid)} \u00b7 ${_formatDate(_logs.first.paymentDate)}',
+                                CupertinoIcons.checkmark_alt,
+                                AppColors.primaryPink,
+                                key: const Key('add_payment_last_payment'),
+                              ),
+                              const SizedBox(height: 8),
+                              _buildSummaryRow(
+                                'Rata-rata / Bayar',
+                                _formatCurrency(widget.installment.averagePayment(_logs)),
+                                CupertinoIcons.equal_circle,
+                                const Color(0xFF5856D6),
+                                key: const Key('add_payment_average'),
+                              ),
+                              const SizedBox(height: 8),
+                              _buildSummaryRow(
+                                'Estimasi Sisa Cicilan',
+                                widget.installment.estimatedRemainingPayments(_logs) != null
+                                    ? '${widget.installment.estimatedRemainingPayments(_logs)}x lagi'
+                                    : '-',
+                                CupertinoIcons.number_circle,
+                                const Color(0xFFFF9500),
+                                key: const Key('add_payment_estimated_remaining'),
+                              ),
+                            ],
                           ],
                         ),
                       ),

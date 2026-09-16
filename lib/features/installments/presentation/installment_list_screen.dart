@@ -37,6 +37,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
   bool _isLoading = true;
   InstallmentStatus? _selectedStatus;
   String _selectedSortBy = 'due_date_asc';
+  bool _selectedDueSoon = false;
   UniqueKey _listKey = UniqueKey();
 
   static const _months = [
@@ -71,6 +72,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
       query: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
       status: _selectedStatus,
       sortBy: _selectedSortBy,
+      dueSoon: _selectedDueSoon,
     );
     if (mounted) {
       setState(() {
@@ -102,7 +104,9 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
   }
 
   Widget _buildFilterButton() {
-    final bool hasActiveFilter = _selectedStatus != null || _selectedSortBy != 'due_date_asc';
+    final bool hasActiveFilter = _selectedStatus != null ||
+        _selectedSortBy != 'due_date_asc' ||
+        _selectedDueSoon;
     return CupertinoButton(
       padding: EdgeInsets.zero,
       minimumSize: const Size(44, 44),
@@ -155,10 +159,12 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
         return InstallmentFilterSheet(
           initialStatus: _selectedStatus,
           initialSortBy: _selectedSortBy,
-          onApply: ({required status, required sortBy}) {
+          initialDueSoon: _selectedDueSoon,
+          onApply: ({required status, required sortBy, required dueSoon}) {
             setState(() {
               _selectedStatus = status;
               _selectedSortBy = sortBy;
+              _selectedDueSoon = dueSoon;
             });
             _loadInstallments();
           },
@@ -635,13 +641,48 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                     _buildFilterButton(),
                   ],
                 ),
-                if (_selectedStatus != null || _selectedSortBy != 'due_date_asc') ...[
+                if (_selectedStatus != null ||
+                    _selectedSortBy != 'due_date_asc' ||
+                    _selectedDueSoon) ...[
                   const SizedBox(height: 10),
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     physics: const BouncingScrollPhysics(),
                     child: Row(
                       children: [
+                        if (_selectedDueSoon)
+                          Container(
+                            margin: const EdgeInsets.only(right: 6),
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFFFF4E5),
+                              borderRadius: BorderRadius.circular(14),
+                              border: Border.all(color: const Color(0xFFFFD199)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(CupertinoIcons.clock_fill, size: 12, color: Color(0xFFD97706)),
+                                const SizedBox(width: 5),
+                                const Text(
+                                  'Jatuh Tempo Dekat',
+                                  style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFD97706)),
+                                ),
+                                const SizedBox(width: 4),
+                                GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    setState(() => _selectedDueSoon = false);
+                                    _loadInstallments();
+                                  },
+                                  child: const Padding(
+                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
+                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFFD97706)),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         if (_selectedStatus != null)
                           Container(
                             margin: const EdgeInsets.only(right: 6),
@@ -742,7 +783,8 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                       builder: (context) {
                         final hasFilterOrQuery = _searchController.text.trim().isNotEmpty ||
                             _selectedStatus != null ||
-                            _selectedSortBy != 'due_date_asc';
+                            _selectedSortBy != 'due_date_asc' ||
+                            _selectedDueSoon;
                         return Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
@@ -791,6 +833,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                   setState(() {
                                     _selectedStatus = null;
                                     _selectedSortBy = 'due_date_asc';
+                                    _selectedDueSoon = false;
                                   });
                                   _loadInstallments();
                                 },
@@ -1085,18 +1128,68 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                     ),
                     if (inst.dueDate != null)
                       CupertinoListTile(
-                        leading: const SquircleIcon(
-                          icon: CupertinoIcons.calendar,
-                          color: Color(0xFF5856D6),
+                        leading: SquircleIcon(
+                          icon: inst.isOverdue ? CupertinoIcons.exclamationmark_triangle_fill : CupertinoIcons.calendar,
+                          color: inst.isOverdue ? const Color(0xFFFF3B30) : const Color(0xFF5856D6),
                         ),
                         title: const Text('Jatuh Tempo', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
-                        additionalInfo: Text(
-                          _formatDate(inst.dueDate!),
-                          style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                        additionalInfo: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                          decoration: BoxDecoration(
+                            color: inst.isOverdue ? const Color(0xFFFFEFEF) : const Color(0xFFFFF4E0),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text(
+                            '${_formatDate(inst.dueDate!)}  ${inst.dueLabel()}',
+                            key: const Key('history_due_label'),
+                            style: TextStyle(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.w700,
+                              color: inst.isOverdue ? const Color(0xFFC62828) : const Color(0xFFB26B00),
+                            ),
+                          ),
                         ),
                       ),
                   ],
                 ),
+
+                // Peringatan keterlambatan
+                if (inst.isOverdue)
+                  Padding(
+                    key: const Key('history_overdue_warning'),
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFEFEF),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFFF3B30), width: 1),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Icon(CupertinoIcons.exclamationmark_triangle_fill, size: 16, color: Color(0xFFFF3B30)),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Terlambat ${inst.daysUntilDue()?.abs() ?? 0} hari',
+                                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Color(0xFFC62828)),
+                                ),
+                                const SizedBox(height: 2),
+                                const Text(
+                                  'Tanggal jatuh tempo telah terlewati. Segera catat pembayaran untuk menghindari denda.',
+                                  style: TextStyle(fontSize: 12.5, color: Color(0xFFC62828)),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
 
                 // Section 2: RINGKASAN PEMBAYARAN
                 CupertinoListSection.insetGrouped(

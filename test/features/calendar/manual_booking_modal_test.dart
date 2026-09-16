@@ -6,6 +6,7 @@ import 'package:lilyhouse/features/calendar/presentation/manual_booking_modal.da
 import 'package:lilyhouse/features/costumes/data/costume_repository.dart';
 import 'package:lilyhouse/features/costumes/domain/accessory.dart';
 import 'package:lilyhouse/features/costumes/domain/costume.dart';
+import 'package:lilyhouse/features/costumes/domain/costume_rental_history.dart';
 import 'package:lilyhouse/features/rentals/data/rental_repository.dart';
 import 'package:lilyhouse/features/rentals/domain/customer.dart';
 import 'package:lilyhouse/features/rentals/domain/parsed_rental_data.dart';
@@ -124,6 +125,10 @@ class MockCostumeRepository implements ICostumeRepository {
 
   @override
   Future<int> getActiveRentalsCount(String costumeId) async => 0;
+
+  @override
+  Future<CostumeRentalHistory> getRentalHistory(String costumeId) async =>
+      const CostumeRentalHistory();
 }
 
 void main() {

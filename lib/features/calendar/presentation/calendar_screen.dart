@@ -114,6 +114,44 @@ class _CalendarScreenState extends State<CalendarScreen> {
     }).toList();
   }
 
+  // Daily operational pulse for the rental owner.
+  // Active bookings: rentals on the selected day that are not completed/cancelled.
+  int _countActiveBookingsForDay(DateTime day) {
+    return _getRentalsForDay(day)
+        .where((r) =>
+            r.itemStatus != RentalItemStatus.completed &&
+            r.itemStatus != RentalItemStatus.cancelled)
+        .length;
+  }
+
+  // DP belum lunas: active bookings on the selected day where a DP was recorded
+  // but the full payment has not been settled yet.
+  int _countUnsettledDpForDay(DateTime day) {
+    return _getRentalsForDay(day).where((r) {
+      if (r.itemStatus == RentalItemStatus.completed ||
+          r.itemStatus == RentalItemStatus.cancelled) {
+        return false;
+      }
+      return r.paymentStatus == RentalPaymentStatus.dpPaid ||
+          (r.paymentStatus == RentalPaymentStatus.unpaid && r.dpAmount > 0);
+    }).length;
+  }
+
+  // Sewa jatuh tempo: rentals whose end date falls on the selected day and
+  // are still in an active (not-yet-returned) state.
+  int _countDueTodayForDay(DateTime day) {
+    final target = DateTime(day.year, day.month, day.day);
+    return _allRentals.where((r) {
+      if (r.itemStatus == RentalItemStatus.cancelled ||
+          r.itemStatus == RentalItemStatus.completed ||
+          r.itemStatus == RentalItemStatus.returned) {
+        return false;
+      }
+      final end = DateTime(r.endDate.year, r.endDate.month, r.endDate.day);
+      return end.isAtSameMomentAs(target);
+    }).length;
+  }
+
   void _openBookingEntrySheet() {
     showCupertinoModalPopup<void>(
       context: context,
@@ -355,6 +393,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     ),
                   ),
 
+                  // Daily Operational Pulse Card — owner snapshot for the selected day
+                  _buildDailyOpsCard(),
+
                   // Selected Day Schedule Section
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
@@ -489,6 +530,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                               costume: costume,
                               allRentals: _allRentals,
                               repository: _repository,
+                              costumeRepository: _costumeRepository,
                               onRentalUpdated: _loadData,
                               selectedDay: _selectedDay,
                             ),
@@ -503,6 +545,155 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
     );
   }
+
+  /// Daily operational pulse card for the rental owner.
+  /// Surfaces three at-a-glance indicators for the selected calendar day:
+  ///   1. Booking aktif   — rentals running on that day (not completed/cancelled)
+  ///   2. DP belum lunas  — active bookings with an unsettled down payment
+  ///   3. Jatuh tempo     — rentals whose return date is that day
+  Widget _buildDailyOpsCard() {
+    final int activeBookings = _countActiveBookingsForDay(_selectedDay);
+    final int unsettledDp = _countUnsettledDpForDay(_selectedDay);
+    final int dueToday = _countDueTodayForDay(_selectedDay);
+
+    return Container(
+      key: const Key('daily_ops_card'),
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(color: const Color(0xFFE5E5EA), width: 0.5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8.0,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const SquircleIcon(
+                icon: CupertinoIcons.bolt_fill,
+                color: AppColors.primaryPink,
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'PULASAN OPERASIONAL HARI INI',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                    color: Color(0xFF8E8E93),
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: dueToday > 0 ? const Color(0xFFFFF4E5) : const Color(0xFFE3F9EC),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  dueToday > 0 ? '$dueToday Jatuh Tempo' : 'Aman',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: dueToday > 0 ? const Color(0xFFD97706) : const Color(0xFF1E824C),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: _buildOpsMetric(
+                  icon: CupertinoIcons.calendar,
+                  value: '$activeBookings',
+                  label: 'Booking Aktif',
+                  color: AppColors.primaryPink,
+                  key: const Key('ops_metric_active_bookings'),
+                ),
+              ),
+              Container(
+                width: 0.5,
+                height: 44,
+                color: const Color(0xFFE5E5EA),
+              ),
+              Expanded(
+                child: _buildOpsMetric(
+                  icon: CupertinoIcons.money_dollar_circle,
+                  value: '$unsettledDp',
+                  label: 'DP Belum Lunas',
+                  color: unsettledDp > 0 ? const Color(0xFFD97706) : const Color(0xFF1E824C),
+                  key: const Key('ops_metric_unsettled_dp'),
+                ),
+              ),
+              Container(
+                width: 0.5,
+                height: 44,
+                color: const Color(0xFFE5E5EA),
+              ),
+              Expanded(
+                child: _buildOpsMetric(
+                  icon: CupertinoIcons.return_icon,
+                  value: '$dueToday',
+                  label: 'Jatuh Tempo',
+                  color: dueToday > 0 ? AppColors.dangerRose : const Color(0xFF1E824C),
+                  key: const Key('ops_metric_due_today'),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildOpsMetric({
+    required IconData icon,
+    required String value,
+    required String label,
+    required Color color,
+    Key? key,
+  }) {
+    return Column(
+      key: key,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(icon, size: 18, color: color),
+        const SizedBox(height: 6),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.5,
+            color: AppColors.textDark,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w500,
+            color: Color(0xFF8E8E93),
+          ),
+        ),
+      ],
+    );
+  }
 }
 
 class _RentalSlotCard extends StatelessWidget {
@@ -511,6 +702,7 @@ class _RentalSlotCard extends StatelessWidget {
   final Costume? costume;
   final List<Rental> allRentals;
   final IRentalRepository? repository;
+  final ICostumeRepository? costumeRepository;
   final VoidCallback? onRentalUpdated;
   final DateTime? selectedDay;
 
@@ -520,6 +712,7 @@ class _RentalSlotCard extends StatelessWidget {
     this.costume,
     required this.allRentals,
     this.repository,
+    this.costumeRepository,
     this.onRentalUpdated,
     this.selectedDay,
   });
@@ -541,6 +734,7 @@ class _RentalSlotCard extends StatelessWidget {
         costume: costume,
         hasConflict: hasConflict,
         repository: repository,
+        costumeRepository: costumeRepository,
         onRentalUpdated: onRentalUpdated,
       ),
     );
@@ -775,7 +969,7 @@ class _RentalSlotCard extends StatelessWidget {
       case RentalItemStatus.rented:
         bg = AppColors.successMint.withValues(alpha: 0.15);
         fg = const Color(0xFF289868);
-        label = 'Disewa';
+        label = 'Sedang Disewa';
         break;
       case RentalItemStatus.shipped:
         bg = AppColors.pastelPink.withValues(alpha: 0.2);

@@ -1,4 +1,5 @@
 import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,6 +10,7 @@ import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/squircle_icon.dart';
+import '../../costumes/data/costume_repository.dart';
 import '../../costumes/domain/costume.dart';
 import '../../costumes/presentation/costume_detail_screen.dart';
 import '../../rentals/data/rental_repository.dart';
@@ -23,6 +25,7 @@ class RentalDetailSheet extends StatelessWidget {
   final Costume? costume;
   final bool hasConflict;
   final IRentalRepository? repository;
+  final ICostumeRepository? costumeRepository;
   final VoidCallback? onRentalUpdated;
 
   const RentalDetailSheet({
@@ -32,6 +35,7 @@ class RentalDetailSheet extends StatelessWidget {
     this.costume,
     this.hasConflict = false,
     this.repository,
+    this.costumeRepository,
     this.onRentalUpdated,
   });
 
@@ -41,23 +45,37 @@ class RentalDetailSheet extends StatelessWidget {
         path,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => const Center(
-          child: Icon(CupertinoIcons.sparkles, color: AppColors.primaryPink, size: 24),
+          child: Icon(
+            CupertinoIcons.sparkles,
+            color: AppColors.primaryPink,
+            size: 24,
+          ),
         ),
       );
     }
-    final cleanPath = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
+    final cleanPath = path.startsWith('file://')
+        ? path.replaceFirst('file://', '')
+        : path;
     final file = File(cleanPath);
     if (file.existsSync()) {
       return Image.file(
         file,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => const Center(
-          child: Icon(CupertinoIcons.sparkles, color: AppColors.primaryPink, size: 24),
+          child: Icon(
+            CupertinoIcons.sparkles,
+            color: AppColors.primaryPink,
+            size: 24,
+          ),
         ),
       );
     }
     return const Center(
-      child: Icon(CupertinoIcons.sparkles, color: AppColors.primaryPink, size: 24),
+      child: Icon(
+        CupertinoIcons.sparkles,
+        color: AppColors.primaryPink,
+        size: 24,
+      ),
     );
   }
 
@@ -71,7 +89,9 @@ class RentalDetailSheet extends StatelessWidget {
         ),
       );
     }
-    final cleanPath = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
+    final cleanPath = path.startsWith('file://')
+        ? path.replaceFirst('file://', '')
+        : path;
     final file = File(cleanPath);
     if (file.existsSync()) {
       return Image.file(
@@ -102,15 +122,24 @@ class RentalDetailSheet extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(CupertinoIcons.exclamationmark_triangle, color: Colors.white54, size: 42),
+              Icon(
+                CupertinoIcons.exclamationmark_triangle,
+                color: Colors.white54,
+                size: 42,
+              ),
               SizedBox(height: 10),
-              Text('Gagal memuat gambar dari URL', style: TextStyle(color: Colors.white70, fontSize: 13)),
+              Text(
+                'Gagal memuat gambar dari URL',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
             ],
           ),
         ),
       );
     }
-    final cleanPath = path.startsWith('file://') ? path.replaceFirst('file://', '') : path;
+    final cleanPath = path.startsWith('file://')
+        ? path.replaceFirst('file://', '')
+        : path;
     final file = File(cleanPath);
     if (file.existsSync()) {
       return Image.file(
@@ -120,9 +149,16 @@ class RentalDetailSheet extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(CupertinoIcons.exclamationmark_triangle, color: Colors.white54, size: 42),
+              Icon(
+                CupertinoIcons.exclamationmark_triangle,
+                color: Colors.white54,
+                size: 42,
+              ),
               SizedBox(height: 10),
-              Text('Format gambar tidak didukung', style: TextStyle(color: Colors.white70, fontSize: 13)),
+              Text(
+                'Format gambar tidak didukung',
+                style: TextStyle(color: Colors.white70, fontSize: 13),
+              ),
             ],
           ),
         ),
@@ -132,7 +168,11 @@ class RentalDetailSheet extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(CupertinoIcons.photo_on_rectangle, color: Colors.white54, size: 44),
+          Icon(
+            CupertinoIcons.photo_on_rectangle,
+            color: Colors.white54,
+            size: 44,
+          ),
           SizedBox(height: 10),
           Text(
             'File lokal tidak ditemukan di penyimpanan perangkat ini.',
@@ -162,7 +202,9 @@ class RentalDetailSheet extends StatelessWidget {
           navigationBar: CupertinoNavigationBar(
             automaticallyImplyLeading: false,
             backgroundColor: const Color(0xFF2C2C2E),
-            border: const Border(bottom: BorderSide(color: Color(0xFF38383A), width: 0.5)),
+            border: const Border(
+              bottom: BorderSide(color: Color(0xFF38383A), width: 0.5),
+            ),
             middle: Text(
               title,
               style: const TextStyle(
@@ -197,12 +239,19 @@ class RentalDetailSheet extends StatelessWidget {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   color: const Color(0xFF2C2C2E),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(CupertinoIcons.zoom_in, size: 14, color: Color(0xFF8E8E93)),
+                      Icon(
+                        CupertinoIcons.zoom_in,
+                        size: 14,
+                        color: Color(0xFF8E8E93),
+                      ),
                       SizedBox(width: 6),
                       Text(
                         'Cubit layar untuk zoom & geser foto',
@@ -234,10 +283,7 @@ class RentalDetailSheet extends StatelessWidget {
     final hasPhoto = photoPath != null && photoPath.trim().isNotEmpty;
 
     return CupertinoListTile(
-      leading: SquircleIcon(
-        icon: icon,
-        color: iconColor,
-      ),
+      leading: SquircleIcon(icon: icon, color: iconColor),
       title: Text(
         title,
         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
@@ -260,7 +306,10 @@ class RentalDetailSheet extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: AppColors.background,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(color: const Color(0xFFE5E5EA), width: 0.8),
+                    border: Border.all(
+                      color: const Color(0xFFE5E5EA),
+                      width: 0.8,
+                    ),
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(7.2),
@@ -277,13 +326,14 @@ class RentalDetailSheet extends StatelessWidget {
             )
           : const Text(
               'Tidak ada',
-              style: TextStyle(
-                fontSize: 13,
-                color: Color(0xFF8E8E93),
-              ),
+              style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
             ),
       onTap: hasPhoto
-          ? () => _showPhotoPreviewModal(context, title: title, photoPath: photoPath)
+          ? () => _showPhotoPreviewModal(
+              context,
+              title: title,
+              photoPath: photoPath,
+            )
           : () {
               IosToast.show(context, '$title belum diunggah');
             },
@@ -370,11 +420,7 @@ class RentalDetailSheet extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: fg,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -415,13 +461,367 @@ class RentalDetailSheet extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          color: fg,
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-        ),
+        style: TextStyle(color: fg, fontSize: 11, fontWeight: FontWeight.w600),
       ),
     );
+  }
+
+  /// Jumlah hari sampai tanggal pengembalian (endDate). Bila negatif berarti
+  /// sudah lewat jatuh tempo. Selalu dihitung relatif terhadap hari ini.
+  int _remainingReturnDays() {
+    final today = DateTime(
+      DateTime.now().year,
+      DateTime.now().month,
+      DateTime.now().day,
+    );
+    final due = DateTime(
+      rental.endDate.year,
+      rental.endDate.month,
+      rental.endDate.day,
+    );
+    return due.difference(today).inDays;
+  }
+
+  /// Benar bila kostum masih berstatus [RentalItemStatus.shipped] atau
+  /// [RentalItemStatus.rented] (masih berjalan) dan jatuh tempo dalam <= 7 hari
+  /// atau sudah terlewat. Khusus untuk memunculkan banner peringatan dini.
+  bool get _hasReturnWarning {
+    final stillRunning =
+        rental.itemStatus == RentalItemStatus.shipped ||
+        rental.itemStatus == RentalItemStatus.rented;
+    return stillRunning && _remainingReturnDays() <= 7;
+  }
+
+  /// Kartu ringkasan status pembayaran: menampilkan Sisa Tagihan secara
+  /// real-time untuk status DP, progress bar DP->Lunas, dan kondisi Lunas.
+  Widget _buildPaymentSummaryCard(
+    double sisaTagihan,
+    NumberFormat currencyFormat,
+  ) {
+    final isFullyPaid =
+        rental.paymentStatus == RentalPaymentStatus.paid ||
+        rental.paymentStatus == RentalPaymentStatus.refunded;
+
+    // Kasus khusus: DP lebih besar dari total (overpayment) -> anggap lunas.
+    final hasBalance = sisaTagihan > 0 && !isFullyPaid;
+    final double progress = rental.totalPrice > 0
+        ? (rental.dpAmount / rental.totalPrice).clamp(0.0, 1.0)
+        : 1.0;
+
+    final Color accent = hasBalance
+        ? AppColors.dangerRose
+        : (rental.paymentStatus == RentalPaymentStatus.refunded
+              ? const Color(0xFF3A3A3C)
+              : const Color(0xFF289868));
+    final Color accentBg = hasBalance
+        ? AppColors.dangerRose.withValues(alpha: 0.08)
+        : (rental.paymentStatus == RentalPaymentStatus.refunded
+              ? const Color(0xFFF1F1F4)
+              : const Color(0xFFE3F9EC));
+
+    String statusLine;
+    if (isFullyPaid) {
+      statusLine = rental.paymentStatus == RentalPaymentStatus.refunded
+          ? 'Pembayaran dikembalikan (refund)'
+          : 'Sudah lunas • Tidak ada tunggakan';
+    } else if (hasBalance &&
+        rental.paymentStatus == RentalPaymentStatus.dpPaid) {
+      statusLine = 'DP terbayar • Menunggu pelunasan saat serah terima';
+    } else if (hasBalance) {
+      statusLine = 'Belum ada pembayaran diterima';
+    } else {
+      statusLine = 'Sudah lunas • Tidak ada tunggakan';
+    }
+
+    return Container(
+      key: const Key('payment_summary_card'),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+      decoration: BoxDecoration(
+        color: accentBg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: hasBalance
+              ? accent.withValues(alpha: 0.25)
+              : const Color(0xFFCFE9DC),
+          width: 0.6,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              SquircleIcon(
+                icon: hasBalance
+                    ? CupertinoIcons.creditcard_fill
+                    : CupertinoIcons.checkmark_seal_fill,
+                color: accent,
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'STATUS PEMBAYARAN',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
+                    color: Color(0xFF6E6E73),
+                  ),
+                ),
+              ),
+              Text(
+                hasBalance
+                    ? '${(progress * 100).round()}% terbayar'
+                    : (rental.paymentStatus == RentalPaymentStatus.refunded
+                          ? 'Refund'
+                          : 'Lunas 100%'),
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: accent,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          if (hasBalance) ...[
+            const Text(
+              'Sisa Tagihan',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF8E8E93),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              'Rp ${currencyFormat.format(sisaTagihan.toInt())}',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.w800,
+                color: accent,
+                letterSpacing: -0.5,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(3),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 6,
+                backgroundColor: Colors.white.withValues(alpha: 0.65),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  rental.paymentStatus == RentalPaymentStatus.dpPaid
+                      ? const Color(0xFFFF9500)
+                      : accent,
+                ),
+              ),
+            ),
+            const SizedBox(height: 6),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'DP: Rp ${currencyFormat.format(rental.dpAmount.toInt())}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF8E8E93),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                Text(
+                  'Total: Rp ${currencyFormat.format(rental.totalPrice.toInt())}',
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF8E8E93),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(
+                  rental.paymentStatus == RentalPaymentStatus.refunded
+                      ? CupertinoIcons.arrow_uturn_left_circle_fill
+                      : CupertinoIcons.checkmark_circle_fill,
+                  size: 20,
+                  color: accent,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    rental.paymentStatus == RentalPaymentStatus.refunded
+                        ? 'Rp ${currencyFormat.format(rental.totalPrice.toInt())} dikembalikan'
+                        : 'Lunas • Rp ${currencyFormat.format(rental.totalPrice.toInt())} diterima',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                      color: accent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: 8),
+          Text(
+            statusLine,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF6E6E73),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Banner peringatan pengembalian: muncul saat item sedang dikirim/disewa
+  /// dan mendekati jatuh tempo (<=7 hari), jatuh tempo hari ini, atau lewat.
+  Widget? _buildReturnDeadlineBanner() {
+    if (!_hasReturnWarning) return null;
+
+    final remaining = _remainingReturnDays();
+    final bool isOverdue = remaining < 0;
+    final bool isDueToday = remaining == 0;
+
+    final Color bannerColor = isOverdue
+        ? AppColors.dangerRose
+        : (isDueToday ? AppColors.dangerRose : const Color(0xFFD97706));
+    final Color bannerBg = isOverdue || isDueToday
+        ? AppColors.dangerRose.withValues(alpha: 0.10)
+        : const Color(0xFFFF9500).withValues(alpha: 0.10);
+
+    final String message;
+    if (isOverdue) {
+      final late = -remaining;
+      message = 'Terlambat $late hari • Kostum harus segera dikembalikan';
+    } else if (isDueToday) {
+      message = 'Jatuh tempo pengembalian hari ini';
+    } else if (remaining == 1) {
+      message = 'Jatuh tempo pengembalian besok';
+    } else {
+      message = '$remaining hari lagi menuju jatuh tempo pengembalian';
+    }
+
+    return Container(
+      key: const Key('return_deadline_banner'),
+      margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: bannerBg,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: bannerColor.withValues(alpha: 0.25),
+          width: 0.7,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(
+            isOverdue || isDueToday
+                ? CupertinoIcons.exclamationmark_triangle_fill
+                : CupertinoIcons.clock_fill,
+            size: 16,
+            color: bannerColor,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  isOverdue
+                      ? 'Pengembalian Terlambat'
+                      : (isDueToday
+                            ? 'Pengembalian Jatuh Tempo Hari Ini'
+                            : 'Pengembalian Mendekati Jatuh Tempo'),
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: bannerColor,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  message,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: bannerColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// Tile salin alamat pengiriman pelanggan ke clipboard dalam satu ketukan.
+  Widget _buildCopyShippingAddressTile(BuildContext context, String address) {
+    final hasAddress = address.trim().isNotEmpty;
+
+    return CupertinoListTile(
+      key: const Key('copy_shipping_address_tile'),
+      leading: const SquircleIcon(
+        icon: CupertinoIcons.location_fill,
+        color: Color(0xFFFF9500),
+      ),
+      title: const Text(
+        'Salin Alamat Pengiriman',
+        style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+      ),
+      subtitle: Text(
+        hasAddress
+            ? 'Ketuk untuk menyalin alamat tujuan pengiriman'
+            : 'Alamat pengiriman belum ditambahkan',
+        style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+      ),
+      trailing: hasAddress
+          ? Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFF9500).withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                hasAddress ? 'Salin' : 'Kosong',
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFFD97706),
+                ),
+              ),
+            )
+          : null,
+      onTap: hasAddress
+          ? () {
+              HapticFeedback.lightImpact();
+              Clipboard.setData(ClipboardData(text: address.trim()));
+              IosToast.show(context, 'Alamat pengiriman disalin ke clipboard');
+            }
+          : null,
+    );
+  }
+
+  /// Keeps the costume's availability status in sync with the rental lifecycle
+  /// so the 'Sedang Disewa' costume filter reflects reality.
+  Future<void> _syncCostumeStatus(CostumeStatus status) async {
+    if (costume == null || costumeRepository == null) return;
+    if (costume!.status == status) return;
+    try {
+      await costumeRepository!.updateCostume(costume!.copyWith(status: status));
+    } catch (_) {
+      // Sync is best-effort; the rental update itself already succeeded.
+    }
   }
 
   void _confirmCancelBooking(BuildContext context) {
@@ -446,8 +846,11 @@ class RentalDetailSheet extends StatelessWidget {
             onPressed: () async {
               Navigator.pop(dialogCtx);
               if (repository != null) {
-                final updated = rental.copyWith(itemStatus: RentalItemStatus.cancelled);
+                final updated = rental.copyWith(
+                  itemStatus: RentalItemStatus.cancelled,
+                );
                 await repository!.updateRental(updated);
+                await _syncCostumeStatus(CostumeStatus.available);
                 onRentalUpdated?.call();
               }
               if (!context.mounted) return;
@@ -461,7 +864,11 @@ class RentalDetailSheet extends StatelessWidget {
     );
   }
 
-  void _showReturnDialog(BuildContext context, {required bool isLate, required int lateDays}) {
+  void _showReturnDialog(
+    BuildContext context, {
+    required bool isLate,
+    required int lateDays,
+  }) {
     final noteController = TextEditingController();
     final penaltyController = TextEditingController();
     final currencyFormat = NumberFormat('#,###', 'id_ID');
@@ -486,21 +893,33 @@ class RentalDetailSheet extends StatelessWidget {
               CupertinoTextField(
                 controller: penaltyController,
                 keyboardType: TextInputType.number,
-                inputFormatters: [
-                  FilteringTextInputFormatter.digitsOnly,
-                ],
-                placeholder: isLate ? 'Denda keterlambatan / rusak (Rp)' : 'Denda jika ada kerusakan (opsional)',
-                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 13),
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                placeholder: isLate
+                    ? 'Denda keterlambatan / rusak (Rp)'
+                    : 'Denda jika ada kerusakan (opsional)',
+                placeholderStyle: const TextStyle(
+                  color: Color(0xFFC7C7CC),
+                  fontSize: 13,
+                ),
                 style: const TextStyle(fontSize: 13, color: AppColors.textDark),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
               ),
               const SizedBox(height: 8),
               CupertinoTextField(
                 controller: noteController,
                 placeholder: 'Catatan kondisi / kelengkapan (opsional)',
-                placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 13),
+                placeholderStyle: const TextStyle(
+                  color: Color(0xFFC7C7CC),
+                  fontSize: 13,
+                ),
                 style: const TextStyle(fontSize: 13, color: AppColors.textDark),
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
                 maxLines: 2,
               ),
             ],
@@ -526,13 +945,17 @@ class RentalDetailSheet extends StatelessWidget {
                   notesParts.add(rental.notes!.trim());
                 }
                 if (penaltyAmount > 0) {
-                  notesParts.add('Denda: Rp ${currencyFormat.format(penaltyAmount.toInt())}');
+                  notesParts.add(
+                    'Denda: Rp ${currencyFormat.format(penaltyAmount.toInt())}',
+                  );
                 }
                 if (inputNotes.isNotEmpty) {
                   notesParts.add('Kondisi: $inputNotes');
                 }
 
-                final updatedNotes = notesParts.isNotEmpty ? notesParts.join(' | ') : null;
+                final updatedNotes = notesParts.isNotEmpty
+                    ? notesParts.join(' | ')
+                    : null;
                 final newTotalPrice = rental.totalPrice + penaltyAmount;
 
                 final updated = rental.copyWith(
@@ -541,10 +964,14 @@ class RentalDetailSheet extends StatelessWidget {
                   notes: updatedNotes,
                 );
                 await repository!.updateRental(updated);
+                await _syncCostumeStatus(CostumeStatus.available);
                 onRentalUpdated?.call();
               }
               if (!context.mounted) return;
-              IosToast.show(context, 'Status rental diubah ke "Sudah Dikembalikan"');
+              IosToast.show(
+                context,
+                'Status rental diubah ke "Sudah Dikembalikan"',
+              );
               Navigator.pop(context);
             },
           ),
@@ -601,18 +1028,20 @@ class RentalDetailSheet extends StatelessWidget {
   }) {
     final paymentStatusLabel = paymentStatus == RentalPaymentStatus.paid
         ? 'Lunas'
-        : (paymentStatus == RentalPaymentStatus.dpPaid
-            ? 'DP'
-            : 'Belum Lunas');
+        : (paymentStatus == RentalPaymentStatus.dpPaid ? 'DP' : 'Belum Lunas');
 
     final buffer = StringBuffer();
     buffer.writeln('*KONFIRMASI SEWA KOSTUM - LILYHOUSE*');
-    buffer.writeln('Halo Kak $customerName, pesanan sewa kostum kamu telah tercatat di sistem LilyHouse (@lilycosrent).');
+    buffer.writeln(
+      'Halo Kak $customerName, pesanan sewa kostum kamu telah tercatat di sistem LilyHouse (@lilycosrent).',
+    );
     buffer.writeln();
     buffer.writeln('*Rincian Sewa:*');
     buffer.writeln('- Kostum: $costumeName');
     buffer.writeln('- Seri: $costumeSeries');
-    buffer.writeln('- Tanggal Sewa: $startDateFormatted - $endDateFormatted ($durationDays Hari)');
+    buffer.writeln(
+      '- Tanggal Sewa: $startDateFormatted - $endDateFormatted ($durationDays Hari)',
+    );
     buffer.writeln('- Total Biaya: Rp ${currencyFormat.format(totalPrice)}');
     if (dpAmount > 0) {
       buffer.writeln('- Uang Muka (DP): Rp ${currencyFormat.format(dpAmount)}');
@@ -621,8 +1050,12 @@ class RentalDetailSheet extends StatelessWidget {
     buffer.writeln('- Sisa Tagihan: Rp ${currencyFormat.format(sisaTagihan)}');
     buffer.writeln();
     buffer.writeln('*Petunjuk & Peraturan Rental:*');
-    buffer.writeln('1. Mohon menjaga kebersihan dan kelengkapan kostum beserta seluruh aksesori.');
-    buffer.writeln('2. Kostum tidak perlu dicuci saat dikembalikan, tim LilyHouse yang akan menangani proses pencucian.');
+    buffer.writeln(
+      '1. Mohon menjaga kebersihan dan kelengkapan kostum beserta seluruh aksesori.',
+    );
+    buffer.writeln(
+      '2. Kostum tidak perlu dicuci saat dikembalikan, tim LilyHouse yang akan menangani proses pencucian.',
+    );
     buffer.writeln('3. Pengembalian maksimal pada hari terakhir masa sewa.');
     buffer.writeln('4. Keterlambatan/kerusakan dikenakan biaya kompensasi.');
     buffer.writeln();
@@ -633,29 +1066,77 @@ class RentalDetailSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final custName = (customer?.fullName.isNotEmpty == true ? customer!.fullName : (rental.customerId.isNotEmpty ? rental.customerId : 'Penyewa')).replaceAll('_', ' ');
-    final custPhone = customer?.phone.isNotEmpty == true ? customer!.phone : '-';
-    final custAddr = customer?.address.isNotEmpty == true ? customer!.address : '-';
-    final custSosmed = customer?.socialMedia?.isNotEmpty == true ? customer!.socialMedia! : '-';
-    final costName = (costume?.name ?? (rental.costumeId.isNotEmpty ? rental.costumeId : 'Kostum')).replaceAll('_', ' ');
-    final costSeries = (costume?.animeSeries.isNotEmpty == true ? costume!.animeSeries : 'Kostum Rental').replaceAll('_', ' ');
+    final custName =
+        (customer?.fullName.isNotEmpty == true
+                ? customer!.fullName
+                : (rental.customerId.isNotEmpty
+                      ? rental.customerId
+                      : 'Penyewa'))
+            .replaceAll('_', ' ');
+    final custPhone = customer?.phone.isNotEmpty == true
+        ? customer!.phone
+        : '-';
+    final custAddr = customer?.address.isNotEmpty == true
+        ? customer!.address
+        : '-';
+    final custSosmed = customer?.socialMedia?.isNotEmpty == true
+        ? customer!.socialMedia!
+        : '-';
+    final costName =
+        (costume?.name ??
+                (rental.costumeId.isNotEmpty ? rental.costumeId : 'Kostum'))
+            .replaceAll('_', ' ');
+    final costSeries =
+        (costume?.animeSeries.isNotEmpty == true
+                ? costume!.animeSeries
+                : 'Kostum Rental')
+            .replaceAll('_', ' ');
 
-    final hasCover = costume?.coverPhoto != null && costume!.coverPhoto!.trim().isNotEmpty;
+    final hasCover =
+        costume?.coverPhoto != null && costume!.coverPhoto!.trim().isNotEmpty;
     final currencyFormat = NumberFormat('#,###', 'id_ID');
 
-    final startDateFormatted = DateFormat('d MMM yyyy', 'id_ID').format(rental.startDate);
-    final endDateFormatted = DateFormat('d MMM yyyy', 'id_ID').format(rental.endDate);
+    final startDateFormatted = DateFormat(
+      'd MMM yyyy',
+      'id_ID',
+    ).format(rental.startDate);
+    final endDateFormatted = DateFormat(
+      'd MMM yyyy',
+      'id_ID',
+    ).format(rental.endDate);
 
-    final sisaTagihan = (rental.totalPrice - rental.dpAmount).clamp(0.0, double.infinity);
+    final sisaTagihan = (rental.totalPrice - rental.dpAmount).clamp(
+      0.0,
+      double.infinity,
+    );
 
-    final isLateReturn = rental.itemStatus == RentalItemStatus.rented &&
-        DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day).isAfter(
-          DateTime(rental.endDate.year, rental.endDate.month, rental.endDate.day),
+    final isLateReturn =
+        rental.itemStatus == RentalItemStatus.rented &&
+        DateTime(
+          DateTime.now().year,
+          DateTime.now().month,
+          DateTime.now().day,
+        ).isAfter(
+          DateTime(
+            rental.endDate.year,
+            rental.endDate.month,
+            rental.endDate.day,
+          ),
         );
     final lateDays = isLateReturn
-        ? DateTime(DateTime.now().year, DateTime.now().month, DateTime.now().day)
-            .difference(DateTime(rental.endDate.year, rental.endDate.month, rental.endDate.day))
-            .inDays
+        ? DateTime(
+                DateTime.now().year,
+                DateTime.now().month,
+                DateTime.now().day,
+              )
+              .difference(
+                DateTime(
+                  rental.endDate.year,
+                  rental.endDate.month,
+                  rental.endDate.day,
+                ),
+              )
+              .inDays
         : 0;
 
     return DraggableSheetContainer(
@@ -672,7 +1153,9 @@ class RentalDetailSheet extends StatelessWidget {
           navigationBar: CupertinoNavigationBar(
             automaticallyImplyLeading: false,
             backgroundColor: AppColors.background,
-            border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
+            border: const Border(
+              bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
+            ),
             middle: const Text('Rincian Rental', style: AppTypography.navTitle),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
@@ -702,7 +1185,9 @@ class RentalDetailSheet extends StatelessWidget {
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: hasConflict ? AppColors.dangerRose : AppColors.borderSubtle,
+                        color: hasConflict
+                            ? AppColors.dangerRose
+                            : AppColors.borderSubtle,
                         width: hasConflict ? 1.5 : 0.5,
                       ),
                       boxShadow: [
@@ -719,19 +1204,32 @@ class RentalDetailSheet extends StatelessWidget {
                         if (hasConflict)
                           Container(
                             margin: const EdgeInsets.only(bottom: 12),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 6,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppColors.dangerRose.withValues(alpha: 0.12),
+                              color: AppColors.dangerRose.withValues(
+                                alpha: 0.12,
+                              ),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Row(
                               children: [
-                                Icon(CupertinoIcons.exclamationmark_triangle_fill, size: 14, color: AppColors.dangerRose),
+                                Icon(
+                                  CupertinoIcons.exclamationmark_triangle_fill,
+                                  size: 14,
+                                  color: AppColors.dangerRose,
+                                ),
                                 SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
                                     'Konflik Jadwal: Tanggal booking bentrok dengan sewa lain!',
-                                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.dangerRose),
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.dangerRose,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -746,7 +1244,10 @@ class RentalDetailSheet extends StatelessWidget {
                               decoration: BoxDecoration(
                                 color: AppColors.softPinkBg,
                                 borderRadius: BorderRadius.circular(14),
-                                border: Border.all(color: AppColors.borderSubtle, width: 0.5),
+                                border: Border.all(
+                                  color: AppColors.borderSubtle,
+                                  width: 0.5,
+                                ),
                               ),
                               child: ClipRRect(
                                 borderRadius: BorderRadius.circular(13.5),
@@ -792,14 +1293,24 @@ class RentalDetailSheet extends StatelessWidget {
                                       _buildItemStatusBadge(rental.itemStatus),
                                       if (isLateReturn)
                                         _buildLateReturnBadge(lateDays),
-                                      _buildPaymentStatusBadge(rental.paymentStatus),
+                                      _buildPaymentStatusBadge(
+                                        rental.paymentStatus,
+                                      ),
                                       if (rental.purpose.isNotEmpty)
                                         Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 8,
+                                            vertical: 3,
+                                          ),
                                           decoration: BoxDecoration(
                                             color: AppColors.background,
-                                            borderRadius: BorderRadius.circular(8),
-                                            border: Border.all(color: AppColors.borderSubtle, width: 0.5),
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                            border: Border.all(
+                                              color: AppColors.borderSubtle,
+                                              width: 0.5,
+                                            ),
                                           ),
                                           child: Text(
                                             rental.purpose,
@@ -819,20 +1330,34 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         const SizedBox(height: 14),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 9,
+                          ),
                           decoration: BoxDecoration(
-                            color: isLateReturn ? AppColors.dangerRose.withValues(alpha: 0.08) : AppColors.background,
+                            color: isLateReturn
+                                ? AppColors.dangerRose.withValues(alpha: 0.08)
+                                : AppColors.background,
                             borderRadius: BorderRadius.circular(10),
                             border: isLateReturn
-                                ? Border.all(color: AppColors.dangerRose.withValues(alpha: 0.3), width: 0.8)
+                                ? Border.all(
+                                    color: AppColors.dangerRose.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                    width: 0.8,
+                                  )
                                 : null,
                           ),
                           child: Row(
                             children: [
                               Icon(
-                                isLateReturn ? CupertinoIcons.exclamationmark_circle_fill : CupertinoIcons.calendar,
+                                isLateReturn
+                                    ? CupertinoIcons.exclamationmark_circle_fill
+                                    : CupertinoIcons.calendar,
                                 size: 15,
-                                color: isLateReturn ? AppColors.dangerRose : AppColors.primaryPink,
+                                color: isLateReturn
+                                    ? AppColors.dangerRose
+                                    : AppColors.primaryPink,
                               ),
                               const SizedBox(width: 8),
                               Expanded(
@@ -841,28 +1366,46 @@ class RentalDetailSheet extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: isLateReturn ? AppColors.dangerRose : AppColors.textDark,
+                                    color: isLateReturn
+                                        ? AppColors.dangerRose
+                                        : AppColors.textDark,
                                   ),
                                 ),
                               ),
                               if (isLateReturn) ...[
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: AppColors.dangerRose.withValues(alpha: 0.15),
+                                    color: AppColors.dangerRose.withValues(
+                                      alpha: 0.15,
+                                    ),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     'Telat $lateDays Hari',
-                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.dangerRose),
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.dangerRose,
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(width: 6),
                               ],
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
                                 decoration: BoxDecoration(
-                                  color: isLateReturn ? AppColors.dangerRose.withValues(alpha: 0.12) : AppColors.softPinkBg,
+                                  color: isLateReturn
+                                      ? AppColors.dangerRose.withValues(
+                                          alpha: 0.12,
+                                        )
+                                      : AppColors.softPinkBg,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: Text(
@@ -870,7 +1413,9 @@ class RentalDetailSheet extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 11,
                                     fontWeight: FontWeight.w700,
-                                    color: isLateReturn ? AppColors.dangerRose : AppColors.primaryPink,
+                                    color: isLateReturn
+                                        ? AppColors.dangerRose
+                                        : AppColors.primaryPink,
                                   ),
                                 ),
                               ),
@@ -879,10 +1424,7 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         if (costume != null) ...[
                           const SizedBox(height: 10),
-                          Container(
-                            height: 0.5,
-                            color: AppColors.borderSubtle,
-                          ),
+                          Container(height: 0.5, color: AppColors.borderSubtle),
                           const SizedBox(height: 6),
                           CupertinoButton(
                             padding: EdgeInsets.zero,
@@ -891,13 +1433,18 @@ class RentalDetailSheet extends StatelessWidget {
                               HapticFeedback.lightImpact();
                               Navigator.of(context).push(
                                 CupertinoPageRoute(
-                                  builder: (_) => CostumeDetailScreen(costume: costume!),
+                                  builder: (_) =>
+                                      CostumeDetailScreen(costume: costume!),
                                 ),
                               );
                             },
                             child: const Row(
                               children: [
-                                Icon(CupertinoIcons.info_circle_fill, size: 16, color: AppColors.primaryPink),
+                                Icon(
+                                  CupertinoIcons.info_circle_fill,
+                                  size: 16,
+                                  color: AppColors.primaryPink,
+                                ),
                                 SizedBox(width: 8),
                                 Text(
                                   'Lihat Detail & Kelengkapan Kostum',
@@ -908,7 +1455,11 @@ class RentalDetailSheet extends StatelessWidget {
                                   ),
                                 ),
                                 Spacer(),
-                                Icon(CupertinoIcons.chevron_right, size: 13, color: Color(0xFFC7C7CC)),
+                                Icon(
+                                  CupertinoIcons.chevron_right,
+                                  size: 13,
+                                  color: Color(0xFFC7C7CC),
+                                ),
                               ],
                             ),
                           ),
@@ -917,6 +1468,15 @@ class RentalDetailSheet extends StatelessWidget {
                     ),
                   ),
                 ),
+
+                // 1b. Payment Status Summary (Sisa Tagihan real-time)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: _buildPaymentSummaryCard(sisaTagihan, currencyFormat),
+                ),
+
+                // 1c. Return Deadline Warning Banner
+                ?_buildReturnDeadlineBanner(),
 
                 // 2. Customer Information Section
                 CupertinoListSection.insetGrouped(
@@ -939,9 +1499,18 @@ class RentalDetailSheet extends StatelessWidget {
                       ),
                       title: Text(
                         custName,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
                       ),
-                      subtitle: const Text('Nama Lengkap Penyewa', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                      subtitle: const Text(
+                        'Nama Lengkap Penyewa',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8E8E93),
+                        ),
+                      ),
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(
@@ -950,17 +1519,32 @@ class RentalDetailSheet extends StatelessWidget {
                       ),
                       title: Text(
                         custPhone,
-                        style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                        ),
                       ),
                       subtitle: Text(
-                        custPhone != '-' ? 'Nomor Telepon / HP • ${_formatDisplayPhone(custPhone)}' : 'Nomor Telepon / HP',
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                        custPhone != '-'
+                            ? 'Nomor Telepon / HP • ${_formatDisplayPhone(custPhone)}'
+                            : 'Nomor Telepon / HP',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8E8E93),
+                        ),
                       ),
                       onTap: (custPhone != '-')
                           ? () {
                               HapticFeedback.lightImpact();
-                              Clipboard.setData(ClipboardData(text: _normalizePhoneForCopy(custPhone)));
-                              IosToast.show(context, 'Nomor HP disalin ke clipboard');
+                              Clipboard.setData(
+                                ClipboardData(
+                                  text: _normalizePhoneForCopy(custPhone),
+                                ),
+                              );
+                              IosToast.show(
+                                context,
+                                'Nomor HP disalin ke clipboard',
+                              );
                             }
                           : null,
                       trailing: (custPhone != '-')
@@ -969,8 +1553,15 @@ class RentalDetailSheet extends StatelessWidget {
                               minimumSize: const Size(44, 44),
                               onPressed: () {
                                 HapticFeedback.lightImpact();
-                                Clipboard.setData(ClipboardData(text: _normalizePhoneForCopy(custPhone)));
-                                IosToast.show(context, 'Nomor HP disalin ke clipboard');
+                                Clipboard.setData(
+                                  ClipboardData(
+                                    text: _normalizePhoneForCopy(custPhone),
+                                  ),
+                                );
+                                IosToast.show(
+                                  context,
+                                  'Nomor HP disalin ke clipboard',
+                                );
                               },
                               child: Container(
                                 width: 32,
@@ -990,7 +1581,8 @@ class RentalDetailSheet extends StatelessWidget {
                             )
                           : null,
                     ),
-                    if (customer?.parentPhone != null && customer!.parentPhone!.trim().isNotEmpty)
+                    if (customer?.parentPhone != null &&
+                        customer!.parentPhone!.trim().isNotEmpty)
                       CupertinoListTile(
                         leading: const SquircleIcon(
                           icon: CupertinoIcons.person_2_fill,
@@ -998,12 +1590,23 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         title: Text(
                           customer!.parentPhone!,
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                          ),
                         ),
-                        subtitle: const Text('Nomor HP Orang Tua', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        subtitle: const Text(
+                          'Nomor HP Orang Tua',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
                         onTap: () {
                           HapticFeedback.lightImpact();
-                          Clipboard.setData(ClipboardData(text: customer!.parentPhone!));
+                          Clipboard.setData(
+                            ClipboardData(text: customer!.parentPhone!),
+                          );
                           IosToast.show(context, 'Nomor HP ortu disalin');
                         },
                         trailing: CupertinoButton(
@@ -1011,7 +1614,9 @@ class RentalDetailSheet extends StatelessWidget {
                           minimumSize: const Size(44, 44),
                           onPressed: () {
                             HapticFeedback.lightImpact();
-                            Clipboard.setData(ClipboardData(text: customer!.parentPhone!));
+                            Clipboard.setData(
+                              ClipboardData(text: customer!.parentPhone!),
+                            );
                             IosToast.show(context, 'Nomor HP ortu disalin');
                           },
                           child: Container(
@@ -1041,16 +1646,31 @@ class RentalDetailSheet extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 15,
-                          color: custSosmed != '-' ? AppColors.textDark : AppColors.textMuted,
-                          fontStyle: custSosmed != '-' ? FontStyle.normal : FontStyle.italic,
+                          color: custSosmed != '-'
+                              ? AppColors.textDark
+                              : AppColors.textMuted,
+                          fontStyle: custSosmed != '-'
+                              ? FontStyle.normal
+                              : FontStyle.italic,
                         ),
                       ),
-                      subtitle: const Text('Akun Media Sosial', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                      subtitle: const Text(
+                        'Akun Media Sosial',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8E8E93),
+                        ),
+                      ),
                       onTap: (custSosmed != '-')
                           ? () {
                               HapticFeedback.lightImpact();
-                              Clipboard.setData(ClipboardData(text: custSosmed));
-                              IosToast.show(context, 'Akun media sosial disalin');
+                              Clipboard.setData(
+                                ClipboardData(text: custSosmed),
+                              );
+                              IosToast.show(
+                                context,
+                                'Akun media sosial disalin',
+                              );
                             }
                           : null,
                       trailing: (custSosmed != '-')
@@ -1059,8 +1679,13 @@ class RentalDetailSheet extends StatelessWidget {
                               minimumSize: const Size(44, 44),
                               onPressed: () {
                                 HapticFeedback.lightImpact();
-                                Clipboard.setData(ClipboardData(text: custSosmed));
-                                IosToast.show(context, 'Akun media sosial disalin');
+                                Clipboard.setData(
+                                  ClipboardData(text: custSosmed),
+                                );
+                                IosToast.show(
+                                  context,
+                                  'Akun media sosial disalin',
+                                );
                               },
                               child: Container(
                                 width: 32,
@@ -1090,45 +1715,23 @@ class RentalDetailSheet extends StatelessWidget {
                         style: TextStyle(
                           fontWeight: FontWeight.w500,
                           fontSize: 14,
-                          color: custAddr != '-' ? AppColors.textDark : AppColors.textMuted,
-                          fontStyle: custAddr != '-' ? FontStyle.normal : FontStyle.italic,
+                          color: custAddr != '-'
+                              ? AppColors.textDark
+                              : AppColors.textMuted,
+                          fontStyle: custAddr != '-'
+                              ? FontStyle.normal
+                              : FontStyle.italic,
                         ),
                       ),
-                      subtitle: const Text('Alamat Pengiriman / Domisili', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
-                      onTap: (custAddr != '-')
-                          ? () {
-                              HapticFeedback.lightImpact();
-                              Clipboard.setData(ClipboardData(text: custAddr));
-                              IosToast.show(context, 'Alamat disalin ke clipboard');
-                            }
-                          : null,
-                      trailing: (custAddr != '-')
-                          ? CupertinoButton(
-                              padding: EdgeInsets.zero,
-                              minimumSize: const Size(44, 44),
-                              onPressed: () {
-                                HapticFeedback.lightImpact();
-                                Clipboard.setData(ClipboardData(text: custAddr));
-                                IosToast.show(context, 'Alamat disalin ke clipboard');
-                              },
-                              child: Container(
-                                width: 32,
-                                height: 32,
-                                decoration: const BoxDecoration(
-                                  color: AppColors.softPinkBg,
-                                  shape: BoxShape.circle,
-                                ),
-                                child: const Center(
-                                  child: Icon(
-                                    CupertinoIcons.doc_on_doc,
-                                    size: 15,
-                                    color: AppColors.primaryPink,
-                                  ),
-                                ),
-                              ),
-                            )
-                          : null,
+                      subtitle: const Text(
+                        'Alamat Pengiriman / Domisili',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8E8E93),
+                        ),
+                      ),
                     ),
+                    _buildCopyShippingAddressTile(context, custAddr),
                     CupertinoListTile(
                       leading: const SquircleIcon(
                         icon: CupertinoIcons.paperplane_fill,
@@ -1144,7 +1747,10 @@ class RentalDetailSheet extends StatelessWidget {
                       ),
                       subtitle: const Text(
                         'Template rincian sewa & aturan rental untuk dikirim via DM Instagram',
-                        style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8E8E93),
+                        ),
                       ),
                       onTap: () {
                         HapticFeedback.lightImpact();
@@ -1162,7 +1768,10 @@ class RentalDetailSheet extends StatelessWidget {
                           currencyFormat: currencyFormat,
                         );
                         Clipboard.setData(ClipboardData(text: message));
-                        IosToast.show(context, 'Format konfirmasi Instagram berhasil disalin');
+                        IosToast.show(
+                          context,
+                          'Format konfirmasi Instagram berhasil disalin',
+                        );
                       },
                       trailing: CupertinoButton(
                         padding: EdgeInsets.zero,
@@ -1183,7 +1792,10 @@ class RentalDetailSheet extends StatelessWidget {
                             currencyFormat: currencyFormat,
                           );
                           Clipboard.setData(ClipboardData(text: message));
-                          IosToast.show(context, 'Format konfirmasi Instagram berhasil disalin');
+                          IosToast.show(
+                            context,
+                            'Format konfirmasi Instagram berhasil disalin',
+                          );
                         },
                         child: Container(
                           width: 32,
@@ -1257,11 +1869,27 @@ class RentalDetailSheet extends StatelessWidget {
                         icon: CupertinoIcons.money_dollar_circle_fill,
                         color: Color(0xFFFF9500),
                       ),
-                      title: const Text('Total Biaya Sewa', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
-                      subtitle: Text('Tarif sewa untuk ${rental.durationDays} hari', style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                      title: const Text(
+                        'Total Biaya Sewa',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
+                        ),
+                      ),
+                      subtitle: Text(
+                        'Tarif sewa untuk ${rental.durationDays} hari',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF8E8E93),
+                        ),
+                      ),
                       trailing: Text(
                         'Rp ${currencyFormat.format(rental.totalPrice.toInt())}',
-                        style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16, color: AppColors.primaryPink),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                          color: AppColors.primaryPink,
+                        ),
                       ),
                     ),
                     if (rental.dpAmount > 0)
@@ -1270,24 +1898,57 @@ class RentalDetailSheet extends StatelessWidget {
                           icon: CupertinoIcons.checkmark_seal_fill,
                           color: Color(0xFF34C759),
                         ),
-                        title: const Text('Uang Muka (DP)', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
-                        subtitle: const Text('Pembayaran awal yang telah diterima', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        title: const Text(
+                          'Uang Muka (DP)',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15,
+                          ),
+                        ),
+                        subtitle: const Text(
+                          'Pembayaran awal yang telah diterima',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
                         trailing: Text(
                           'Rp ${currencyFormat.format(rental.dpAmount.toInt())}',
-                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF289868)),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: Color(0xFF289868),
+                          ),
                         ),
                       ),
-                    if (rental.dpAmount > 0 && rental.paymentStatus != RentalPaymentStatus.paid)
+                    if (rental.dpAmount > 0 &&
+                        rental.paymentStatus != RentalPaymentStatus.paid)
                       CupertinoListTile(
                         leading: const SquircleIcon(
                           icon: CupertinoIcons.hourglass,
                           color: AppColors.dangerRose,
                         ),
-                        title: const Text('Sisa Tagihan Pelunasan', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15)),
-                        subtitle: const Text('Perlu dilunasi saat serah terima kostum', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        title: const Text(
+                          'Sisa Tagihan Pelunasan',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15,
+                          ),
+                        ),
+                        subtitle: const Text(
+                          'Perlu dilunasi saat serah terima kostum',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
                         trailing: Text(
                           'Rp ${currencyFormat.format(sisaTagihan.toInt())}',
-                          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: AppColors.dangerRose),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            color: AppColors.dangerRose,
+                          ),
                         ),
                       ),
                     if (rental.notes != null && rental.notes!.trim().isNotEmpty)
@@ -1298,9 +1959,19 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         title: Text(
                           rental.notes!,
-                          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14, color: AppColors.textDark),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 14,
+                            color: AppColors.textDark,
+                          ),
                         ),
-                        subtitle: const Text('Catatan Tambahan', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        subtitle: const Text(
+                          'Catatan Tambahan',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
                       ),
                   ],
                 ),
@@ -1331,17 +2002,33 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         title: const Text(
                           'Tandai Sedang Disewa',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF1E824C)),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: Color(0xFF1E824C),
+                          ),
                         ),
-                        subtitle: const Text('Kostum telah diserahkan atau dikirim ke penyewa', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        subtitle: const Text(
+                          'Kostum telah diserahkan atau dikirim ke penyewa',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
                         onTap: () async {
                           if (repository != null) {
-                            final updated = rental.copyWith(itemStatus: RentalItemStatus.rented);
+                            final updated = rental.copyWith(
+                              itemStatus: RentalItemStatus.rented,
+                            );
                             await repository!.updateRental(updated);
+                            await _syncCostumeStatus(CostumeStatus.rented);
                             onRentalUpdated?.call();
                           }
                           if (!context.mounted) return;
-                          IosToast.show(context, 'Status rental diubah ke "Sedang Disewa"');
+                          IosToast.show(
+                            context,
+                            'Status rental diubah ke "Sedang Disewa"',
+                          );
                           Navigator.pop(context);
                         },
                       ),
@@ -1357,10 +2044,24 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         title: const Text(
                           'Tandai Sudah Dikembalikan',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.primaryPink),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: AppColors.primaryPink,
+                          ),
                         ),
-                        subtitle: const Text('Kostum telah diterima kembali dari penyewa', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
-                        onTap: () => _showReturnDialog(context, isLate: isLateReturn, lateDays: lateDays),
+                        subtitle: const Text(
+                          'Kostum telah diterima kembali dari penyewa',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
+                        onTap: () => _showReturnDialog(
+                          context,
+                          isLate: isLateReturn,
+                          lateDays: lateDays,
+                        ),
                       ),
 
                     // Aksi 3: Tandai Pembayaran Lunas
@@ -1373,36 +2074,55 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         title: const Text(
                           'Tandai Pembayaran Lunas',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF289868)),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: Color(0xFF289868),
+                          ),
                         ),
-                        subtitle: const Text('Catat bahwa seluruh biaya sewa telah dilunasi', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        subtitle: const Text(
+                          'Catat bahwa seluruh biaya sewa telah dilunasi',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
                         onTap: () async {
                           final confirm = await showCupertinoDialog<bool>(
                             context: context,
                             builder: (dialogCtx) => CupertinoAlertDialog(
                               title: const Text('Konfirmasi Pelunasan'),
-                              content: const Text('Tandai seluruh biaya sewa telah dilunasi?'),
+                              content: const Text(
+                                'Tandai seluruh biaya sewa telah dilunasi?',
+                              ),
                               actions: [
                                 CupertinoDialogAction(
                                   isDefaultAction: true,
                                   child: const Text('Batal'),
-                                  onPressed: () => Navigator.pop(dialogCtx, false),
+                                  onPressed: () =>
+                                      Navigator.pop(dialogCtx, false),
                                 ),
                                 CupertinoDialogAction(
                                   child: const Text('Ya, Sudah Lunas'),
-                                  onPressed: () => Navigator.pop(dialogCtx, true),
+                                  onPressed: () =>
+                                      Navigator.pop(dialogCtx, true),
                                 ),
                               ],
                             ),
                           );
                           if (confirm != true) return;
                           if (repository != null) {
-                            final updated = rental.copyWith(paymentStatus: RentalPaymentStatus.paid);
+                            final updated = rental.copyWith(
+                              paymentStatus: RentalPaymentStatus.paid,
+                            );
                             await repository!.updateRental(updated);
                             onRentalUpdated?.call();
                           }
                           if (!context.mounted) return;
-                          IosToast.show(context, 'Pembayaran rental berhasil ditandai Lunas');
+                          IosToast.show(
+                            context,
+                            'Pembayaran rental berhasil ditandai Lunas',
+                          );
                           Navigator.pop(context);
                         },
                       ),
@@ -1417,36 +2137,55 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         title: const Text(
                           'Selesaikan Rental',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF289868)),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: Color(0xFF289868),
+                          ),
                         ),
-                        subtitle: const Text('Kostum sudah dicek lengkap dan sewa dinyatakan tuntas', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        subtitle: const Text(
+                          'Kostum sudah dicek lengkap dan sewa dinyatakan tuntas',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
                         onTap: () async {
                           final confirm = await showCupertinoDialog<bool>(
                             context: context,
                             builder: (dialogCtx) => CupertinoAlertDialog(
                               title: const Text('Selesaikan Rental'),
-                              content: const Text('Tandai seluruh siklus rental ini telah selesai dan tuntas?'),
+                              content: const Text(
+                                'Tandai seluruh siklus rental ini telah selesai dan tuntas?',
+                              ),
                               actions: [
                                 CupertinoDialogAction(
                                   isDefaultAction: true,
                                   child: const Text('Batal'),
-                                  onPressed: () => Navigator.pop(dialogCtx, false),
+                                  onPressed: () =>
+                                      Navigator.pop(dialogCtx, false),
                                 ),
                                 CupertinoDialogAction(
                                   child: const Text('Selesaikan'),
-                                  onPressed: () => Navigator.pop(dialogCtx, true),
+                                  onPressed: () =>
+                                      Navigator.pop(dialogCtx, true),
                                 ),
                               ],
                             ),
                           );
                           if (confirm != true) return;
                           if (repository != null) {
-                            final updated = rental.copyWith(itemStatus: RentalItemStatus.completed);
+                            final updated = rental.copyWith(
+                              itemStatus: RentalItemStatus.completed,
+                            );
                             await repository!.updateRental(updated);
                             onRentalUpdated?.call();
                           }
                           if (!context.mounted) return;
-                          IosToast.show(context, 'Rental berhasil diselesaikan sepenuhnya');
+                          IosToast.show(
+                            context,
+                            'Rental berhasil diselesaikan sepenuhnya',
+                          );
                           Navigator.pop(context);
                         },
                       ),
@@ -1460,9 +2199,19 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         title: Text(
                           'Booking Telah Dibatalkan',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF8E8E93)),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: Color(0xFF8E8E93),
+                          ),
                         ),
-                        subtitle: Text('Jadwal sewa ini tidak lagi aktif', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        subtitle: Text(
+                          'Jadwal sewa ini tidak lagi aktif',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
                       ),
 
                     if (rental.itemStatus == RentalItemStatus.completed)
@@ -1473,9 +2222,19 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         title: Text(
                           'Rental Selesai & Lunas',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF289868)),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: Color(0xFF289868),
+                          ),
                         ),
-                        subtitle: Text('Transaksi rental ini telah sukses terselesaikan', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        subtitle: Text(
+                          'Transaksi rental ini telah sukses terselesaikan',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
                       ),
                   ],
                 ),
@@ -1504,9 +2263,19 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                         title: const Text(
                           'Batalkan Booking',
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: AppColors.dangerRose),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            color: AppColors.dangerRose,
+                          ),
                         ),
-                        subtitle: const Text('Batalkan reservasi dan kosongkan slot tanggal', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        subtitle: const Text(
+                          'Batalkan reservasi dan kosongkan slot tanggal',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Color(0xFF8E8E93),
+                          ),
+                        ),
                         onTap: () => _confirmCancelBooking(context),
                       ),
                     ],

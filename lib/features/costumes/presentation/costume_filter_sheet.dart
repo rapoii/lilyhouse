@@ -227,7 +227,11 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.arrow_right_circle_fill, color: AppColors.primaryPink),
-                      title: const Text('Disewa', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                      title: const Text('Sedang Disewa', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                      subtitle: const Text(
+                        'Kostum sedang dalam masa sewa aktif',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                      ),
                       trailing: _buildCheckmark(_selectedStatus == CostumeStatus.rented),
                       onTap: () => _select(() => _selectedStatus = CostumeStatus.rented),
                     ),

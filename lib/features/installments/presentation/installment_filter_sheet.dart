@@ -10,15 +10,18 @@ import '../domain/installment.dart';
 class InstallmentFilterSheet extends StatefulWidget {
   final InstallmentStatus? initialStatus;
   final String initialSortBy;
+  final bool initialDueSoon;
   final void Function({
     required InstallmentStatus? status,
     required String sortBy,
+    required bool dueSoon,
   }) onApply;
 
   const InstallmentFilterSheet({
     super.key,
     this.initialStatus,
     this.initialSortBy = 'due_date_asc',
+    this.initialDueSoon = false,
     required this.onApply,
   });
 
@@ -29,12 +32,14 @@ class InstallmentFilterSheet extends StatefulWidget {
 class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
   InstallmentStatus? _selectedStatus;
   late String _selectedSortBy;
+  late bool _dueSoon;
 
   @override
   void initState() {
     super.initState();
     _selectedStatus = widget.initialStatus;
     _selectedSortBy = widget.initialSortBy;
+    _dueSoon = widget.initialDueSoon;
   }
 
   void _select(VoidCallback fn) {
@@ -51,6 +56,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
     setState(() {
       _selectedStatus = null;
       _selectedSortBy = 'due_date_asc';
+      _dueSoon = false;
     });
   }
 
@@ -61,6 +67,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
     widget.onApply(
       status: _selectedStatus,
       sortBy: _selectedSortBy,
+      dueSoon: _dueSoon,
     );
     Navigator.of(context).pop();
   }
@@ -147,7 +154,43 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
                   ],
                 ),
 
-                // Section 2: Urutkan Berdasarkan
+                // Section 2: Prioritas - Jatuh Tempo Dekat
+                CupertinoListSection.insetGrouped(
+                  header: const Text(
+                    'PRIORITAS',
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF8E8E93)),
+                  ),
+                  backgroundColor: AppColors.background,
+                  margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+                  children: [
+                    CupertinoListTile(
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.exclamationmark_bubble_fill,
+                        color: Color(0xFFFF9500),
+                      ),
+                      title: const Text(
+                        'Jatuh Tempo Dekat',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      additionalInfo: Text(
+                        '<= 7 hari',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                          color: _dueSoon ? AppColors.primaryPink : const Color(0xFF8E8E93),
+                        ),
+                      ),
+                      trailing: CupertinoSwitch(
+                        key: const Key('filter_due_soon_switch'),
+                        value: _dueSoon,
+                        activeTrackColor: AppColors.primaryPink,
+                        onChanged: (value) => _select(() => _dueSoon = value),
+                      ),
+                    ),
+                  ],
+                ),
+
+                // Section 3: Urutkan Berdasarkan
                 CupertinoListSection.insetGrouped(
                   header: const Text(
                     'URUTKAN BERDASARKAN',

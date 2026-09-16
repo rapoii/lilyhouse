@@ -690,7 +690,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.89 (BUILD 124) - TERBARU'),
+                  header: const Text('VERSI 1.0.90 (BUILD 125) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.bolt_fill,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: Text('Pulasan Operasional Harian', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Kartu ringkasan di kalender kini menampilkan jumlah booking aktif, DP belum lunas, dan sewa yang jatuh tempo pada hari yang dipilih, beserta badge peringatan jatuh tempo.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.arrow_right_circle_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Filter "Sedang Disewa" & Status Kostum Real-time', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Filter katalog kini menyertakan opsi "Sedang Disewa" dengan sublabel keterangan, dan status ketersediaan kostum otomatis tersinkron saat rental ditandai disewa, dikembalikan, atau dibatalkan.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.89 (BUILD 124)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [

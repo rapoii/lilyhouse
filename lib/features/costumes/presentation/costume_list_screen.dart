@@ -136,7 +136,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
       case CostumeStatus.booked:
         return 'Dibooking';
       case CostumeStatus.rented:
-        return 'Disewa';
+        return 'Sedang Disewa';
       case CostumeStatus.laundry:
         return 'Dicuci';
       case CostumeStatus.maintenance:

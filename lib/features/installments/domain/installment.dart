@@ -62,6 +62,61 @@ class Installment {
 
   bool get isPaidOff => remainingBalance <= 0.01 && totalPaid >= (totalCost - 0.01) && totalCost > 0;
 
+  /// Jumlah hari sampai jatuh tempo, dihitung relatif terhadap [now].
+  ///
+  /// Mengembalikan null bila tanggal jatuh tempo belum ditentukan. Perhitungan
+  /// dilakukan pada level hari (tanggal) sehingga stabil sepanjang hari dan
+  /// tidak bergantung pada jam menit detik.
+  int? daysUntilDue({DateTime? now}) {
+    final due = dueDate;
+    if (due == null) return null;
+
+    final reference = (now ?? DateTime.now());
+    final today = DateTime(reference.year, reference.month, reference.day);
+    final dueDay = DateTime(due.year, due.month, due.day);
+    return dueDay.difference(today).inDays;
+  }
+
+  /// Sudah melewati tanggal jatuh tempo dan masih ada sisa tagihan.
+  bool get isOverdue {
+    if (isPaidOff) return false;
+    final days = daysUntilDue();
+    return days != null && days < 0;
+  }
+
+  /// Jatuh tempo dalam <=7 hari atau sudah lewat (selama belum lunas).
+  bool get isDueSoon => !isPaidOff && (daysUntilDue() ?? 8) <= 7;
+
+  /// Label ramah pengguna untuk remaining waktu sampai jatuh tempo, misalnya
+  /// "Jatuh tempo hari ini", "3 hari lagi", atau "Terlambat 5 hari".
+  String dueLabel({DateTime? now}) {
+    if (isPaidOff) return 'Lunas';
+    final days = daysUntilDue(now: now);
+    if (days == null) return 'Tanpa jatuh tempo';
+
+    if (days == 0) return 'Jatuh tempo hari ini';
+    if (days > 0) return '$days hari lagi';
+    final late = -days;
+    return late == 1 ? 'Terlambat 1 hari' : 'Terlambat $late hari';
+  }
+
+  /// Rata-rata pembayaran per transaksi berdasarkan [logs]. Mengembalikan 0
+  /// bila belum ada catatan pembayaran.
+  double averagePayment(List<InstallmentLog> logs) {
+    if (logs.isEmpty) return 0.0;
+    final total = logs.fold<double>(0.0, (sum, log) => sum + log.amountPaid);
+    return total / logs.length;
+  }
+
+  /// Estimasi jumlah cicilan tersisa dengan asumsi pembayaran rata-rata
+  /// berjalan. Mengembalikan null bila belum ada riwayat pembayaran.
+  int? estimatedRemainingPayments(List<InstallmentLog> logs) {
+    if (logs.isEmpty || isPaidOff) return null;
+    final avg = averagePayment(logs);
+    if (avg <= 0) return null;
+    return (remainingBalance / avg).ceil();
+  }
+
   Installment recalculateWithLogs(List<InstallmentLog> logs) {
     final newTotalPaid = logs.fold<double>(0.0, (sum, log) => sum + log.amountPaid);
     final rawRemaining = totalCost - newTotalPaid;

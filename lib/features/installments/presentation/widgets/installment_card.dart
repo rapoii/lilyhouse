@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/pressable_card.dart';
@@ -24,6 +25,9 @@ class InstallmentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDone = installment.isPaidOff;
+    final isOverdue = installment.isOverdue;
+    final isDueSoon = installment.isDueSoon;
+    final showDueBadge = !isDone && (isOverdue || isDueSoon);
 
     return PressableCard(
       onTap: onTap,
@@ -85,6 +89,46 @@ class InstallmentCard extends StatelessWidget {
                 ),
               ],
             ),
+            if (showDueBadge) ...[
+              const SizedBox(height: 10),
+              Container(
+                key: const Key('installment_due_soon_badge'),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isOverdue
+                      ? const Color(0xFFFFEFEF)
+                      : const Color(0xFFFFF4E0),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: isOverdue
+                        ? const Color(0xFFFF3B30)
+                        : const Color(0xFFFFAA5A),
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isOverdue ? CupertinoIcons.exclamationmark_triangle_fill : CupertinoIcons.clock_fill,
+                      size: 13,
+                      color: isOverdue ? const Color(0xFFFF3B30) : const Color(0xFFFF9500),
+                    ),
+                    const SizedBox(width: 5),
+                    Flexible(
+                      child: Text(
+                        installment.dueLabel(),
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          color: isOverdue ? const Color(0xFFC62828) : const Color(0xFFB26B00),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 12),
 
             // Key Number: Remaining Balance or Fully Paid with Total Context

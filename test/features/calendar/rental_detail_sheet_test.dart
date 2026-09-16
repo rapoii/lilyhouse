@@ -5,7 +5,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:lilyhouse/core/theme/app_theme.dart';
 import 'package:lilyhouse/features/calendar/presentation/rental_detail_sheet.dart';
+import 'package:lilyhouse/features/costumes/data/costume_repository.dart';
+import 'package:lilyhouse/features/costumes/domain/accessory.dart';
 import 'package:lilyhouse/features/costumes/domain/costume.dart';
+import 'package:lilyhouse/features/costumes/domain/costume_rental_history.dart';
 import 'package:lilyhouse/features/rentals/data/rental_repository.dart';
 import 'package:lilyhouse/features/rentals/domain/customer.dart';
 import 'package:lilyhouse/features/rentals/domain/rental.dart';
@@ -43,7 +46,10 @@ class MockRentalRepo implements IRentalRepository {
   Future<List<Rental>> getRentalsForDate(DateTime date) async => [];
 
   @override
-  Future<List<Rental>> getRentalsByDateRange(DateTime start, DateTime end) async => [];
+  Future<List<Rental>> getRentalsByDateRange(
+    DateTime start,
+    DateTime end,
+  ) async => [];
 
   @override
   Future<List<Rental>> getRentalsByCostumeId(String costumeId) async => [];
@@ -79,6 +85,61 @@ class MockRentalRepo implements IRentalRepository {
   Future<int> getActiveRentalsCountByCustomer(String customerId) async => 0;
 }
 
+/// Costume repository that records status updates so we can verify the costume
+/// availability status stays in sync with the rental lifecycle.
+class MockCostumeRepo implements ICostumeRepository {
+  Costume? lastUpdatedCostume;
+
+  @override
+  Future<int> updateCostume(Costume costume) async {
+    lastUpdatedCostume = costume;
+    return 1;
+  }
+
+  @override
+  Future<int> insertCostume(Costume costume) async => 1;
+
+  @override
+  Future<Costume?> getCostumeById(String id) async => null;
+
+  @override
+  Future<List<Costume>> getAllCostumes() async => [];
+
+  @override
+  Future<List<Costume>> searchCostumes({
+    String? query,
+    CostumeStatus? status,
+    String? size,
+    String? series,
+    String? sortBy,
+  }) async => [];
+
+  @override
+  Future<List<String>> getDistinctAnimeSeries() async => [];
+
+  @override
+  Future<int> deleteCostume(String id) async => 1;
+
+  @override
+  Future<int> addAccessory(Accessory accessory) async => 1;
+
+  @override
+  Future<List<Accessory>> getAccessoriesByCostumeId(String costumeId) async => [];
+
+  @override
+  Future<int> updateAccessory(Accessory accessory) async => 1;
+
+  @override
+  Future<int> deleteAccessory(String id) async => 1;
+
+  @override
+  Future<int> getActiveRentalsCount(String costumeId) async => 0;
+
+  @override
+  Future<CostumeRentalHistory> getRentalHistory(String costumeId) async =>
+      const CostumeRentalHistory();
+}
+
 void main() {
   setUpAll(() async {
     await initializeDateFormatting('id_ID', null);
@@ -106,6 +167,7 @@ void main() {
   Widget createTestWidget({
     required Rental rental,
     required MockRentalRepo repo,
+    MockCostumeRepo? costumeRepo,
     VoidCallback? onUpdated,
   }) {
     return MaterialApp(
@@ -122,6 +184,7 @@ void main() {
                   customer: testCustomer,
                   costume: testCostume,
                   repository: repo,
+                  costumeRepository: costumeRepo,
                   onRentalUpdated: onUpdated,
                 ),
               );
@@ -132,7 +195,9 @@ void main() {
     );
   }
 
-  testWidgets('RentalDetailSheet displays all details in Apple HIG layout', (tester) async {
+  testWidgets('RentalDetailSheet displays all details in Apple HIG layout', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0; // 1080x2400 logical points
     addTearDown(() {
@@ -191,12 +256,18 @@ void main() {
     expect(find.text('Uang Muka (DP)'), findsOneWidget);
     expect(find.text('Rp 50.000'), findsOneWidget);
     expect(find.text('Sisa Tagihan Pelunasan'), findsOneWidget);
-    expect(find.text('Rp 100.000'), findsOneWidget);
+    // 'Rp 100.000' appears in the payment summary card (hero) and in the
+    // billing detail row.
+    expect(find.text('Rp 100.000'), findsNWidgets(2));
     expect(find.text('Harap packing rapi wig dan aksesori'), findsOneWidget);
 
     // Scroll to Actions Section if needed
     final actionSection = find.text('KELOLA STATUS RENTAL');
-    await tester.scrollUntilVisible(actionSection, 200, scrollable: find.byType(Scrollable).last);
+    await tester.scrollUntilVisible(
+      actionSection,
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(actionSection, findsOneWidget);
     expect(find.text('Tandai Sedang Disewa'), findsOneWidget);
     expect(find.text('Tandai Sudah Dikembalikan'), findsOneWidget);
@@ -204,7 +275,9 @@ void main() {
     expect(find.text('Batalkan Booking'), findsOneWidget);
   });
 
-  testWidgets('Tapping Tandai Sedang Disewa updates rental itemStatus', (tester) async {
+  testWidgets('Tapping Tandai Sedang Disewa updates rental itemStatus', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -227,17 +300,23 @@ void main() {
       itemStatus: RentalItemStatus.booked,
     );
 
-    await tester.pumpWidget(createTestWidget(
-      rental: rental,
-      repo: repo,
-      onUpdated: () => updatedCalled = true,
-    ));
+    await tester.pumpWidget(
+      createTestWidget(
+        rental: rental,
+        repo: repo,
+        onUpdated: () => updatedCalled = true,
+      ),
+    );
     await tester.tap(find.text('Open Sheet'));
     await tester.pumpAndSettle();
 
     // Scroll to and tap "Tandai Sedang Disewa"
     final disewaTile = find.text('Tandai Sedang Disewa');
-    await tester.scrollUntilVisible(disewaTile, 200, scrollable: find.byType(Scrollable).last);
+    await tester.scrollUntilVisible(
+      disewaTile,
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
     await tester.tap(disewaTile);
     await tester.pump();
     await tester.pump(const Duration(seconds: 3));
@@ -247,7 +326,61 @@ void main() {
     expect(repo.lastUpdatedRental?.itemStatus, RentalItemStatus.rented);
   });
 
-  testWidgets('Tapping Tandai Pembayaran Lunas updates payment status', (tester) async {
+  testWidgets(
+    'Tapping Tandai Sedang Disewa syncs costume status so the "Sedang Disewa" filter is accurate',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      final costumeRepo = MockCostumeRepo();
+      final rental = Rental(
+        id: 'rent-1',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: DateTime(2026, 9, 13),
+        endDate: DateTime(2026, 9, 16),
+        durationDays: 3,
+        purpose: 'Photoshoot',
+        totalPrice: 150000.0,
+        paymentStatus: RentalPaymentStatus.unpaid,
+        itemStatus: RentalItemStatus.booked,
+      );
+
+      await tester.pumpWidget(
+        createTestWidget(
+          rental: rental,
+          repo: repo,
+          costumeRepo: costumeRepo,
+        ),
+      );
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      final disewaTile = find.text('Tandai Sedang Disewa');
+      await tester.scrollUntilVisible(
+        disewaTile,
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.tap(disewaTile);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+
+      expect(repo.lastUpdatedRental?.itemStatus, RentalItemStatus.rented);
+      // The costume should now appear under the "Sedang Disewa" filter.
+      expect(costumeRepo.lastUpdatedCostume?.status, CostumeStatus.rented);
+    },
+  );
+
+  testWidgets('Tapping Tandai Pembayaran Lunas updates payment status', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -270,17 +403,23 @@ void main() {
       itemStatus: RentalItemStatus.booked,
     );
 
-    await tester.pumpWidget(createTestWidget(
-      rental: rental,
-      repo: repo,
-      onUpdated: () => updatedCalled = true,
-    ));
+    await tester.pumpWidget(
+      createTestWidget(
+        rental: rental,
+        repo: repo,
+        onUpdated: () => updatedCalled = true,
+      ),
+    );
     await tester.tap(find.text('Open Sheet'));
     await tester.pumpAndSettle();
 
     // Scroll to and tap "Tandai Pembayaran Lunas"
     final lunasTile = find.text('Tandai Pembayaran Lunas');
-    await tester.scrollUntilVisible(lunasTile, 200, scrollable: find.byType(Scrollable).last);
+    await tester.scrollUntilVisible(
+      lunasTile,
+      200,
+      scrollable: find.byType(Scrollable).last,
+    );
     await tester.tap(lunasTile);
     await tester.pumpAndSettle();
 
@@ -294,7 +433,479 @@ void main() {
     expect(repo.lastUpdatedRental?.paymentStatus, RentalPaymentStatus.paid);
   });
 
-  testWidgets('Batalkan Booking shows CupertinoAlertDialog and cancels when confirmed', (tester) async {
+  testWidgets(
+    'Batalkan Booking shows CupertinoAlertDialog and cancels when confirmed',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      bool updatedCalled = false;
+      final rental = Rental(
+        id: 'rent-3',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: DateTime(2026, 9, 13),
+        endDate: DateTime(2026, 9, 16),
+        durationDays: 3,
+        purpose: 'Photoshoot',
+        totalPrice: 150000.0,
+        paymentStatus: RentalPaymentStatus.unpaid,
+        itemStatus: RentalItemStatus.booked,
+      );
+
+      await tester.pumpWidget(
+        createTestWidget(
+          rental: rental,
+          repo: repo,
+          onUpdated: () => updatedCalled = true,
+        ),
+      );
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      // Scroll to and tap "Batalkan Booking"
+      final batalTile = find.text('Batalkan Booking');
+      await tester.scrollUntilVisible(
+        batalTile,
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.tap(batalTile);
+      await tester.pumpAndSettle();
+
+      // Confirm dialog is shown
+      expect(find.text('Batalkan Booking?'), findsOneWidget);
+      expect(find.text('Batal'), findsOneWidget);
+
+      // Tap destructive confirm in dialog
+      final confirmBtn = find.widgetWithText(
+        CupertinoDialogAction,
+        'Batalkan Booking',
+      );
+      await tester.tap(confirmBtn);
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+
+      expect(updatedCalled, isTrue);
+      expect(repo.lastUpdatedRental?.itemStatus, RentalItemStatus.cancelled);
+    },
+  );
+
+  testWidgets(
+    'RentalDetailSheet shows late return indicator when rented and past endDate',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      final pastEndDate = DateTime.now().subtract(const Duration(days: 3));
+      final startDate = pastEndDate.subtract(const Duration(days: 3));
+
+      final lateRental = Rental(
+        id: 'rent-late',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: startDate,
+        endDate: pastEndDate,
+        durationDays: 3,
+        purpose: 'Event Cosplay',
+        totalPrice: 150000.0,
+        paymentStatus: RentalPaymentStatus.paid,
+        itemStatus: RentalItemStatus.rented,
+      );
+
+      await tester.pumpWidget(createTestWidget(rental: lateRental, repo: repo));
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      // Verify late return badge in status Wrap
+      expect(find.text('Terlambat 3 Hari'), findsOneWidget);
+      // Verify late return text in schedule bar
+      expect(find.text('Telat 3 Hari'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'RentalDetailSheet does NOT show late return indicator when returned or completed',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      final pastEndDate = DateTime.now().subtract(const Duration(days: 3));
+      final startDate = pastEndDate.subtract(const Duration(days: 3));
+
+      final returnedRental = Rental(
+        id: 'rent-returned',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: startDate,
+        endDate: pastEndDate,
+        durationDays: 3,
+        purpose: 'Event Cosplay',
+        totalPrice: 150000.0,
+        paymentStatus: RentalPaymentStatus.paid,
+        itemStatus: RentalItemStatus.returned,
+      );
+
+      await tester.pumpWidget(
+        createTestWidget(rental: returnedRental, repo: repo),
+      );
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      // Indicator must NOT be shown
+      expect(find.textContaining('Terlambat'), findsNothing);
+      expect(find.textContaining('Telat'), findsNothing);
+    },
+  );
+
+  testWidgets(
+    'Tapping Tandai Sudah Dikembalikan shows return dialog with penalty and condition notes',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      bool updatedCalled = false;
+      final pastEndDate = DateTime.now().subtract(const Duration(days: 2));
+      final startDate = pastEndDate.subtract(const Duration(days: 3));
+
+      final rental = Rental(
+        id: 'rent-return-test',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: startDate,
+        endDate: pastEndDate,
+        durationDays: 3,
+        purpose: 'Photoshoot',
+        totalPrice: 150000.0,
+        paymentStatus: RentalPaymentStatus.paid,
+        itemStatus: RentalItemStatus.rented,
+        notes: 'Bawa wig net cadangan',
+      );
+
+      await tester.pumpWidget(
+        createTestWidget(
+          rental: rental,
+          repo: repo,
+          onUpdated: () => updatedCalled = true,
+        ),
+      );
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      final kembalikanTile = find.text('Tandai Sudah Dikembalikan');
+      await tester.scrollUntilVisible(
+        kembalikanTile,
+        200,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.tap(kembalikanTile);
+      await tester.pumpAndSettle();
+
+      // Verify Return Dialog appears
+      expect(find.text('Konfirmasi Pengembalian Kostum'), findsOneWidget);
+      expect(find.textContaining('terlambat 2 hari'), findsOneWidget);
+
+      // Enter penalty 50000 and notes
+      final textFields = find.byType(CupertinoTextField);
+      expect(textFields, findsNWidgets(2));
+
+      await tester.enterText(textFields.first, '50000');
+      await tester.enterText(textFields.last, 'Wig sedikit kusut tapi aman');
+      await tester.pumpAndSettle();
+
+      // Tap Simpan & Selesai
+      await tester.tap(find.text('Simpan & Selesai'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+
+      expect(updatedCalled, isTrue);
+      expect(repo.lastUpdatedRental?.itemStatus, RentalItemStatus.returned);
+      // Total price should increase by penalty (150.000 + 50.000 = 200.000)
+      expect(repo.lastUpdatedRental?.totalPrice, 200000.0);
+      // Notes should combine existing notes + Denda + Kondisi
+      expect(repo.lastUpdatedRental?.notes, contains('Bawa wig net cadangan'));
+      expect(repo.lastUpdatedRental?.notes, contains('Denda: Rp 50.000'));
+      expect(
+        repo.lastUpdatedRental?.notes,
+        contains('Kondisi: Wig sedikit kusut tapi aman'),
+      );
+    },
+  );
+
+  testWidgets(
+    'Tapping Salin Format DM Instagram copies formatted Instagram message to clipboard with IosToast',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      final rental = Rental(
+        id: 'rent-wa-1',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: DateTime(2026, 9, 13),
+        endDate: DateTime(2026, 9, 16),
+        durationDays: 3,
+        purpose: 'Event Cosplay',
+        totalPrice: 150000.0,
+        dpAmount: 50000.0,
+        paymentStatus: RentalPaymentStatus.dpPaid,
+        itemStatus: RentalItemStatus.booked,
+        notes: 'Tolong pastikan wig bersih',
+      );
+
+      // Track clipboard calls
+      final List<MethodCall> log = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (
+            MethodCall methodCall,
+          ) async {
+            log.add(methodCall);
+            if (methodCall.method == 'Clipboard.setData') {
+              return null;
+            }
+            return null;
+          });
+
+      await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      final copyTile = find.text('Salin Format DM Instagram');
+      expect(copyTile, findsOneWidget);
+
+      // Tap tile
+      await tester.tap(copyTile);
+      await tester.pump();
+
+      // Verify toast appeared
+      expect(
+        find.text('Format konfirmasi Instagram berhasil disalin'),
+        findsOneWidget,
+      );
+
+      // Verify clipboard content
+      final clipboardCalls = log
+          .where((call) => call.method == 'Clipboard.setData')
+          .toList();
+      expect(clipboardCalls.isNotEmpty, isTrue);
+
+      final dynamic copiedMap = clipboardCalls.last.arguments;
+      final copiedText = copiedMap is Map ? copiedMap['text'] as String : '';
+      expect(copiedText, contains('*KONFIRMASI SEWA KOSTUM - LILYHOUSE*'));
+      expect(
+        copiedText,
+        contains(
+          'Halo Kak Alya Rani, pesanan sewa kostum kamu telah tercatat di sistem LilyHouse (@lilycosrent).',
+        ),
+      );
+      expect(copiedText, contains('- Kostum: Furina Archon'));
+      expect(copiedText, contains('- Seri: Genshin Impact'));
+      expect(
+        copiedText,
+        contains('- Tanggal Sewa: 13 Sep 2026 - 16 Sep 2026 (3 Hari)'),
+      );
+      expect(copiedText, contains('- Total Biaya: Rp 150.000'));
+      expect(copiedText, contains('- Uang Muka (DP): Rp 50.000'));
+      expect(copiedText, contains('- Status Pembayaran: DP'));
+      expect(copiedText, contains('- Sisa Tagihan: Rp 100.000'));
+      expect(copiedText, contains('*Petunjuk & Peraturan Rental:*'));
+      expect(
+        copiedText,
+        contains(
+          '1. Mohon menjaga kebersihan dan kelengkapan kostum beserta seluruh aksesori.',
+        ),
+      );
+      expect(
+        copiedText,
+        contains(
+          '2. Kostum tidak perlu dicuci saat dikembalikan, tim LilyHouse yang akan menangani proses pencucian.',
+        ),
+      );
+      expect(
+        copiedText,
+        contains('3. Pengembalian maksimal pada hari terakhir masa sewa.'),
+      );
+      expect(
+        copiedText,
+        contains('4. Keterlambatan/kerusakan dikenakan biaya kompensasi.'),
+      );
+      expect(
+        copiedText,
+        contains('Terima kasih telah menyewa di LilyHouse (@lilycosrent).'),
+      );
+
+      // Check no emojis in the copied message
+      final emojiRegex = RegExp(
+        r'[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]',
+        unicode: true,
+      );
+      expect(emojiRegex.hasMatch(copiedText), isFalse);
+
+      // Let the toast animation finish
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'Tapping trailing circular copy button copies formatted Instagram message to clipboard',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      final rental = Rental(
+        id: 'rent-dm-2',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: DateTime(2026, 9, 20),
+        endDate: DateTime(2026, 9, 23),
+        durationDays: 3,
+        purpose: 'Photoshoot',
+        totalPrice: 200000.0,
+        dpAmount: 200000.0,
+        paymentStatus: RentalPaymentStatus.paid,
+        itemStatus: RentalItemStatus.rented,
+      );
+
+      final List<MethodCall> log = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(SystemChannels.platform, (
+            MethodCall methodCall,
+          ) async {
+            log.add(methodCall);
+            if (methodCall.method == 'Clipboard.setData') {
+              return null;
+            }
+            return null;
+          });
+
+      await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      // Verify touch target: button has minimumSize of 44x44
+      final trailingButtonFinder = find.widgetWithIcon(
+        CupertinoButton,
+        CupertinoIcons.doc_on_clipboard_fill,
+      );
+      expect(trailingButtonFinder, findsOneWidget);
+
+      final buttonWidget = tester.widget<CupertinoButton>(trailingButtonFinder);
+      expect(buttonWidget.minimumSize, const Size(44, 44));
+
+      // Tap trailing button
+      await tester.tap(trailingButtonFinder);
+      await tester.pump();
+
+      // Verify toast
+      expect(
+        find.text('Format konfirmasi Instagram berhasil disalin'),
+        findsOneWidget,
+      );
+
+      final clipboardCalls = log
+          .where((call) => call.method == 'Clipboard.setData')
+          .toList();
+      expect(clipboardCalls.isNotEmpty, isTrue);
+
+      final dynamic copiedMap = clipboardCalls.last.arguments;
+      final copiedText = copiedMap is Map ? copiedMap['text'] as String : '';
+      expect(copiedText, contains('Status Pembayaran: Lunas'));
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'Payment summary card shows real-time Sisa Tagihan for DP status',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      final rental = Rental(
+        id: 'rent-sum-1',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: DateTime(2026, 9, 20),
+        endDate: DateTime(2026, 9, 23),
+        durationDays: 3,
+        purpose: 'Event Cosplay',
+        totalPrice: 200000.0,
+        dpAmount: 75000.0,
+        paymentStatus: RentalPaymentStatus.dpPaid,
+        itemStatus: RentalItemStatus.booked,
+      );
+
+      await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      // Summary card is present
+      expect(find.byKey(const Key('payment_summary_card')), findsOneWidget);
+      expect(find.text('STATUS PEMBAYARAN'), findsOneWidget);
+
+      // Real-time remaining balance: 200000 - 75000 = 125000
+      expect(find.text('Sisa Tagihan'), findsOneWidget);
+      // 'Rp 125.000' appears in the payment summary card and the billing detail row.
+      expect(find.text('Rp 125.000'), findsNWidgets(2));
+
+      // Progress percentage chip (75000/200000 = 38%)
+      expect(find.text('38% terbayar'), findsOneWidget);
+
+      // Progress bar renders
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('payment_summary_card')),
+          matching: find.byType(LinearProgressIndicator),
+        ),
+        findsOneWidget,
+      );
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('Payment summary card shows Lunas state when fully paid', (
+    tester,
+  ) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -303,327 +914,275 @@ void main() {
     });
 
     final repo = MockRentalRepo();
-    bool updatedCalled = false;
     final rental = Rental(
-      id: 'rent-3',
-      costumeId: 'cos-1',
-      customerId: 'cust-1',
-      startDate: DateTime(2026, 9, 13),
-      endDate: DateTime(2026, 9, 16),
-      durationDays: 3,
-      purpose: 'Photoshoot',
-      totalPrice: 150000.0,
-      paymentStatus: RentalPaymentStatus.unpaid,
-      itemStatus: RentalItemStatus.booked,
-    );
-
-    await tester.pumpWidget(createTestWidget(
-      rental: rental,
-      repo: repo,
-      onUpdated: () => updatedCalled = true,
-    ));
-    await tester.tap(find.text('Open Sheet'));
-    await tester.pumpAndSettle();
-
-    // Scroll to and tap "Batalkan Booking"
-    final batalTile = find.text('Batalkan Booking');
-    await tester.scrollUntilVisible(batalTile, 200, scrollable: find.byType(Scrollable).last);
-    await tester.tap(batalTile);
-    await tester.pumpAndSettle();
-
-    // Confirm dialog is shown
-    expect(find.text('Batalkan Booking?'), findsOneWidget);
-    expect(find.text('Batal'), findsOneWidget);
-
-    // Tap destructive confirm in dialog
-    final confirmBtn = find.widgetWithText(CupertinoDialogAction, 'Batalkan Booking');
-    await tester.tap(confirmBtn);
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 3));
-    await tester.pumpAndSettle();
-
-    expect(updatedCalled, isTrue);
-    expect(repo.lastUpdatedRental?.itemStatus, RentalItemStatus.cancelled);
-  });
-
-  testWidgets('RentalDetailSheet shows late return indicator when rented and past endDate', (tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    });
-
-    final repo = MockRentalRepo();
-    final pastEndDate = DateTime.now().subtract(const Duration(days: 3));
-    final startDate = pastEndDate.subtract(const Duration(days: 3));
-
-    final lateRental = Rental(
-      id: 'rent-late',
-      costumeId: 'cos-1',
-      customerId: 'cust-1',
-      startDate: startDate,
-      endDate: pastEndDate,
-      durationDays: 3,
-      purpose: 'Event Cosplay',
-      totalPrice: 150000.0,
-      paymentStatus: RentalPaymentStatus.paid,
-      itemStatus: RentalItemStatus.rented,
-    );
-
-    await tester.pumpWidget(createTestWidget(rental: lateRental, repo: repo));
-    await tester.tap(find.text('Open Sheet'));
-    await tester.pumpAndSettle();
-
-    // Verify late return badge in status Wrap
-    expect(find.text('Terlambat 3 Hari'), findsOneWidget);
-    // Verify late return text in schedule bar
-    expect(find.text('Telat 3 Hari'), findsOneWidget);
-  });
-
-  testWidgets('RentalDetailSheet does NOT show late return indicator when returned or completed', (tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    });
-
-    final repo = MockRentalRepo();
-    final pastEndDate = DateTime.now().subtract(const Duration(days: 3));
-    final startDate = pastEndDate.subtract(const Duration(days: 3));
-
-    final returnedRental = Rental(
-      id: 'rent-returned',
-      costumeId: 'cos-1',
-      customerId: 'cust-1',
-      startDate: startDate,
-      endDate: pastEndDate,
-      durationDays: 3,
-      purpose: 'Event Cosplay',
-      totalPrice: 150000.0,
-      paymentStatus: RentalPaymentStatus.paid,
-      itemStatus: RentalItemStatus.returned,
-    );
-
-    await tester.pumpWidget(createTestWidget(rental: returnedRental, repo: repo));
-    await tester.tap(find.text('Open Sheet'));
-    await tester.pumpAndSettle();
-
-    // Indicator must NOT be shown
-    expect(find.textContaining('Terlambat'), findsNothing);
-    expect(find.textContaining('Telat'), findsNothing);
-  });
-
-  testWidgets('Tapping Tandai Sudah Dikembalikan shows return dialog with penalty and condition notes', (tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    });
-
-    final repo = MockRentalRepo();
-    bool updatedCalled = false;
-    final pastEndDate = DateTime.now().subtract(const Duration(days: 2));
-    final startDate = pastEndDate.subtract(const Duration(days: 3));
-
-    final rental = Rental(
-      id: 'rent-return-test',
-      costumeId: 'cos-1',
-      customerId: 'cust-1',
-      startDate: startDate,
-      endDate: pastEndDate,
-      durationDays: 3,
-      purpose: 'Photoshoot',
-      totalPrice: 150000.0,
-      paymentStatus: RentalPaymentStatus.paid,
-      itemStatus: RentalItemStatus.rented,
-      notes: 'Bawa wig net cadangan',
-    );
-
-    await tester.pumpWidget(createTestWidget(
-      rental: rental,
-      repo: repo,
-      onUpdated: () => updatedCalled = true,
-    ));
-    await tester.tap(find.text('Open Sheet'));
-    await tester.pumpAndSettle();
-
-    final kembalikanTile = find.text('Tandai Sudah Dikembalikan');
-    await tester.scrollUntilVisible(kembalikanTile, 200, scrollable: find.byType(Scrollable).last);
-    await tester.tap(kembalikanTile);
-    await tester.pumpAndSettle();
-
-    // Verify Return Dialog appears
-    expect(find.text('Konfirmasi Pengembalian Kostum'), findsOneWidget);
-    expect(find.textContaining('terlambat 2 hari'), findsOneWidget);
-
-    // Enter penalty 50000 and notes
-    final textFields = find.byType(CupertinoTextField);
-    expect(textFields, findsNWidgets(2));
-
-    await tester.enterText(textFields.first, '50000');
-    await tester.enterText(textFields.last, 'Wig sedikit kusut tapi aman');
-    await tester.pumpAndSettle();
-
-    // Tap Simpan & Selesai
-    await tester.tap(find.text('Simpan & Selesai'));
-    await tester.pump();
-    await tester.pump(const Duration(seconds: 3));
-    await tester.pumpAndSettle();
-
-    expect(updatedCalled, isTrue);
-    expect(repo.lastUpdatedRental?.itemStatus, RentalItemStatus.returned);
-    // Total price should increase by penalty (150.000 + 50.000 = 200.000)
-    expect(repo.lastUpdatedRental?.totalPrice, 200000.0);
-    // Notes should combine existing notes + Denda + Kondisi
-    expect(repo.lastUpdatedRental?.notes, contains('Bawa wig net cadangan'));
-    expect(repo.lastUpdatedRental?.notes, contains('Denda: Rp 50.000'));
-    expect(repo.lastUpdatedRental?.notes, contains('Kondisi: Wig sedikit kusut tapi aman'));
-  });
-
-  testWidgets('Tapping Salin Format DM Instagram copies formatted Instagram message to clipboard with IosToast', (tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    });
-
-    final repo = MockRentalRepo();
-    final rental = Rental(
-      id: 'rent-wa-1',
-      costumeId: 'cos-1',
-      customerId: 'cust-1',
-      startDate: DateTime(2026, 9, 13),
-      endDate: DateTime(2026, 9, 16),
-      durationDays: 3,
-      purpose: 'Event Cosplay',
-      totalPrice: 150000.0,
-      dpAmount: 50000.0,
-      paymentStatus: RentalPaymentStatus.dpPaid,
-      itemStatus: RentalItemStatus.booked,
-      notes: 'Tolong pastikan wig bersih',
-    );
-
-    // Track clipboard calls
-    final List<MethodCall> log = <MethodCall>[];
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      (MethodCall methodCall) async {
-        log.add(methodCall);
-        if (methodCall.method == 'Clipboard.setData') {
-          return null;
-        }
-        return null;
-      },
-    );
-
-    await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
-    await tester.tap(find.text('Open Sheet'));
-    await tester.pumpAndSettle();
-
-    final copyTile = find.text('Salin Format DM Instagram');
-    expect(copyTile, findsOneWidget);
-
-    // Tap tile
-    await tester.tap(copyTile);
-    await tester.pump();
-
-    // Verify toast appeared
-    expect(find.text('Format konfirmasi Instagram berhasil disalin'), findsOneWidget);
-
-    // Verify clipboard content
-    final clipboardCalls = log.where((call) => call.method == 'Clipboard.setData').toList();
-    expect(clipboardCalls.isNotEmpty, isTrue);
-
-    final dynamic copiedMap = clipboardCalls.last.arguments;
-    final copiedText = copiedMap is Map ? copiedMap['text'] as String : '';
-    expect(copiedText, contains('*KONFIRMASI SEWA KOSTUM - LILYHOUSE*'));
-    expect(copiedText, contains('Halo Kak Alya Rani, pesanan sewa kostum kamu telah tercatat di sistem LilyHouse (@lilycosrent).'));
-    expect(copiedText, contains('- Kostum: Furina Archon'));
-    expect(copiedText, contains('- Seri: Genshin Impact'));
-    expect(copiedText, contains('- Tanggal Sewa: 13 Sep 2026 - 16 Sep 2026 (3 Hari)'));
-    expect(copiedText, contains('- Total Biaya: Rp 150.000'));
-    expect(copiedText, contains('- Uang Muka (DP): Rp 50.000'));
-    expect(copiedText, contains('- Status Pembayaran: DP'));
-    expect(copiedText, contains('- Sisa Tagihan: Rp 100.000'));
-    expect(copiedText, contains('*Petunjuk & Peraturan Rental:*'));
-    expect(copiedText, contains('1. Mohon menjaga kebersihan dan kelengkapan kostum beserta seluruh aksesori.'));
-    expect(copiedText, contains('2. Kostum tidak perlu dicuci saat dikembalikan, tim LilyHouse yang akan menangani proses pencucian.'));
-    expect(copiedText, contains('3. Pengembalian maksimal pada hari terakhir masa sewa.'));
-    expect(copiedText, contains('4. Keterlambatan/kerusakan dikenakan biaya kompensasi.'));
-    expect(copiedText, contains('Terima kasih telah menyewa di LilyHouse (@lilycosrent).'));
-
-    // Check no emojis in the copied message
-    final emojiRegex = RegExp(r'[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]', unicode: true);
-    expect(emojiRegex.hasMatch(copiedText), isFalse);
-
-    // Let the toast animation finish
-    await tester.pump(const Duration(seconds: 3));
-    await tester.pumpAndSettle();
-  });
-
-  testWidgets('Tapping trailing circular copy button copies formatted Instagram message to clipboard', (tester) async {
-    tester.view.physicalSize = const Size(1080, 2400);
-    tester.view.devicePixelRatio = 1.0;
-    addTearDown(() {
-      tester.view.resetPhysicalSize();
-      tester.view.resetDevicePixelRatio();
-    });
-
-    final repo = MockRentalRepo();
-    final rental = Rental(
-      id: 'rent-dm-2',
+      id: 'rent-sum-2',
       costumeId: 'cos-1',
       customerId: 'cust-1',
       startDate: DateTime(2026, 9, 20),
       endDate: DateTime(2026, 9, 23),
       durationDays: 3,
-      purpose: 'Photoshoot',
+      purpose: 'Event Cosplay',
       totalPrice: 200000.0,
       dpAmount: 200000.0,
       paymentStatus: RentalPaymentStatus.paid,
       itemStatus: RentalItemStatus.rented,
     );
 
-    final List<MethodCall> log = <MethodCall>[];
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      SystemChannels.platform,
-      (MethodCall methodCall) async {
-        log.add(methodCall);
-        if (methodCall.method == 'Clipboard.setData') {
-          return null;
-        }
-        return null;
-      },
+    await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('payment_summary_card')), findsOneWidget);
+    // No remaining balance shown when fully paid
+    expect(find.text('Sisa Tagihan'), findsNothing);
+    expect(find.text('Lunas 100%'), findsOneWidget);
+    expect(find.text('Sudah lunas • Tidak ada tunggakan'), findsOneWidget);
+
+    await tester.pumpAndSettle();
+  });
+
+  testWidgets(
+    'Payment summary card shows Sisa Tagihan as full total when unpaid',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      final rental = Rental(
+        id: 'rent-sum-3',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: DateTime(2026, 9, 20),
+        endDate: DateTime(2026, 9, 23),
+        durationDays: 3,
+        purpose: 'Event Cosplay',
+        totalPrice: 150000.0,
+        dpAmount: 0.0,
+        paymentStatus: RentalPaymentStatus.unpaid,
+        itemStatus: RentalItemStatus.booked,
+      );
+
+      await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('payment_summary_card')), findsOneWidget);
+      // Nothing paid yet: remaining balance == full total
+      expect(find.text('Sisa Tagihan'), findsOneWidget);
+      expect(
+        find.text('Rp 150.000'),
+        findsNWidgets(2),
+      ); // summary card + billing detail row
+      expect(find.text('0% terbayar'), findsOneWidget);
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'Return deadline banner warns when due date is near (within 7 days)',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      final now = DateTime.now();
+      final rental = Rental(
+        id: 'rent-due-1',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: DateTime(now.year, now.month, now.day - 5),
+        endDate: DateTime(now.year, now.month, now.day + 3),
+        durationDays: 9,
+        purpose: 'Event Cosplay',
+        totalPrice: 150000.0,
+        dpAmount: 50000.0,
+        paymentStatus: RentalPaymentStatus.dpPaid,
+        itemStatus: RentalItemStatus.rented,
+      );
+
+      await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('return_deadline_banner')), findsOneWidget);
+      expect(find.textContaining('3 hari lagi'), findsOneWidget);
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('Return deadline banner shows due-today message on last day', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repo = MockRentalRepo();
+    final now = DateTime.now();
+    final rental = Rental(
+      id: 'rent-due-2',
+      costumeId: 'cos-1',
+      customerId: 'cust-1',
+      startDate: DateTime(now.year, now.month, now.day - 3),
+      endDate: DateTime(now.year, now.month, now.day),
+      durationDays: 4,
+      purpose: 'Event Cosplay',
+      totalPrice: 150000.0,
+      dpAmount: 50000.0,
+      paymentStatus: RentalPaymentStatus.dpPaid,
+      itemStatus: RentalItemStatus.rented,
     );
 
     await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
     await tester.tap(find.text('Open Sheet'));
     await tester.pumpAndSettle();
 
-    // Verify touch target: button has minimumSize of 44x44
-    final trailingButtonFinder = find.widgetWithIcon(CupertinoButton, CupertinoIcons.doc_on_clipboard_fill);
-    expect(trailingButtonFinder, findsOneWidget);
+    expect(find.byKey(const Key('return_deadline_banner')), findsOneWidget);
+    expect(find.text('Jatuh tempo pengembalian hari ini'), findsOneWidget);
 
-    final buttonWidget = tester.widget<CupertinoButton>(trailingButtonFinder);
-    expect(buttonWidget.minimumSize, const Size(44, 44));
+    await tester.pumpAndSettle();
+  });
 
-    // Tap trailing button
-    await tester.tap(trailingButtonFinder);
+  testWidgets(
+    'Return deadline banner does NOT appear for bookings far in the future',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      final now = DateTime.now();
+      final rental = Rental(
+        id: 'rent-due-3',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: DateTime(now.year, now.month, now.day + 30),
+        endDate: DateTime(now.year, now.month, now.day + 33),
+        durationDays: 4,
+        purpose: 'Event Cosplay',
+        totalPrice: 150000.0,
+        dpAmount: 50000.0,
+        paymentStatus: RentalPaymentStatus.dpPaid,
+        itemStatus: RentalItemStatus.booked,
+      );
+
+      await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('return_deadline_banner')), findsNothing);
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets(
+    'Return deadline banner does NOT appear when item already returned',
+    (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final repo = MockRentalRepo();
+      final now = DateTime.now();
+      final rental = Rental(
+        id: 'rent-due-4',
+        costumeId: 'cos-1',
+        customerId: 'cust-1',
+        startDate: DateTime(now.year, now.month, now.day - 5),
+        endDate: DateTime(now.year, now.month, now.day + 2),
+        durationDays: 8,
+        purpose: 'Event Cosplay',
+        totalPrice: 150000.0,
+        dpAmount: 50000.0,
+        paymentStatus: RentalPaymentStatus.paid,
+        itemStatus: RentalItemStatus.returned,
+      );
+
+      await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
+      await tester.tap(find.text('Open Sheet'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('return_deadline_banner')), findsNothing);
+
+      await tester.pumpAndSettle();
+    },
+  );
+
+  testWidgets('Tapping Salin Alamat Pengiriman copies address to clipboard', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    final repo = MockRentalRepo();
+    final rental = Rental(
+      id: 'rent-addr-1',
+      costumeId: 'cos-1',
+      customerId: 'cust-1',
+      startDate: DateTime(2026, 9, 20),
+      endDate: DateTime(2026, 9, 23),
+      durationDays: 3,
+      purpose: 'Photoshoot',
+      totalPrice: 150000.0,
+      dpAmount: 50000.0,
+      paymentStatus: RentalPaymentStatus.dpPaid,
+      itemStatus: RentalItemStatus.booked,
+    );
+
+    final List<MethodCall> log = <MethodCall>[];
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(SystemChannels.platform, (
+          MethodCall methodCall,
+        ) async {
+          log.add(methodCall);
+          return null;
+        });
+
+    await tester.pumpWidget(createTestWidget(rental: rental, repo: repo));
+    await tester.tap(find.text('Open Sheet'));
+    await tester.pumpAndSettle();
+
+    // Customer info section must contain the copy address tile
+    expect(find.text('Salin Alamat Pengiriman'), findsOneWidget);
+
+    await tester.tap(find.text('Salin Alamat Pengiriman'));
     await tester.pump();
 
-    // Verify toast
-    expect(find.text('Format konfirmasi Instagram berhasil disalin'), findsOneWidget);
+    // Toast confirmation
+    expect(find.text('Alamat pengiriman disalin ke clipboard'), findsOneWidget);
 
-    final clipboardCalls = log.where((call) => call.method == 'Clipboard.setData').toList();
+    // Clipboard got the exact address from the customer record
+    final clipboardCalls = log
+        .where((call) => call.method == 'Clipboard.setData')
+        .toList();
     expect(clipboardCalls.isNotEmpty, isTrue);
-
     final dynamic copiedMap = clipboardCalls.last.arguments;
     final copiedText = copiedMap is Map ? copiedMap['text'] as String : '';
-    expect(copiedText, contains('Status Pembayaran: Lunas'));
+    expect(copiedText, 'Jl. Merdeka No. 10, Jakarta');
 
     await tester.pump(const Duration(seconds: 3));
     await tester.pumpAndSettle();

@@ -2,10 +2,13 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../data/costume_repository.dart';
 import '../domain/costume.dart';
 import '../domain/accessory.dart';
+import '../domain/costume_rental_history.dart';
+import '../../rentals/domain/rental.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/ios_toast.dart';
@@ -32,7 +35,9 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
   late ICostumeRepository _repository;
   late Costume _costume;
   List<Accessory> _accessories = [];
+  CostumeRentalHistory _history = const CostumeRentalHistory();
   bool _isLoading = true;
+  bool _isLoadingHistory = true;
 
   @override
   void initState() {
@@ -40,6 +45,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
     _costume = widget.costume;
     _repository = widget.repository ?? CostumeRepository();
     _loadAccessories();
+    _loadRentalHistory();
   }
 
   Future<void> _loadAccessories() async {
@@ -52,6 +58,16 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
     }
   }
 
+  Future<void> _loadRentalHistory() async {
+    final history = await _repository.getRentalHistory(_costume.id);
+    if (mounted) {
+      setState(() {
+        _history = history;
+        _isLoadingHistory = false;
+      });
+    }
+  }
+
   Future<void> _reloadCostume() async {
     final updated = await _repository.getCostumeById(_costume.id);
     if (updated != null && mounted) {
@@ -59,6 +75,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
         _costume = updated;
       });
     }
+    await _loadRentalHistory();
   }
 
   Future<void> _showEditCostumeSheet() async {
@@ -429,7 +446,109 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               ],
             ),
 
-            // Section 3: AKSESORI & PROPERTI
+            // Section 3: RIWAYAT SEWA — badge "Disewa X kali", tanggal servis
+            // terakhir, indikator periode pemakaian aktif, dan daftar penyewa.
+            CupertinoListSection.insetGrouped(
+              backgroundColor: AppColors.background,
+              header: const Text('RIWAYAT SEWA'),
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              children: [
+                if (_isLoadingHistory)
+                  const CupertinoListTile(
+                    title: Center(child: CupertinoActivityIndicator(radius: 12)),
+                  )
+                else ...[
+                  // Badge "Disewa X kali"
+                  CupertinoListTile(
+                    leading: const SquircleIcon(
+                      icon: CupertinoIcons.repeat,
+                      color: AppColors.primaryPink,
+                    ),
+                    title: const Text(
+                      'Jumlah Disewa',
+                      style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                    ),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _history.totalRentals > 0
+                            ? AppColors.softPinkBg
+                            : const Color(0xFFF2F2F7),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Text(
+                        _history.badgeLabel,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          decoration: TextDecoration.none,
+                          color: _history.totalRentals > 0
+                              ? AppColors.deepPinkText
+                              : const Color(0xFF8E8E93),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Tanggal servis terakhir (akhir rental terbaru)
+                  CupertinoListTile(
+                    leading: const SquircleIcon(
+                      icon: CupertinoIcons.wrench,
+                      color: Color(0xFF8E8E93),
+                    ),
+                    title: const Text(
+                      'Servis Terakhir',
+                      style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                    ),
+                    additionalInfo: Text(
+                      _history.lastServiceDate != null
+                          ? DateFormat('d MMM yyyy', 'id_ID')
+                              .format(_history.lastServiceDate!)
+                          : 'Belum pernah',
+                      style: TextStyle(
+                        fontSize: 15,
+                        fontWeight: _history.lastServiceDate != null
+                            ? FontWeight.w600
+                            : FontWeight.w400,
+                        color: _history.lastServiceDate != null
+                            ? AppColors.textDark
+                            : const Color(0xFF8E8E93),
+                      ),
+                    ),
+                  ),
+                  // Indikator periode pemakaian aktif
+                  if (_history.activeRental != null)
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.timer,
+                        color: _history.activeRental!.coversDate(DateTime.now())
+                            ? const Color(0xFF34C759)
+                            : const Color(0xFFD97706),
+                      ),
+                      title: const Text(
+                        'Sedang Dipakai',
+                        style: TextStyle(fontSize: 15, color: AppColors.textDark),
+                      ),
+                      subtitle: Text(
+                        _formatActivePeriod(_history.activeRental!),
+                        style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                      trailing: _buildActivePeriodBadge(_history.activeRental!),
+                    ),
+                  // Daftar penyewa (riwayat)
+                  if (_history.records.isEmpty)
+                    CupertinoListTile(
+                      title: const Text(
+                        'Belum ada riwayat penyewaan untuk kostum ini.',
+                        style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                      ),
+                    )
+                  else
+                    ..._history.records.map(_buildRenterTile),
+                ],
+              ],
+            ),
+
+            // Section 4: AKSESORI & PROPERTI
             CupertinoListSection.insetGrouped(
               backgroundColor: AppColors.background,
               header: const Text('AKSESORI & PROPERTI'),
@@ -503,6 +622,104 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
         return (bg: const Color(0xFFFFEBF0), text: AppColors.dangerRose);
       case AccessoryCondition.lost:
         return (bg: const Color(0xFFFEE2E2), text: const Color(0xFFDC2626));
+    }
+  }
+
+  /// "12 – 15 Sep 2026 (3 Hari)" — Indonesian date range for an in-progress rental.
+  String _formatActivePeriod(CostumeRentalRecord record) {
+    final fmt = DateFormat('d MMM yyyy', 'id_ID');
+    final days = record.endDate.difference(record.startDate).inDays.abs() + 1;
+    return '${fmt.format(record.startDate)} – ${fmt.format(record.endDate)} ($days Hari)';
+  }
+
+  /// Green "Aktif" pill when today falls inside the rental window,
+  /// amber "Dijadwalkan" when the active rental is still upcoming.
+  Widget _buildActivePeriodBadge(CostumeRentalRecord record) {
+    final isCurrentlyInUse = record.coversDate(DateTime.now());
+    final bg = isCurrentlyInUse
+        ? const Color(0xFFE3F9EC)
+        : const Color(0xFFFFF4E5);
+    final fg = isCurrentlyInUse
+        ? const Color(0xFF1E824C)
+        : const Color(0xFFD97706);
+    final label = isCurrentlyInUse ? 'Aktif' : 'Dijadwalkan';
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          decoration: TextDecoration.none,
+          color: fg,
+        ),
+      ),
+    );
+  }
+
+  /// One row of the renter history list: renter name, status chip, and the
+  /// rental date range as the subtitle.
+  Widget _buildRenterTile(CostumeRentalRecord record) {
+    final badge = _getRentalStatusBadgeData(record.itemStatus);
+    final fmt = DateFormat('d MMM yyyy', 'id_ID');
+
+    return CupertinoListTile(
+      leading: const SquircleIcon(
+        icon: CupertinoIcons.person_fill,
+        color: AppColors.primaryPink,
+      ),
+      title: Text(
+        record.customerName,
+        style: const TextStyle(
+          fontSize: 15,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textDark,
+        ),
+      ),
+      subtitle: Text(
+        '${fmt.format(record.startDate)} – ${fmt.format(record.endDate)}',
+        style: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+      ),
+      additionalInfo: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+        decoration: BoxDecoration(
+          color: badge.bg,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          badge.label,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            decoration: TextDecoration.none,
+            color: badge.text,
+          ),
+        ),
+      ),
+    );
+  }
+
+  ({Color bg, Color text, String label}) _getRentalStatusBadgeData(RentalItemStatus status) {
+    switch (status) {
+      case RentalItemStatus.booked:
+        return (bg: AppColors.softPinkBg, text: AppColors.primaryPink, label: 'Dibooking');
+      case RentalItemStatus.shipped:
+        return (bg: AppColors.pastelPink.withValues(alpha: 0.25), text: AppColors.primaryPink, label: 'Dikirim');
+      case RentalItemStatus.rented:
+        return (bg: const Color(0xFFE3F9EC), text: const Color(0xFF1E824C), label: 'Sedang Disewa');
+      case RentalItemStatus.returned:
+        return (bg: const Color(0xFFF2F2F7), text: const Color(0xFF3A3A3C), label: 'Dikembalikan');
+      case RentalItemStatus.laundry:
+        return (bg: const Color(0xFFE8F1FF), text: const Color(0xFF2563EB), label: 'Dicuci');
+      case RentalItemStatus.completed:
+        return (bg: AppColors.successMint.withValues(alpha: 0.22), text: const Color(0xFF1B7A4E), label: 'Selesai');
+      case RentalItemStatus.cancelled:
+        return (bg: AppColors.dangerRose.withValues(alpha: 0.14), text: AppColors.dangerRose, label: 'Dibatalkan');
     }
   }
 

@@ -6,6 +6,7 @@ import 'package:lilyhouse/features/calendar/presentation/calendar_screen.dart';
 import 'package:lilyhouse/features/costumes/data/costume_repository.dart';
 import 'package:lilyhouse/features/costumes/domain/accessory.dart';
 import 'package:lilyhouse/features/costumes/domain/costume.dart';
+import 'package:lilyhouse/features/costumes/domain/costume_rental_history.dart';
 import 'package:lilyhouse/features/costumes/presentation/costume_list_screen.dart';
 import 'package:lilyhouse/features/installments/data/installment_repository.dart';
 import 'package:lilyhouse/features/installments/domain/installment.dart';
@@ -49,6 +50,10 @@ class MockCostumeRepository implements ICostumeRepository {
   Future<int> deleteAccessory(String id) async => 1;
   @override
   Future<int> getActiveRentalsCount(String costumeId) async => 0;
+
+  @override
+  Future<CostumeRentalHistory> getRentalHistory(String costumeId) async =>
+      const CostumeRentalHistory();
 }
 
 class MockRentalRepository implements IRentalRepository {
@@ -112,6 +117,8 @@ class MockInstallmentRepository implements IInstallmentRepository {
     String? query,
     InstallmentStatus? status,
     String sortBy = 'due_date_asc',
+    bool dueSoon = false,
+    DateTime? now,
   }) async => installments;
   @override
   Future<int> updateInstallment(Installment installment) async => 1;
