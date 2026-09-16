@@ -275,11 +275,11 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                const Icon(CupertinoIcons.tv, size: 12, color: AppColors.primaryPink),
+                                const Icon(CupertinoIcons.tv, size: 12, color: AppColors.deepPinkText),
                                 const SizedBox(width: 5),
                                 Text(
                                   _selectedSeries!,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPink),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.deepPinkText),
                                 ),
                                 const SizedBox(width: 4),
                                 GestureDetector(
@@ -290,7 +290,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                                   },
                                   child: const Padding(
                                     padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
-                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: AppColors.primaryPink),
+                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: AppColors.deepPinkText),
                                   ),
                                 ),
                               ],

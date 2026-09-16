@@ -80,8 +80,15 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             : 'Data sudah mutakhir dengan cloud',
       );
     } else {
+      final rawError = result.errorMessage ?? '';
+      final humanMsg = rawError.contains('SocketException') ||
+              rawError.contains('Failed host lookup') ||
+              rawError.contains('TimeoutException') ||
+              rawError.contains('ClientException')
+          ? 'Gagal terhubung ke cloud. Periksa koneksi internet Anda'
+          : (rawError.isNotEmpty ? rawError : 'Gagal melakukan sinkronisasi');
       _showIosToast(
-        result.errorMessage ?? 'Gagal melakukan sinkronisasi',
+        humanMsg,
         icon: CupertinoIcons.exclamationmark_circle_fill,
       );
     }
@@ -510,7 +517,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.84',
+                    'Versi 1.0.85',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -675,7 +682,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.84 (BUILD 119) - TERBARU'),
+                  header: const Text('VERSI 1.0.85 (BUILD 120) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.shield_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Validasi Finansial & Integritas Data', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Validasi ketat DP non-negatif pada cicilan baru, tarif sewa minimum Rp 1.000, serta penutupan siklus rental ke status Selesai & Lunas.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.slider_horizontal_3,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: Text('Ergonomi Apple HIG & Feedback Ramah', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Keyboard dismiss onDrag pada form cicilan, touch target tombol filter 44pt, nama pelanggan pada peringatan konflik, dan pesan kesalahan koneksi cloud yang manusiawi.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.84 (BUILD 119)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1330,7 +1366,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           key: const ValueKey('idle'),
                           'Sinkronkan Sekarang',
                           style: const TextStyle(
-                            color: AppColors.primaryPink,
+                            color: AppColors.deepPinkText,
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
@@ -1417,9 +1453,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   icon: CupertinoIcons.heart_fill,
                   color: AppColors.primaryPink,
                 ),
-                title: const Text('LilyHouse Rent', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                additionalInfo: const Text('v1.0.84', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                title: const Text('LilyHouse Rent', style: AppTypography.body),
+                additionalInfo: const Text('v1.0.85', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),
 

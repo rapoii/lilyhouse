@@ -1155,6 +1155,50 @@ class RentalDetailSheet extends StatelessWidget {
                         },
                       ),
 
+                    // Aksi Tambahan: Tandai Transaksi Selesai (bila sudah dikembalikan)
+                    if (rental.itemStatus == RentalItemStatus.returned &&
+                        rental.paymentStatus == RentalPaymentStatus.paid)
+                      CupertinoListTile(
+                        leading: const SquircleIcon(
+                          icon: CupertinoIcons.checkmark_seal_fill,
+                          color: Color(0xFF34C759),
+                        ),
+                        title: const Text(
+                          'Selesaikan Rental',
+                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15, color: Color(0xFF289868)),
+                        ),
+                        subtitle: const Text('Kostum sudah dicek lengkap dan sewa dinyatakan tuntas', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
+                        onTap: () async {
+                          final confirm = await showCupertinoDialog<bool>(
+                            context: context,
+                            builder: (dialogCtx) => CupertinoAlertDialog(
+                              title: const Text('Selesaikan Rental'),
+                              content: const Text('Tandai seluruh siklus rental ini telah selesai dan tuntas?'),
+                              actions: [
+                                CupertinoDialogAction(
+                                  isDefaultAction: true,
+                                  child: const Text('Batal'),
+                                  onPressed: () => Navigator.pop(dialogCtx, false),
+                                ),
+                                CupertinoDialogAction(
+                                  child: const Text('Selesaikan'),
+                                  onPressed: () => Navigator.pop(dialogCtx, true),
+                                ),
+                              ],
+                            ),
+                          );
+                          if (confirm != true) return;
+                          if (repository != null) {
+                            final updated = rental.copyWith(itemStatus: RentalItemStatus.completed);
+                            await repository!.updateRental(updated);
+                            onRentalUpdated?.call();
+                          }
+                          if (!context.mounted) return;
+                          IosToast.show(context, 'Rental berhasil diselesaikan sepenuhnya');
+                          Navigator.pop(context);
+                        },
+                      ),
+
                     // Status Info jika sudah selesai / dibatalkan
                     if (rental.itemStatus == RentalItemStatus.cancelled)
                       const CupertinoListTile(
@@ -1169,9 +1213,7 @@ class RentalDetailSheet extends StatelessWidget {
                         subtitle: Text('Jadwal sewa ini tidak lagi aktif', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                       ),
 
-                    if ((rental.itemStatus == RentalItemStatus.returned ||
-                            rental.itemStatus == RentalItemStatus.completed) &&
-                        rental.paymentStatus == RentalPaymentStatus.paid)
+                    if (rental.itemStatus == RentalItemStatus.completed)
                       const CupertinoListTile(
                         leading: SquircleIcon(
                           icon: CupertinoIcons.checkmark_seal_fill,

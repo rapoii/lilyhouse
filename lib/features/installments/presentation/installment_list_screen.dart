@@ -105,7 +105,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
     final bool hasActiveFilter = _selectedStatus != null || _selectedSortBy != 'due_date_asc';
     return CupertinoButton(
       padding: EdgeInsets.zero,
-      minimumSize: Size.zero,
+      minimumSize: const Size(44, 44),
       onPressed: _showFilterSheet,
       child: Container(
         height: 38,
@@ -239,6 +239,10 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                           _showFormAlert(ctx, 'Total Harga Tidak Valid', 'Mohon masukkan total harga yang valid (lebih dari 0).');
                           return;
                         }
+                        if (dp < 0) {
+                          _showFormAlert(ctx, 'DP Tidak Valid', 'Jumlah DP awal tidak boleh kurang dari Rp 0.');
+                          return;
+                        }
                         if (dp > cost) {
                           _showFormAlert(ctx, 'DP Melebihi Total', 'Jumlah DP awal tidak boleh melebihi total harga.');
                           return;
@@ -284,6 +288,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                   child: SafeArea(
                     top: false,
                     child: ListView(
+                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
                       padding: EdgeInsets.fromLTRB(0, 8, 0, bottomInset + 24),
                       physics: const BouncingScrollPhysics(),
                       children: [

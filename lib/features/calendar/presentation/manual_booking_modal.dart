@@ -406,7 +406,18 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
 
   Future<bool?> _showConflictDialog(List<Rental> conflicts) async {
     final conflictDetails = conflicts.map((c) {
-      final name = c.customerId.replaceAll('_', ' ');
+      String name = 'Penyewa';
+      for (final cust in _existingCustomers) {
+        if (cust.id == c.customerId) {
+          name = cust.fullName;
+          break;
+        }
+      }
+      if (name == 'Penyewa') {
+        name = c.customerId.replaceAll('_', ' ');
+      } else {
+        name = name.replaceAll('_', ' ');
+      }
       final start = '${c.startDate.day}/${c.startDate.month}';
       final end = '${c.endDate.day}/${c.endDate.month}';
       return '• $name ($start - $end)';

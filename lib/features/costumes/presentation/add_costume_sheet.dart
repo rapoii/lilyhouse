@@ -165,11 +165,11 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       );
       return;
     }
-    if (price <= 0) {
+    if (price < 1000) {
       HapticFeedback.lightImpact();
       IosToast.show(
         context,
-        'Tarif sewa harus lebih dari Rp 0',
+        'Tarif sewa minimum adalah Rp 1.000',
         icon: CupertinoIcons.exclamationmark_circle_fill,
         iconColor: AppColors.warningOrange,
       );
