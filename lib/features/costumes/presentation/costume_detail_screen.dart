@@ -203,7 +203,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       case CostumeStatus.booked:
         return (const Color(0xFFFFF4E5), const Color(0xFFD97706), 'Dibooking');
       case CostumeStatus.rented:
-        return (const Color(0xFFFFEBF0), AppColors.primaryPink, 'Disewa');
+        return (const Color(0xFFFFEBF0), AppColors.deepPinkText, 'Disewa');
       case CostumeStatus.laundry:
         return (const Color(0xFFE8F1FF), const Color(0xFF2563EB), 'Dicuci');
       case CostumeStatus.maintenance:
@@ -238,7 +238,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
           ),
         ),
         middle: Text(
-          _costume.name,
+          _costume.name.replaceAll('_', ' '),
           style: AppTypography.navTitle,
           overflow: TextOverflow.ellipsis,
         ),
@@ -281,7 +281,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                       ? GestureDetector(
                           onTap: () => _showPhotoPreviewModal(
                             context,
-                            title: _costume.name,
+                            title: _costume.name.replaceAll('_', ' '),
                             photoPath: _costume.coverPhoto!,
                           ),
                           child: Stack(
@@ -337,7 +337,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                   ),
                   title: const Text('Nama Kostum', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                   additionalInfo: Text(
-                    _costume.name,
+                    _costume.name.replaceAll('_', ' '),
                     style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textDark),
                   ),
                 ),
@@ -348,7 +348,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                   ),
                   title: const Text('Serial Anime', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                   additionalInfo: Text(
-                    _costume.animeSeries,
+                    _costume.animeSeries.replaceAll('_', ' '),
                     style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                   ),
                 ),

@@ -960,7 +960,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: inst.isPaidOff ? const Color(0xFF1E824C) : AppColors.primaryPink,
+                            color: inst.isPaidOff ? const Color(0xFF1E824C) : AppColors.deepPinkText,
                           ),
                         ),
                       ),

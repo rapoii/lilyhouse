@@ -230,7 +230,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       decoration: TextDecoration.none,
-                      color: inst.isPaidOff ? const Color(0xFF1E824C) : AppColors.primaryPink,
+                      color: inst.isPaidOff ? const Color(0xFF1E824C) : AppColors.deepPinkText,
                     ),
                   ),
                 ),

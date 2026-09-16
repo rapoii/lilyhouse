@@ -331,7 +331,7 @@ void main() {
 
     // Confirm dialog is shown
     expect(find.text('Batalkan Booking?'), findsOneWidget);
-    expect(find.text('Kembali'), findsOneWidget);
+    expect(find.text('Batal'), findsOneWidget);
 
     // Tap destructive confirm in dialog
     final confirmBtn = find.widgetWithText(CupertinoDialogAction, 'Batalkan Booking');

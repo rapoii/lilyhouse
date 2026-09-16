@@ -405,18 +405,26 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   }
 
   Future<bool?> _showConflictDialog(List<Rental> conflicts) async {
+    final conflictDetails = conflicts.map((c) {
+      final name = c.customerId.replaceAll('_', ' ');
+      final start = '${c.startDate.day}/${c.startDate.month}';
+      final end = '${c.endDate.day}/${c.endDate.month}';
+      return '• $name ($start - $end)';
+    }).join('\n');
+
     return showCupertinoDialog<bool>(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
-        title: const Text('Konflik Jadwal'),
+        title: const Text('Konflik Jadwal Sewa'),
         content: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            'Kostum ini sudah dipesan ${conflicts.length} kali pada rentang tanggal tersebut. Tetap simpan?',
+            'Kostum ini sudah memiliki jadwal sewa pada rentang tanggal yang sama:\n\n$conflictDetails\n\nTetap simpan booking ini?',
           ),
         ),
         actions: [
           CupertinoDialogAction(
+            isDefaultAction: true,
             onPressed: () => Navigator.of(ctx).pop(false),
             child: const Text('Batal'),
           ),

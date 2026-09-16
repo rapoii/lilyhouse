@@ -107,7 +107,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       case CostumeStatus.booked:
         return const Color(0xFFD97706);
       case CostumeStatus.rented:
-        return AppColors.primaryPink;
+        return AppColors.deepPinkText;
       case CostumeStatus.laundry:
         return const Color(0xFF2563EB);
       case CostumeStatus.maintenance:
@@ -425,6 +425,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
         child: CupertinoPageScaffold(
           backgroundColor: AppColors.background,
           navigationBar: CupertinoNavigationBar(
+            automaticallyImplyLeading: false,
             backgroundColor: AppColors.background,
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
@@ -592,7 +593,11 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                             child: CupertinoTextField(
                               controller: _priceController,
                               textAlign: TextAlign.right,
-                              placeholder: '150000',
+                              prefix: const Padding(
+                                padding: EdgeInsets.only(left: 8),
+                                child: Text('Rp ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+                              ),
+                              placeholder: '150.000',
                               placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
                               style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                               keyboardType: TextInputType.number,

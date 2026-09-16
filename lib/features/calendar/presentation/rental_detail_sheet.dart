@@ -396,8 +396,8 @@ class RentalDetailSheet extends StatelessWidget {
   }
 
   void _confirmCancelBooking(BuildContext context) {
-    final costumeName = costume?.name ?? 'kostum ini';
-    final customerName = customer?.fullName ?? 'penyewa';
+    final costumeName = (costume?.name ?? 'kostum ini').replaceAll('_', ' ');
+    final customerName = (customer?.fullName ?? 'penyewa').replaceAll('_', ' ');
 
     showCupertinoDialog<void>(
       context: context,
@@ -408,8 +408,9 @@ class RentalDetailSheet extends StatelessWidget {
         ),
         actions: [
           CupertinoDialogAction(
+            isDefaultAction: true,
             onPressed: () => Navigator.pop(dialogCtx),
-            child: const Text('Kembali'),
+            child: const Text('Batal'),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -829,8 +830,13 @@ class RentalDetailSheet extends StatelessWidget {
                         color: Color(0xFFAF52DE),
                       ),
                       title: Text(
-                        custSosmed,
-                        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 15),
+                        custSosmed != '-' ? custSosmed : 'Belum ditambahkan',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
+                          color: custSosmed != '-' ? AppColors.textDark : AppColors.textMuted,
+                          fontStyle: custSosmed != '-' ? FontStyle.normal : FontStyle.italic,
+                        ),
                       ),
                       subtitle: const Text('Akun Media Sosial', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                       onTap: (custSosmed != '-')
@@ -873,8 +879,13 @@ class RentalDetailSheet extends StatelessWidget {
                         color: Color(0xFFFF9500),
                       ),
                       title: Text(
-                        custAddr,
-                        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
+                        custAddr != '-' ? custAddr : 'Belum ditambahkan',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 14,
+                          color: custAddr != '-' ? AppColors.textDark : AppColors.textMuted,
+                          fontStyle: custAddr != '-' ? FontStyle.normal : FontStyle.italic,
+                        ),
                       ),
                       subtitle: const Text('Alamat Pengiriman / Domisili', style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93))),
                       onTap: (custAddr != '-')

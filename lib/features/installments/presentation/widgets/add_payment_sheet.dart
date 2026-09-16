@@ -138,6 +138,8 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
 
     return DraggableSheetContainer(
       backgroundColor: AppColors.background,
+      initialHeightFraction: 0.70,
+      maxHeightFraction: 0.92,
       onDismissed: () => Navigator.of(context).pop(),
       builder: (ctx) => DefaultTextStyle(
         style: const TextStyle(
@@ -148,6 +150,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
         child: CupertinoPageScaffold(
           backgroundColor: AppColors.background,
           navigationBar: CupertinoNavigationBar(
+            automaticallyImplyLeading: false,
             backgroundColor: AppColors.background,
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
@@ -189,12 +192,12 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                widget.installment.itemName,
+                                widget.installment.itemName.replaceAll('_', ' '),
                                 style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textDark),
                               ),
                               if (widget.installment.storeName != null)
                                 Text(
-                                  widget.installment.storeName!,
+                                  widget.installment.storeName!.replaceAll('_', ' '),
                                   style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                                 ),
                             ],
@@ -241,11 +244,11 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            const Icon(CupertinoIcons.sparkles, size: 14, color: AppColors.primaryPink),
+                            const Icon(CupertinoIcons.sparkles, size: 14, color: AppColors.deepPinkText),
                             const SizedBox(width: 6),
                             Text(
                               'Isi Nominal Sisa Tagihan (${_formatCurrency(widget.installment.remainingBalance)})',
-                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primaryPink),
+                              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.deepPinkText),
                             ),
                           ],
                         ),

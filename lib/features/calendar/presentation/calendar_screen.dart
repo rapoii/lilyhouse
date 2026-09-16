@@ -1102,7 +1102,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                       CupertinoListTile(
                         leading: const SquircleIcon(icon: CupertinoIcons.person_fill, color: AppColors.primaryPink),
                         title: const Text('Nama Penyewa', style: TextStyle(fontSize: 14, color: AppColors.textDark)),
-                        additionalInfo: Text(_parsedData!.fullName ?? '-', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                        additionalInfo: Text(_parsedData!.fullName?.replaceAll('_', ' ') ?? '-', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
                       ),
                       CupertinoListTile(
                         leading: const SquircleIcon(icon: CupertinoIcons.phone_fill, color: Color(0xFF34C759)),
@@ -1118,7 +1118,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                       CupertinoListTile(
                         leading: const SquircleIcon(icon: CupertinoIcons.sparkles, color: Color(0xFF5856D6)),
                         title: const Text('Kostum', style: TextStyle(fontSize: 14, color: AppColors.textDark)),
-                        additionalInfo: Text(_parsedData!.costumeName ?? '-', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
+                        additionalInfo: Text(_parsedData!.costumeName?.replaceAll('_', ' ') ?? '-', style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textDark)),
                       ),
                       CupertinoListTile(
                         leading: const SquircleIcon(icon: CupertinoIcons.calendar, color: Color(0xFF007AFF)),
