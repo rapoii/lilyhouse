@@ -562,7 +562,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
             textBaseline: TextBaseline.alphabetic,
             children: [
               const Text(
-                'Total Sisa Hutang',
+                'Total Sisa Utang',
                 style: TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w500,

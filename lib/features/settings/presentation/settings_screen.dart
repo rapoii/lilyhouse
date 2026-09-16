@@ -739,9 +739,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: CupertinoIcons.chart_pie_fill,
                         color: AppColors.primaryPink,
                       ),
-                      title: Text('Ringkasan Hutang & Template Konfirmasi', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      title: Text('Ringkasan Utang & Template Konfirmasi', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
-                        'Kartu ringkasan total hutang cicilan, sanitasi pemisah ribuan, filter chip interaktif katalog kostum, dan template pesan konfirmasi pelanggan.',
+                        'Kartu ringkasan total utang cicilan, sanitasi pemisah ribuan, filter chip interaktif katalog kostum, dan template pesan konfirmasi pelanggan.',
                         style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
                       ),
                     ),

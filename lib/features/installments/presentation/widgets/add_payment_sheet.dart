@@ -123,11 +123,11 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
       return;
     }
 
-    // Pencegahan overpayment: nominal bayar tidak boleh melebihi sisa hutang
+    // Pencegahan overpayment: nominal bayar tidak boleh melebihi sisa utang
     final remaining = widget.installment.remainingBalance;
     if (amount > (remaining + 0.01)) {
       setState(() {
-        _errorMessage = 'Nominal melebihi sisa hutang (${_formatCurrency(remaining)})';
+        _errorMessage = 'Nominal melebihi sisa utang (${_formatCurrency(remaining)})';
       });
       return;
     }
@@ -271,7 +271,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Text(
-                                  'Sisa Hutang Saat Ini',
+                                  'Sisa Utang Saat Ini',
                                   style: TextStyle(
                                     fontSize: 13,
                                     color: AppColors.textMuted,

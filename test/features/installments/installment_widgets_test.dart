@@ -462,7 +462,7 @@ void main() {
 
       // Verify validation error is displayed and not saved
       expect(find.byKey(const Key('payment_error_message')), findsOneWidget);
-      expect(find.textContaining('Nominal melebihi sisa hutang (Rp 200.000)'), findsOneWidget);
+      expect(find.textContaining('Nominal melebihi sisa utang (Rp 200.000)'), findsOneWidget);
       expect(saved, isFalse);
       expect(repo._logs.isEmpty, isTrue);
     });
@@ -703,7 +703,7 @@ void main() {
       // Verify Summary Card exists
       expect(find.byKey(const Key('installment_summary_card')), findsOneWidget);
       expect(find.text('RINGKASAN FINANSIAL CICILAN'), findsOneWidget);
-      expect(find.text('Total Sisa Hutang'), findsOneWidget);
+      expect(find.text('Total Sisa Utang'), findsOneWidget);
 
       // Remaining debt: 1.000.000 + 200.000 = 1.200.000
       expect(find.text('Rp 1.200.000'), findsOneWidget);
