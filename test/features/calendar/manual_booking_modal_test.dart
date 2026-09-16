@@ -361,7 +361,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // Toast error shown & nothing saved
-    expect(find.text('Nomor WhatsApp tidak valid (minimal 8 digit)'), findsOneWidget);
+    expect(find.text('Nomor telepon tidak valid (minimal 8 digit)'), findsOneWidget);
     expect(rentalRepo.customers, isEmpty);
     expect(rentalRepo.rentals, isEmpty);
   });

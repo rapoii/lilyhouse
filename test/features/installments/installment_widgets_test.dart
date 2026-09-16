@@ -329,7 +329,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       // Verify Apple HIG nav bar and sections
-      expect(find.text('Detail Cicilan'), findsOneWidget);
+      expect(find.text('Rincian Cicilan'), findsOneWidget);
       expect(find.text('Tutup'), findsOneWidget);
       expect(find.text('INFORMASI BARANG'), findsOneWidget);
       expect(find.text('RINGKASAN PEMBAYARAN'), findsOneWidget);

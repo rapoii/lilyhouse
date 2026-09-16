@@ -168,7 +168,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           ),
                           title: const Text('Smart Paste', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                           subtitle: const Text(
-                            'Parsing otomatis form booking WhatsApp',
+                            'Deteksi otomatis format sewa DM Instagram',
                             style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
                           ),
                           trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
@@ -959,7 +959,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
               onPressed: () => Navigator.of(sheetCtx).pop(),
               child: const Text('Batal', style: AppTypography.actionButton),
             ),
-            middle: const Text('Smart Rent Form Parser', style: AppTypography.navTitle),
+            middle: const Text('Deteksi Format Sewa', style: AppTypography.navTitle),
           ),
           child: SafeArea(
             top: false,
@@ -971,7 +971,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                 const Text(
-                  'Tempel pesan format sewa WhatsApp di bawah ini untuk deteksi jadwal dan isi formulir otomatis.',
+                  'Tempel format sewa DM Instagram di bawah ini untuk deteksi jadwal dan isi formulir otomatis.',
                   style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93), height: 1.3),
                 ),
                 const SizedBox(height: 12),
@@ -1025,7 +1025,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                     maxLines: null,
                     expands: true,
                     style: const TextStyle(fontSize: 13, color: AppColors.textDark),
-                    placeholder: 'Tempel pesan form sewa WhatsApp di sini...',
+                    placeholder: 'Tempel format sewa DM Instagram di sini...',
                     placeholderStyle: const TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
                     padding: const EdgeInsets.all(12),
                     decoration: null,
@@ -1106,7 +1106,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                       ),
                       CupertinoListTile(
                         leading: const SquircleIcon(icon: CupertinoIcons.phone_fill, color: Color(0xFF34C759)),
-                        title: const Text('No. WhatsApp', style: TextStyle(fontSize: 14, color: AppColors.textDark)),
+                        title: const Text('No. Telepon / HP', style: TextStyle(fontSize: 14, color: AppColors.textDark)),
                         additionalInfo: Text(_parsedData!.normalizedPhone ?? _parsedData!.phone ?? '-', style: const TextStyle(fontSize: 14, color: AppColors.textDark)),
                       ),
                       if (_parsedData!.address != null && _parsedData!.address!.isNotEmpty)

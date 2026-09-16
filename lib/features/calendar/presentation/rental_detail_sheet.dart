@@ -479,7 +479,7 @@ class RentalDetailSheet extends StatelessWidget {
               Text(
                 isLate
                     ? 'Kostum terlambat $lateDays hari. Pastikan cek kelengkapan dan kondisi fisik kostum.'
-                    : 'Periksa kelengkapan kostum, wig, dan aksesoris sebelum menandai selesai.',
+                    : 'Periksa kelengkapan kostum, wig, dan aksesori sebelum menandai selesai.',
                 style: const TextStyle(fontSize: 13),
               ),
               const SizedBox(height: 12),
@@ -586,7 +586,7 @@ class RentalDetailSheet extends StatelessWidget {
     return digits;
   }
 
-  String _buildWhatsAppConfirmationMessage({
+  String _buildInstagramConfirmationMessage({
     required String customerName,
     required String costumeName,
     required String costumeSeries,
@@ -602,29 +602,31 @@ class RentalDetailSheet extends StatelessWidget {
     final paymentStatusLabel = paymentStatus == RentalPaymentStatus.paid
         ? 'Lunas'
         : (paymentStatus == RentalPaymentStatus.dpPaid
-            ? 'DP Terbayar (Sisa Rp ${currencyFormat.format(sisaTagihan)})'
-            : 'Belum Lunas (Sisa Rp ${currencyFormat.format(sisaTagihan)})');
+            ? 'DP'
+            : 'Belum Lunas');
 
     final buffer = StringBuffer();
-    buffer.writeln('*KONFIRMASI RESERVASI SEWA KOSTUM - LILYHOUSE*');
-    buffer.writeln('Halo Kak $customerName, pesanan sewa kostum kamu telah tercatat di sistem LilyHouse.');
+    buffer.writeln('*KONFIRMASI SEWA KOSTUM - LILYHOUSE*');
+    buffer.writeln('Halo Kak $customerName, pesanan sewa kostum kamu telah tercatat di sistem LilyHouse (@lilycosrent).');
     buffer.writeln();
     buffer.writeln('*Rincian Sewa:*');
-    buffer.writeln('- Kostum: $costumeName ($costumeSeries)');
-    buffer.writeln('- Jadwal Sewa: $startDateFormatted - $endDateFormatted ($durationDays Hari)');
+    buffer.writeln('- Kostum: $costumeName');
+    buffer.writeln('- Seri: $costumeSeries');
+    buffer.writeln('- Tanggal Sewa: $startDateFormatted - $endDateFormatted ($durationDays Hari)');
     buffer.writeln('- Total Biaya: Rp ${currencyFormat.format(totalPrice)}');
     if (dpAmount > 0) {
       buffer.writeln('- Uang Muka (DP): Rp ${currencyFormat.format(dpAmount)}');
     }
     buffer.writeln('- Status Pembayaran: $paymentStatusLabel');
+    buffer.writeln('- Sisa Tagihan: Rp ${currencyFormat.format(sisaTagihan)}');
     buffer.writeln();
     buffer.writeln('*Petunjuk & Peraturan Rental:*');
-    buffer.writeln('1. Mohon menjaga kebersihan dan kelengkapan kostum beserta seluruh aksesoris.');
-    buffer.writeln('2. Kostum tidak perlu dicuci saat dikembalikan, tim LilyHouse yang akan menangani proses laundry.');
-    buffer.writeln('3. Pengembalian maksimal dilakukan pada hari terakhir masa sewa.');
-    buffer.writeln('4. Keterlambatan pengembalian atau kerusakan properti akan dikenakan biaya kompensasi.');
+    buffer.writeln('1. Mohon menjaga kebersihan dan kelengkapan kostum beserta seluruh aksesori.');
+    buffer.writeln('2. Kostum tidak perlu dicuci saat dikembalikan, tim LilyHouse yang akan menangani proses pencucian.');
+    buffer.writeln('3. Pengembalian maksimal pada hari terakhir masa sewa.');
+    buffer.writeln('4. Keterlambatan/kerusakan dikenakan biaya kompensasi.');
     buffer.writeln();
-    buffer.write('Terima kasih telah mempercayakan kebutuhan cosplay kamu di LilyHouse.');
+    buffer.write('Terima kasih telah menyewa di LilyHouse (@lilycosrent).');
 
     return buffer.toString();
   }
@@ -671,7 +673,7 @@ class RentalDetailSheet extends StatelessWidget {
             automaticallyImplyLeading: false,
             backgroundColor: AppColors.background,
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
-            middle: const Text('Detail Rental', style: AppTypography.navTitle),
+            middle: const Text('Rincian Rental', style: AppTypography.navTitle),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: () => Navigator.of(context).pop(),
@@ -951,7 +953,7 @@ class RentalDetailSheet extends StatelessWidget {
                         style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
                       ),
                       subtitle: Text(
-                        custPhone != '-' ? 'Nomor WhatsApp / HP • ${_formatDisplayPhone(custPhone)}' : 'Nomor WhatsApp / HP',
+                        custPhone != '-' ? 'Nomor Telepon / HP • ${_formatDisplayPhone(custPhone)}' : 'Nomor Telepon / HP',
                         style: const TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
                       ),
                       onTap: (custPhone != '-')
@@ -1129,24 +1131,24 @@ class RentalDetailSheet extends StatelessWidget {
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(
-                        icon: CupertinoIcons.chat_bubble_text_fill,
-                        color: Color(0xFF25D366),
+                        icon: CupertinoIcons.paperplane_fill,
+                        color: Color(0xFFE1306C),
                       ),
                       title: const Text(
-                        'Salin Pesan Konfirmasi WA',
+                        'Salin Format DM Instagram',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 15,
-                          color: Color(0xFF1B5E20),
+                          color: Color(0xFFC2185B),
                         ),
                       ),
                       subtitle: const Text(
-                        'Template rincian sewa & aturan rental untuk dikirim ke WhatsApp',
+                        'Template rincian sewa & aturan rental untuk dikirim via DM Instagram',
                         style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
                       ),
                       onTap: () {
                         HapticFeedback.lightImpact();
-                        final message = _buildWhatsAppConfirmationMessage(
+                        final message = _buildInstagramConfirmationMessage(
                           customerName: custName,
                           costumeName: costName,
                           costumeSeries: costSeries,
@@ -1160,14 +1162,14 @@ class RentalDetailSheet extends StatelessWidget {
                           currencyFormat: currencyFormat,
                         );
                         Clipboard.setData(ClipboardData(text: message));
-                        IosToast.show(context, 'Pesan konfirmasi WA berhasil disalin');
+                        IosToast.show(context, 'Format konfirmasi Instagram berhasil disalin');
                       },
                       trailing: CupertinoButton(
                         padding: EdgeInsets.zero,
                         minimumSize: const Size(44, 44),
                         onPressed: () {
                           HapticFeedback.lightImpact();
-                          final message = _buildWhatsAppConfirmationMessage(
+                          final message = _buildInstagramConfirmationMessage(
                             customerName: custName,
                             costumeName: costName,
                             costumeSeries: costSeries,
@@ -1181,20 +1183,20 @@ class RentalDetailSheet extends StatelessWidget {
                             currencyFormat: currencyFormat,
                           );
                           Clipboard.setData(ClipboardData(text: message));
-                          IosToast.show(context, 'Pesan konfirmasi WA berhasil disalin');
+                          IosToast.show(context, 'Format konfirmasi Instagram berhasil disalin');
                         },
                         child: Container(
                           width: 32,
                           height: 32,
                           decoration: const BoxDecoration(
-                            color: Color(0xFFE8F5E9),
+                            color: Color(0xFFFCE4EC),
                             shape: BoxShape.circle,
                           ),
                           child: const Center(
                             child: Icon(
                               CupertinoIcons.doc_on_clipboard_fill,
                               size: 15,
-                              color: Color(0xFF1B5E20),
+                              color: Color(0xFFC2185B),
                             ),
                           ),
                         ),

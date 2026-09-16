@@ -393,10 +393,10 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               ],
             ),
 
-            // Section 2: TARIF & DETAIL (seiras RINGKASAN PEMBAYARAN di Detail Cicilan)
+            // Section 2: TARIF & KETERANGAN (seiras RINGKASAN PEMBAYARAN di Detail Cicilan)
             CupertinoListSection.insetGrouped(
               backgroundColor: AppColors.background,
-              header: const Text('TARIF & DETAIL'),
+              header: const Text('TARIF & KETERANGAN'),
               margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
               children: [
                 CupertinoListTile(

@@ -90,7 +90,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Hapus Cicilan?'),
-        content: Text('Apakah Anda yakin ingin menghapus data cicilan "${inst.itemName}" beserta riwayat pembayarannya?'),
+        content: Text('Yakin ingin menghapus data cicilan "${inst.itemName}" beserta riwayat pembayarannya?'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),
@@ -155,7 +155,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
         backgroundColor: AppColors.background,
         navigationBar: CupertinoNavigationBar(
           backgroundColor: AppColors.background,
-          middle: const Text('Detail Cicilan', style: AppTypography.navTitle),
+          middle: const Text('Rincian Cicilan', style: AppTypography.navTitle),
           leading: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () => Navigator.maybePop(context),
@@ -184,7 +184,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
             onPressed: () => Navigator.maybePop(context),
             child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
           ),
-          middle: const Text('Detail Cicilan', style: AppTypography.navTitle),
+          middle: const Text('Rincian Cicilan', style: AppTypography.navTitle),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [

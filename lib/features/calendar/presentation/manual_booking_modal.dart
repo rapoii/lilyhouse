@@ -361,11 +361,11 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       return false;
     }
     if (_phoneController.text.trim().isEmpty) {
-      _showErrorSnack('Nomor WhatsApp wajib diisi');
+      _showErrorSnack('Nomor telepon wajib diisi');
       return false;
     }
     if (!okPhone) {
-      _showErrorSnack('Nomor WhatsApp tidak valid (minimal 8 digit)');
+      _showErrorSnack('Nomor telepon tidak valid (minimal 8 digit)');
       return false;
     }
     if (_parentPhoneController.text.trim().isNotEmpty) {
@@ -639,7 +639,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       title: CupertinoTextField(
                         key: const Key('manual_phone_input'),
                         controller: _phoneController,
-                        placeholder: 'No HP / WhatsApp (cth: 081234567890)',
+                        placeholder: 'Nomor Telepon / HP (cth: 081234567890)',
                         placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -697,7 +697,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       title: CupertinoTextField(
                         key: const Key('manual_social_input'),
                         controller: _socialMediaController,
-                        placeholder: 'Akun sosmed (TikTok / IG)',
+                        placeholder: 'Akun Instagram (cth: @username)',
                         placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),

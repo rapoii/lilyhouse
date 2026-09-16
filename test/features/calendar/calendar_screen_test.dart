@@ -326,12 +326,12 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       // Verify dialog appears
-      expect(find.text('Smart Rent Form Parser'), findsOneWidget);
+      expect(find.text('Deteksi Format Sewa'), findsOneWidget);
       expect(find.text('Tempel Klip'), findsOneWidget);
       expect(find.text('PESAN FORMAT SEWA'), findsOneWidget);
       expect(find.byKey(const Key('smart_paste_input')), findsOneWidget);
 
-      // Enter overlapping WhatsApp text
+      // Enter overlapping rental format text
       const rawFormText = '''
 🎀Form Rent Lilycosrent🎀
 1. Nama asli/nama dipaket : Clara Oswald

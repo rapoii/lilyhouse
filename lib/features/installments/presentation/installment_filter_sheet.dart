@@ -158,7 +158,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
                   children: [
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.calendar_today, color: AppColors.primaryPink),
-                      title: const Text('Jatuh Tempo Terdekat (Default)', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                      title: const Text('Jatuh Tempo Terdekat (Bawaan)', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedSortBy == 'due_date_asc'),
                       onTap: () => _select(() => _selectedSortBy = 'due_date_asc'),
                     ),

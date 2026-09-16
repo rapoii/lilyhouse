@@ -1017,12 +1017,12 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('Tutup', style: AppTypography.actionButton),
             ),
-            middle: const Text('Detail Cicilan', style: AppTypography.navTitle),
+            middle: const Text('Rincian Cicilan', style: AppTypography.navTitle),
             trailing: widget.onOpenDetail != null
                 ? CupertinoButton(
                     padding: EdgeInsets.zero,
                     onPressed: widget.onOpenDetail,
-                    child: const Text('Detail Lengkap', style: AppTypography.actionButton),
+                    child: const Text('Rincian Lengkap', style: AppTypography.actionButton),
                   )
                 : null,
           ),

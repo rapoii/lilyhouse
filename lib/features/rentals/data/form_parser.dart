@@ -17,7 +17,7 @@ class SmartFormParser {
     'des': 12, 'desember': 12, 'dec': 12, 'december': 12,
   };
 
-  /// Parses raw Indonesian WhatsApp rental form into [ParsedRentalData].
+  /// Parses raw Indonesian rental form (from Instagram DM or other channels) into [ParsedRentalData].
   static ParsedRentalData parse(String rawText) {
     if (rawText.trim().isEmpty) {
       return const ParsedRentalData();
@@ -26,65 +26,65 @@ class SmartFormParser {
     final fullName = _extractField(
       rawText,
       patterns: [
-        RegExp(r'(?:1\.\s*)?Nama\s*(?:asli|lengkap)?(?:\s*/\s*nama\s*di\s*paket)?\s*:\s*([^\n\r]+)', caseSensitive: false),
-        RegExp(r'Nama\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?Nama\s*(?:asli|lengkap|penyewa)?(?:\s*/\s*nama\s*di\s*paket)?\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*Nama\s*:\s*([^\n\r]+)', caseSensitive: false),
       ],
     );
 
     final phone = _extractField(
       rawText,
       patterns: [
-        RegExp(r'(?:2\.\s*)?No\s*(?:HP|WA|WhatsApp|Telepon)\s*:\s*([^\n\r]+)', caseSensitive: false),
-        RegExp(r'HP\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?(?:(?:No\.?|Nomor)\s*)?\b(?:HP|Telepon|Telp|Kontak|WA|WhatsApp)\b(?:\s*/\s*(?:(?:No\.?|Nomor)\s*)?(?:HP|Telepon|Telp|Kontak|WA|WhatsApp))*(?!\s*(?:ortu|orang\s*tua|darurat))\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:(?:No\.?|Nomor)\s*)?(?:HP|Telepon|Telp|Kontak)\s*:\s*([^\n\r]+)', caseSensitive: false),
       ],
     );
 
     final address = _extractMultilineField(
       rawText,
-      startPattern: RegExp(r'(?:3\.\s*)?Alamat(?:\s*lengkap)?\s*:\s*', caseSensitive: false),
-      nextPattern: RegExp(r'(?:\n\r?|\r\n?)(?:(?:4\.\s*)?No\s*hp\s*ortu|4\.)', caseSensitive: false),
+      startPattern: RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?Alamat(?:\s*lengkap)?\s*:\s*', caseSensitive: false),
+      nextPattern: RegExp(r'(?:^|[\r\n])\s*(?:(?:\d+\.\s*)?(?:(?:No\.?|Nomor)?\s*(?:hp|telepon|telp|kontak)\s*ortu|Kontak\s*darurat|(?:No\.?|Nomor)?\s*(?:hp|telepon|telp|kontak|wa|whatsapp)|Instagram|IG|Akun|Sosmed|Kostum|Tanggal|Untuk|Keperluan)|\d+\.)', caseSensitive: false),
     );
 
     final parentPhone = _extractField(
       rawText,
       patterns: [
-        RegExp(r'(?:4\.\s*)?No\s*hp\s*ortu(?:/org\s*terdekat\s*yg\s*bisa\s*dihubungi|/orang\s*terdekat)?\s*:\s*([^\n\r]+)', caseSensitive: false),
-        RegExp(r'No\s*hp\s*ortu[^\n\r:]*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?(?:(?:No\.?|Nomor)\s*)?(?:hp|telepon|telp|kontak)\s*ortu(?:/org\s*terdekat\s*yg\s*bisa\s*dihubungi|/orang\s*terdekat)?\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?Kontak\s*darurat[^\n\r:]*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:No\.?|Nomor)?\s*(?:hp|telepon|telp|kontak)\s*ortu[^\n\r:]*:\s*([^\n\r]+)', caseSensitive: false),
       ],
     );
 
     final socialMedia = _extractField(
       rawText,
       patterns: [
-        RegExp(r'(?:5\.\s*)?Akun\s*sosmed(?:\s*\([^)]*\))?\s*:\s*([^\n\r]+)', caseSensitive: false),
-        RegExp(r'Sosmed\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?(?:Akun\s*sosmed|Akun\s*Instagram|Akun\s*IG|Username\s*IG|User\s*IG|Instagram|IG|Sosmed)(?:\s*/\s*(?:Akun\s*sosmed|Akun\s*Instagram|Akun\s*IG|Username\s*IG|User\s*IG|Instagram|IG|Sosmed))*(?:\s*\([^)]*\))?\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:Instagram|IG|Sosmed|Akun)\s*:\s*([^\n\r]+)', caseSensitive: false),
       ],
     );
 
     final costumeName = _extractField(
       rawText,
       patterns: [
-        RegExp(r'(?:6\.\s*)?Kostum\s*(?:yg|yang)?\s*di\s*rental\s*:\s*([^\n\r]+)', caseSensitive: false),
-        RegExp(r'Kostum\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?Kostum\s*(?:yg|yang)?\s*(?:di\s*)?(?:rental|sewa)?\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?Kostum\s*:\s*([^\n\r]+)', caseSensitive: false),
       ],
     );
 
     final datesRaw = _extractField(
       rawText,
       patterns: [
-        RegExp(r'(?:7\.\s*)?Tanggal\s*(?:di\s*pakai|dipakai)(?:\s*\([^)]*\))?\s*:\s*([^\n\r]+)', caseSensitive: false),
-        RegExp(r'Tanggal(?:\s*sewa|\s*rental)?\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?Tanggal\s*(?:di\s*pakai|dipakai|sewa|rental|pemakaian)(?:\s*\([^)]*\))?\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?Tanggal(?:\s*sewa|\s*rental)?\s*:\s*([^\n\r]+)', caseSensitive: false),
       ],
     );
 
     final purpose = _extractField(
       rawText,
       patterns: [
-        RegExp(r'(?:8\.\s*)?Untuk\s*keperluan(?:\s*\([^)]*\))?\s*:\s*([^\n\r]+)', caseSensitive: false),
-        RegExp(r'Keperluan\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?Untuk\s*keperluan(?:\s*\([^)]*\))?\s*:\s*([^\n\r]+)', caseSensitive: false),
+        RegExp(r'(?:^|[\r\n])\s*(?:\d+\.\s*)?Keperluan\s*:\s*([^\n\r]+)', caseSensitive: false),
       ],
     );
-
     DateTime? startDate;
     DateTime? endDate;
     int? rentalDurationDays;

@@ -227,7 +227,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   padding: const EdgeInsets.all(16),
                   children: [
                     CupertinoListSection.insetGrouped(
-                      header: Text('${items.length} ITEM MENUNGGU SINKRONISASI'),
+                      header: Text('${items.length} DATA MENUNGGU SINKRONISASI'),
                       backgroundColor: Colors.transparent,
                       margin: EdgeInsets.zero,
                       children: items.map((item) {
@@ -525,7 +525,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.88',
+                    'Versi 1.0.89',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -690,7 +690,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.88 (BUILD 123) - TERBARU'),
+                  header: const Text('VERSI 1.0.89 (BUILD 124) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.paperplane_fill,
+                        color: Color(0xFFE1306C),
+                      ),
+                      title: Text('Format DM Instagram & Toko', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Template rincian sewa disesuaikan untuk DM Instagram (@lilycosrent), lengkap dengan tombol salin cepat berikon paper plane dan touch target 44pt.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.textformat,
+                        color: Color(0xFF5856D6),
+                      ),
+                      title: Text('Penyelarasan Bahasa Baku & KBBI', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Harmonisasi istilah Rincian Rental, Rincian Cicilan, pembakuan kata aksesori (KBBI), penyesuaian label kontak nomor telepon, dan pembersihan residu WhatsApp.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.88 (BUILD 123)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -710,9 +739,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: CupertinoIcons.chart_pie_fill,
                         color: AppColors.primaryPink,
                       ),
-                      title: Text('Ringkasan Hutang & Template WhatsApp', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      title: Text('Ringkasan Hutang & Template Konfirmasi', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
-                        'Kartu ringkasan total hutang cicilan, sanitasi pemisah ribuan, filter chip interaktif katalog kostum, dan template pesan konfirmasi WhatsApp pelanggan.',
+                        'Kartu ringkasan total hutang cicilan, sanitasi pemisah ribuan, filter chip interaktif katalog kostum, dan template pesan konfirmasi pelanggan.',
                         style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
                       ),
                     ),
@@ -904,7 +933,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       title: Text('Kalender & Smart Paste Cepat', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
-                        'Kartu booking kini menampilkan rentang tanggal sewa & durasi lengkap, indikator hari sewa berjalan, dan tombol cepat Tempel Klip untuk form WhatsApp otomatis.',
+                        'Kartu booking kini menampilkan rentang tanggal sewa & durasi lengkap, indikator hari sewa berjalan, dan tombol cepat Tempel Klip untuk format sewa otomatis.',
                         style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
                       ),
                     ),
@@ -1049,7 +1078,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ),
                       title: Text('Deteksi Pelanggan Berulang Cerdas', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
-                        'Saat memasukkan nomor WhatsApp pelanggan lama, sistem otomatis mengisi identitas, alamat, akun sosmed, dan menghubungkan KTP terverifikasi tanpa duplikasi data.',
+                        'Saat memasukkan nomor telepon pelanggan lama, sistem otomatis mengisi identitas, alamat, akun sosmed, dan menghubungkan KTP terverifikasi tanpa duplikasi data.',
                         style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
                       ),
                     ),
@@ -1556,7 +1585,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.88', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.89', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),

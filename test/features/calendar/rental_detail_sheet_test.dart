@@ -161,7 +161,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Nav title
-    expect(find.text('Detail Rental'), findsOneWidget);
+    expect(find.text('Rincian Rental'), findsOneWidget);
 
     // Verify Hero card info
     expect(find.text('Furina Archon'), findsOneWidget);
@@ -177,7 +177,7 @@ void main() {
     expect(find.text('08123456789'), findsOneWidget);
     expect(find.text('@alyacosplay'), findsOneWidget);
     expect(find.text('Jl. Merdeka No. 10, Jakarta'), findsOneWidget);
-    expect(find.text('Salin Pesan Konfirmasi WA'), findsOneWidget);
+    expect(find.text('Salin Format DM Instagram'), findsOneWidget);
 
     // Verify Identity Documents Section
     expect(find.text('DOKUMEN IDENTITAS & JAMINAN'), findsOneWidget);
@@ -483,7 +483,7 @@ void main() {
     expect(repo.lastUpdatedRental?.notes, contains('Kondisi: Wig sedikit kusut tapi aman'));
   });
 
-  testWidgets('Tapping Salin Pesan Konfirmasi WA copies formatted WhatsApp message to clipboard with IosToast', (tester) async {
+  testWidgets('Tapping Salin Format DM Instagram copies formatted Instagram message to clipboard with IosToast', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -524,7 +524,7 @@ void main() {
     await tester.tap(find.text('Open Sheet'));
     await tester.pumpAndSettle();
 
-    final copyTile = find.text('Salin Pesan Konfirmasi WA');
+    final copyTile = find.text('Salin Format DM Instagram');
     expect(copyTile, findsOneWidget);
 
     // Tap tile
@@ -532,7 +532,7 @@ void main() {
     await tester.pump();
 
     // Verify toast appeared
-    expect(find.text('Pesan konfirmasi WA berhasil disalin'), findsOneWidget);
+    expect(find.text('Format konfirmasi Instagram berhasil disalin'), findsOneWidget);
 
     // Verify clipboard content
     final clipboardCalls = log.where((call) => call.method == 'Clipboard.setData').toList();
@@ -540,16 +540,21 @@ void main() {
 
     final dynamic copiedMap = clipboardCalls.last.arguments;
     final copiedText = copiedMap is Map ? copiedMap['text'] as String : '';
-    expect(copiedText, contains('*KONFIRMASI RESERVASI SEWA KOSTUM - LILYHOUSE*'));
-    expect(copiedText, contains('Alya Rani'));
-    expect(copiedText, contains('Furina Archon'));
-    expect(copiedText, contains('Genshin Impact'));
-    expect(copiedText, contains('13 Sep 2026 - 16 Sep 2026 (3 Hari)'));
-    expect(copiedText, contains('Total Biaya: Rp 150.000'));
-    expect(copiedText, contains('Uang Muka (DP): Rp 50.000'));
-    expect(copiedText, contains('DP Terbayar (Sisa Rp 100.000)'));
+    expect(copiedText, contains('*KONFIRMASI SEWA KOSTUM - LILYHOUSE*'));
+    expect(copiedText, contains('Halo Kak Alya Rani, pesanan sewa kostum kamu telah tercatat di sistem LilyHouse (@lilycosrent).'));
+    expect(copiedText, contains('- Kostum: Furina Archon'));
+    expect(copiedText, contains('- Seri: Genshin Impact'));
+    expect(copiedText, contains('- Tanggal Sewa: 13 Sep 2026 - 16 Sep 2026 (3 Hari)'));
+    expect(copiedText, contains('- Total Biaya: Rp 150.000'));
+    expect(copiedText, contains('- Uang Muka (DP): Rp 50.000'));
+    expect(copiedText, contains('- Status Pembayaran: DP'));
+    expect(copiedText, contains('- Sisa Tagihan: Rp 100.000'));
     expect(copiedText, contains('*Petunjuk & Peraturan Rental:*'));
-    expect(copiedText, contains('Kostum tidak perlu dicuci saat dikembalikan'));
+    expect(copiedText, contains('1. Mohon menjaga kebersihan dan kelengkapan kostum beserta seluruh aksesori.'));
+    expect(copiedText, contains('2. Kostum tidak perlu dicuci saat dikembalikan, tim LilyHouse yang akan menangani proses pencucian.'));
+    expect(copiedText, contains('3. Pengembalian maksimal pada hari terakhir masa sewa.'));
+    expect(copiedText, contains('4. Keterlambatan/kerusakan dikenakan biaya kompensasi.'));
+    expect(copiedText, contains('Terima kasih telah menyewa di LilyHouse (@lilycosrent).'));
 
     // Check no emojis in the copied message
     final emojiRegex = RegExp(r'[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]', unicode: true);
@@ -560,7 +565,7 @@ void main() {
     await tester.pumpAndSettle();
   });
 
-  testWidgets('Tapping trailing circular copy button copies formatted WhatsApp message to clipboard', (tester) async {
+  testWidgets('Tapping trailing circular copy button copies formatted Instagram message to clipboard', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 1.0;
     addTearDown(() {
@@ -570,7 +575,7 @@ void main() {
 
     final repo = MockRentalRepo();
     final rental = Rental(
-      id: 'rent-wa-2',
+      id: 'rent-dm-2',
       costumeId: 'cos-1',
       customerId: 'cust-1',
       startDate: DateTime(2026, 9, 20),
@@ -611,7 +616,7 @@ void main() {
     await tester.pump();
 
     // Verify toast
-    expect(find.text('Pesan konfirmasi WA berhasil disalin'), findsOneWidget);
+    expect(find.text('Format konfirmasi Instagram berhasil disalin'), findsOneWidget);
 
     final clipboardCalls = log.where((call) => call.method == 'Clipboard.setData').toList();
     expect(clipboardCalls.isNotEmpty, isTrue);

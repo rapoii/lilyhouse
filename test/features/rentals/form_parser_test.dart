@@ -21,7 +21,7 @@ No privat akun/ganti usn selama masa rental yaa
 10.  Selfie memegang kartu identitas
 ''';
 
-    test('accurately extracts fields from raw WhatsApp message', () {
+    test('accurately extracts fields from raw rental format message', () {
       final result = SmartFormParser.parse(realCustomerSample);
 
       expect(result.fullName, equals('Jihan Fatin'));
@@ -140,6 +140,35 @@ Patokan dekat masjid Al-Hidayah
       final result = SmartFormParser.parse(testPhoneForm);
       expect(result.normalizedPhone, equals('082245777711'));
       expect(result.fullName, equals('Test User'));
+    });
+
+    test('extracts fields from Instagram DM format with varied labels', () {
+      const igDmFormat = '''
+Format Sewa Kostum Lilycosrent
+Nama Penyewa : Mikasa Ackerman
+Kontak / No Telepon : 081299887766
+Alamat : Shiganshina District No 12
+Kontak darurat : 081299887700 (Armin)
+Akun Instagram : @mikasa_ackerman
+Kostum : Scout Legion Cloak
+Tanggal Sewa : 12 - 14 November 2026
+Keperluan : event anime festival
+''';
+
+      final result = SmartFormParser.parse(igDmFormat);
+
+      expect(result.fullName, equals('Mikasa Ackerman'));
+      expect(result.phone, equals('081299887766'));
+      expect(result.address, contains('Shiganshina District No 12'));
+      expect(result.parentPhone, equals('081299887700 (Armin)'));
+      expect(result.socialMedia, equals('@mikasa_ackerman'));
+      expect(result.costumeName, equals('Scout Legion Cloak'));
+      expect(result.datesRaw, equals('12 - 14 November 2026'));
+      expect(result.purpose, equals('event anime festival'));
+      expect(result.startDate, equals(DateTime(2026, 11, 12)));
+      expect(result.endDate, equals(DateTime(2026, 11, 14)));
+      expect(result.rentalDurationDays, equals(3));
+      expect(result.isValid, isTrue);
     });
   });
 }
