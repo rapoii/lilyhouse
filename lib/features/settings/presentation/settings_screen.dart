@@ -525,7 +525,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.87',
+                    'Versi 1.0.88',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -690,7 +690,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.87 (BUILD 122) - TERBARU'),
+                  header: const Text('VERSI 1.0.88 (BUILD 123) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.money_dollar_circle_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Status Pembayaran & Nominal DP', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Form booking kini mendukung status pembayaran Belum Bayar, DP, atau Lunas, lengkap dengan input nominal DP dan kalkulasi sisa pelunasan otomatis.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.chart_pie_fill,
+                        color: AppColors.primaryPink,
+                      ),
+                      title: Text('Ringkasan Hutang & Template WhatsApp', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Kartu ringkasan total hutang cicilan, sanitasi pemisah ribuan, filter chip interaktif katalog kostum, dan template pesan konfirmasi WhatsApp pelanggan.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.87 (BUILD 122)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1527,7 +1556,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.87', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.88', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),

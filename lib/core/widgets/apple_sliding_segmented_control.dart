@@ -1,15 +1,18 @@
 import 'dart:ui';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Single item descriptor for [AppleSlidingSegmentedControl].
 class SegmentItem<T> {
   final T value;
   final String label;
+  final Key? key;
 
   const SegmentItem({
     required this.value,
     required this.label,
+    this.key,
   });
 }
 
@@ -143,6 +146,7 @@ class _AppleSlidingSegmentedControlState<T>
               });
 
               if (selectedValue != widget.groupValue) {
+                HapticFeedback.selectionClick();
                 widget.onValueChanged(selectedValue);
               }
             },
@@ -199,9 +203,11 @@ class _AppleSlidingSegmentedControlState<T>
 
                     return Expanded(
                       child: GestureDetector(
+                        key: item.key,
                         behavior: HitTestBehavior.opaque,
                         onTap: () {
                           if (widget.groupValue != item.value) {
+                            HapticFeedback.selectionClick();
                             widget.onValueChanged(item.value);
                           }
                         },

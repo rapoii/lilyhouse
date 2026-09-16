@@ -365,4 +365,183 @@ void main() {
     expect(rentalRepo.customers, isEmpty);
     expect(rentalRepo.rentals, isEmpty);
   });
+
+  testWidgets('ManualBookingModal payment status selection: default unpaid, DP shows DP input and remaining balance', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(buildModal(
+      initialParsedData: ParsedRentalData(
+        costumeName: 'Furina Archon',
+        startDate: DateTime(2026, 9, 1),
+        endDate: DateTime(2026, 9, 3), // 3 days -> 150000
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Modal'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    // Verify Payment Status Segmented Control is present with 3 items
+    expect(find.byKey(const Key('manual_payment_status_control')), findsOneWidget);
+    expect(find.byKey(const Key('payment_status_unpaid')), findsOneWidget);
+    expect(find.byKey(const Key('payment_status_dp')), findsOneWidget);
+    expect(find.byKey(const Key('payment_status_paid')), findsOneWidget);
+
+    // In default Unpaid state, DP field and remaining balance tile should NOT be visible
+    expect(find.byKey(const Key('manual_dp_input')), findsNothing);
+    expect(find.byKey(const Key('manual_remaining_balance_tile')), findsNothing);
+
+    // Switch to DP status
+    await tester.tap(find.byKey(const Key('payment_status_dp')));
+    await tester.pumpAndSettle();
+
+    // Now DP field and remaining balance tile should appear
+    expect(find.byKey(const Key('manual_dp_input')), findsOneWidget);
+    expect(find.byKey(const Key('manual_remaining_balance_tile')), findsOneWidget);
+
+    // Initial remaining balance with 0 DP should be full price (Rp 150.000)
+    expect(find.text('Rp 150.000'), findsWidgets);
+
+    // Enter DP amount with dots/commas: 50.000
+    await tester.enterText(find.byKey(const Key('manual_dp_amount_field')), '50.000');
+    await tester.pumpAndSettle();
+
+    // Remaining balance should update to 150.000 - 50.000 = 100.000
+    expect(find.text('Rp 100.000'), findsOneWidget);
+
+    // Switch to Lunas status
+    await tester.tap(find.byKey(const Key('payment_status_paid')));
+    await tester.pumpAndSettle();
+
+    // DP input and remaining balance should hide
+    expect(find.byKey(const Key('manual_dp_input')), findsNothing);
+    expect(find.byKey(const Key('manual_remaining_balance_tile')), findsNothing);
+  });
+
+  testWidgets('ManualBookingModal validates DP amount and saves rental with paymentStatus and dpAmount', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(buildModal(
+      initialParsedData: ParsedRentalData(
+        costumeName: 'Furina Archon',
+        startDate: DateTime(2026, 9, 1),
+        endDate: DateTime(2026, 9, 3), // 3 days -> 150000
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Modal'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    // Fill customer info
+    await tester.enterText(find.byKey(const Key('manual_name_input')), 'Aether Cosplayer');
+    await tester.enterText(find.byKey(const Key('manual_phone_input')), '081234567890');
+
+    // Select DP status
+    await tester.tap(find.byKey(const Key('payment_status_dp')));
+    await tester.pumpAndSettle();
+
+    // Try saving without entering DP
+    final saveButton = find.byKey(const Key('manual_save_booking_button'));
+    await tester.tap(saveButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Toast error shown for empty DP
+    expect(find.text('Nominal DP wajib diisi (minimal Rp 1.000)'), findsWidgets);
+    expect(rentalRepo.rentals, isEmpty);
+
+    // Enter DP equal to or exceeding total price
+    await tester.enterText(find.byKey(const Key('manual_dp_amount_field')), '150.000');
+    await tester.pumpAndSettle();
+
+    await tester.tap(saveButton);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    // Toast error for DP >= total price
+    expect(find.text('Nominal DP harus lebih kecil dari total harga (gunakan status Lunas)'), findsWidgets);
+    expect(rentalRepo.rentals, isEmpty);
+
+    // Enter valid DP with thousand separators: 60.000
+    await tester.enterText(find.byKey(const Key('manual_dp_amount_field')), '60.000');
+    await tester.pumpAndSettle();
+
+    // Remaining balance displays Rp 90.000
+    expect(find.text('Rp 90.000'), findsOneWidget);
+
+    // Save valid booking
+    await tester.tap(saveButton);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    // Verify rental was inserted with correct paymentStatus and dpAmount
+    expect(rentalRepo.rentals.length, 1);
+    final savedRental = rentalRepo.rentals.first;
+    expect(savedRental.totalPrice, 150000.0);
+    expect(savedRental.dpAmount, 60000.0);
+    expect(savedRental.paymentStatus, RentalPaymentStatus.dpPaid);
+    expect(savedRental.itemStatus, RentalItemStatus.booked);
+  });
+
+  testWidgets('ManualBookingModal saves rental with Lunas status sets dpAmount to totalPrice', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(buildModal(
+      initialParsedData: ParsedRentalData(
+        costumeName: 'Furina Archon',
+        startDate: DateTime(2026, 9, 1),
+        endDate: DateTime(2026, 9, 3), // 150000
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Modal'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    // Fill customer info
+    await tester.enterText(find.byKey(const Key('manual_name_input')), 'Lumine Cosplayer');
+    await tester.enterText(find.byKey(const Key('manual_phone_input')), '081234567890');
+
+    // Select Lunas status
+    await tester.tap(find.byKey(const Key('payment_status_paid')));
+    await tester.pumpAndSettle();
+
+    // Tap Simpan
+    final saveButton = find.byKey(const Key('manual_save_booking_button'));
+    await tester.tap(saveButton);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    // Verify rental was inserted with Lunas status and dpAmount == totalPrice
+    expect(rentalRepo.rentals.length, 1);
+    final savedRental = rentalRepo.rentals.first;
+    expect(savedRental.totalPrice, 150000.0);
+    expect(savedRental.dpAmount, 150000.0);
+    expect(savedRental.paymentStatus, RentalPaymentStatus.paid);
+  });
+
 }

@@ -144,6 +144,176 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
     }
   }
 
+  void _resetAllFilters({bool resetSearch = false}) {
+    try {
+      HapticFeedback.lightImpact();
+    } catch (_) {}
+    if (resetSearch) {
+      _searchController.clear();
+    }
+    setState(() {
+      _selectedSeries = null;
+      _selectedStatus = null;
+      _selectedSize = null;
+      _selectedSortBy = 'name_asc';
+    });
+    _fetchCostumes();
+  }
+
+  Widget _buildFilterChip({
+    required IconData icon,
+    required String label,
+    required Color color,
+    required Color backgroundColor,
+    required Color borderColor,
+    required VoidCallback onRemove,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: borderColor),
+      ),
+      child: CupertinoButton(
+        padding: const EdgeInsets.fromLTRB(10, 0, 8, 0),
+        minimumSize: const Size(44, 44),
+        onPressed: () {
+          try {
+            HapticFeedback.lightImpact();
+          } catch (_) {}
+          onRemove();
+        },
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, size: 13, color: color),
+            const SizedBox(width: 5),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Icon(
+              CupertinoIcons.clear_circled_solid,
+              size: 15,
+              color: color.withValues(alpha: 0.85),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildResetAllFiltersChip() {
+    return Container(
+      margin: const EdgeInsets.only(right: 8),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFD1D1D6)),
+      ),
+      child: CupertinoButton(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        minimumSize: const Size(44, 44),
+        onPressed: () => _resetAllFilters(resetSearch: false),
+        child: const Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(CupertinoIcons.arrow_counterclockwise, size: 13, color: AppColors.primaryPink),
+            SizedBox(width: 5),
+            Text(
+              'Reset Filter',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryPink,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActiveFilterChips() {
+    final bool hasSeries = _selectedSeries != null;
+    final bool hasStatus = _selectedStatus != null;
+    final bool hasSize = _selectedSize != null;
+    final bool hasSort = _selectedSortBy != 'name_asc';
+
+    final int filterCount = (hasSeries ? 1 : 0) + (hasStatus ? 1 : 0) + (hasSize ? 1 : 0) + (hasSort ? 1 : 0);
+
+    if (filterCount == 0) return const SizedBox.shrink();
+
+    return Column(
+      children: [
+        const SizedBox(height: 10),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          child: Row(
+            children: [
+              if (filterCount > 1) _buildResetAllFiltersChip(),
+              if (hasSeries)
+                _buildFilterChip(
+                  icon: CupertinoIcons.tv,
+                  label: _selectedSeries!,
+                  color: AppColors.deepPinkText,
+                  backgroundColor: AppColors.softPinkBg,
+                  borderColor: AppColors.pastelPink,
+                  onRemove: () {
+                    setState(() => _selectedSeries = null);
+                    _fetchCostumes();
+                  },
+                ),
+              if (hasStatus)
+                _buildFilterChip(
+                  icon: CupertinoIcons.check_mark_circled_solid,
+                  label: _getStatusLabel(_selectedStatus!),
+                  color: const Color(0xFF1E824C),
+                  backgroundColor: const Color(0xFFE8F8F0),
+                  borderColor: const Color(0xFFA3E6C4),
+                  onRemove: () {
+                    setState(() => _selectedStatus = null);
+                    _fetchCostumes();
+                  },
+                ),
+              if (hasSize)
+                _buildFilterChip(
+                  icon: CupertinoIcons.tag_fill,
+                  label: 'Size ${_selectedSize!}',
+                  color: const Color(0xFFD97706),
+                  backgroundColor: const Color(0xFFFFF4E5),
+                  borderColor: const Color(0xFFFFD199),
+                  onRemove: () {
+                    setState(() => _selectedSize = null);
+                    _fetchCostumes();
+                  },
+                ),
+              if (hasSort)
+                _buildFilterChip(
+                  icon: CupertinoIcons.sort_down,
+                  label: _getSortLabel(_selectedSortBy),
+                  color: const Color(0xFF555558),
+                  backgroundColor: AppColors.background,
+                  borderColor: const Color(0xFFD1D1D6),
+                  onRemove: () {
+                    setState(() => _selectedSortBy = 'name_asc');
+                    _fetchCostumes();
+                  },
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFilterButton() {
     final bool hasActiveFilter = _selectedSeries != null ||
         _selectedStatus != null ||
@@ -151,22 +321,30 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
         _selectedSortBy != 'name_asc';
     return CupertinoButton(
       padding: EdgeInsets.zero,
-      minimumSize: Size.zero,
-      onPressed: _showFilterSheet,
+      minimumSize: const Size(44, 44),
+      onPressed: () {
+        try {
+          HapticFeedback.lightImpact();
+        } catch (_) {}
+        _showFilterSheet();
+      },
       child: Container(
-        height: 38,
-        width: 38,
+        height: 40,
+        width: 40,
         decoration: BoxDecoration(
           color: hasActiveFilter ? AppColors.softPinkBg : AppColors.background,
           borderRadius: BorderRadius.circular(10.0),
-          border: hasActiveFilter ? Border.all(color: AppColors.primaryPink.withValues(alpha: 0.5), width: 1.2) : null,
+          border: Border.all(
+            color: hasActiveFilter ? AppColors.primaryPink.withValues(alpha: 0.5) : const Color(0xFFD1D1D6),
+            width: 1.2,
+          ),
         ),
         child: Stack(
           alignment: Alignment.center,
           children: [
             Icon(
               CupertinoIcons.slider_horizontal_3,
-              size: 19,
+              size: 20,
               color: hasActiveFilter ? AppColors.primaryPink : const Color(0xFF555558),
             ),
             if (hasActiveFilter)
@@ -253,151 +431,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                     _buildFilterButton(),
                   ],
                 ),
-                if (_selectedSeries != null ||
-                    _selectedStatus != null ||
-                    _selectedSize != null ||
-                    _selectedSortBy != 'name_asc') ...[
-                  const SizedBox(height: 10),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    physics: const BouncingScrollPhysics(),
-                    child: Row(
-                      children: [
-                        if (_selectedSeries != null)
-                          Container(
-                            margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.softPinkBg,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: AppColors.pastelPink),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(CupertinoIcons.tv, size: 12, color: AppColors.deepPinkText),
-                                const SizedBox(width: 5),
-                                Text(
-                                  _selectedSeries!,
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.deepPinkText),
-                                ),
-                                const SizedBox(width: 4),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    setState(() => _selectedSeries = null);
-                                    _fetchCostumes();
-                                  },
-                                  child: const Padding(
-                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
-                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: AppColors.deepPinkText),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        if (_selectedStatus != null)
-                          Container(
-                            margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFE8F8F0),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: const Color(0xFFA3E6C4)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(CupertinoIcons.check_mark_circled_solid, size: 12, color: Color(0xFF1E824C)),
-                                const SizedBox(width: 5),
-                                Text(
-                                  _getStatusLabel(_selectedStatus!),
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF1E824C)),
-                                ),
-                                const SizedBox(width: 4),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    setState(() => _selectedStatus = null);
-                                    _fetchCostumes();
-                                  },
-                                  child: const Padding(
-                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
-                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF1E824C)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        if (_selectedSize != null)
-                          Container(
-                            margin: const EdgeInsets.only(right: 6),
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFFFFF4E5),
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: const Color(0xFFFFD199)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(CupertinoIcons.tag_fill, size: 12, color: Color(0xFFD97706)),
-                                const SizedBox(width: 5),
-                                Text(
-                                  'Size ${_selectedSize!}',
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFD97706)),
-                                ),
-                                const SizedBox(width: 4),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    setState(() => _selectedSize = null);
-                                    _fetchCostumes();
-                                  },
-                                  child: const Padding(
-                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
-                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFFD97706)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        if (_selectedSortBy != 'name_asc')
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.background,
-                              borderRadius: BorderRadius.circular(14),
-                              border: Border.all(color: const Color(0xFFD1D1D6)),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(CupertinoIcons.sort_down, size: 12, color: Color(0xFF555558)),
-                                const SizedBox(width: 5),
-                                Text(
-                                  _getSortLabel(_selectedSortBy),
-                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFF555558)),
-                                ),
-                                const SizedBox(width: 4),
-                                GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    setState(() => _selectedSortBy = 'name_asc');
-                                    _fetchCostumes();
-                                  },
-                                  child: const Padding(
-                                    padding: EdgeInsets.fromLTRB(4, 2, 2, 2),
-                                    child: Icon(CupertinoIcons.clear_circled_solid, size: 14, color: Color(0xFF8E8E93)),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ],
+                _buildActiveFilterChips(),
               ],
             ),
           ),
@@ -461,25 +495,25 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                             const SizedBox(height: 14),
                             if (hasFilterOrQuery)
                               CupertinoButton(
-                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                minimumSize: const Size(44, 44),
                                 color: AppColors.softPinkBg,
-                                borderRadius: BorderRadius.circular(20),
-                                onPressed: () {
-                                  try {
-                                    HapticFeedback.lightImpact();
-                                  } catch (_) {}
-                                  _searchController.clear();
-                                  setState(() {
-                                    _selectedSeries = null;
-                                    _selectedStatus = null;
-                                    _selectedSize = null;
-                                    _selectedSortBy = 'name_asc';
-                                  });
-                                  _fetchCostumes();
-                                },
-                                child: const Text(
-                                  'Atur Ulang Pencarian',
-                                  style: TextStyle(color: AppColors.deepPinkText, fontSize: 13, fontWeight: FontWeight.w600),
+                                borderRadius: BorderRadius.circular(22),
+                                onPressed: () => _resetAllFilters(resetSearch: true),
+                                child: const Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(CupertinoIcons.arrow_counterclockwise, size: 14, color: AppColors.deepPinkText),
+                                    SizedBox(width: 6),
+                                    Text(
+                                      'Reset Filter & Pencarian',
+                                      style: TextStyle(
+                                        color: AppColors.deepPinkText,
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               )
                             else

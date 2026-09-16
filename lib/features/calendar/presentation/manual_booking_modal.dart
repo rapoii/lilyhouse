@@ -6,6 +6,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:intl/intl.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/widgets/apple_sliding_segmented_control.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/photo_source_picker_sheet.dart';
@@ -53,6 +54,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   final _parentPhoneController = TextEditingController();
   final _socialMediaController = TextEditingController();
   final _totalPriceController = TextEditingController();
+  final _dpAmountController = TextEditingController();
 
   final ImagePicker _picker = ImagePicker();
   String? _ktpPhotoPath;
@@ -67,8 +69,10 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   bool _isLoadingCostumes = true;
   bool _isSaving = false;
   bool _isPriceManuallyEdited = false;
+  RentalPaymentStatus _paymentStatus = RentalPaymentStatus.unpaid;
   String? _costumeError;
   String? _dateError;
+  String? _dpError;
 
   @override
   void initState() {
@@ -137,6 +141,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     _parentPhoneController.dispose();
     _socialMediaController.dispose();
     _totalPriceController.dispose();
+    _dpAmountController.dispose();
     super.dispose();
   }
 
@@ -261,6 +266,18 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     );
   }
 
+  double get _totalPrice {
+    final raw = _totalPriceController.text.replaceAll('.', '').replaceAll(',', '').trim();
+    return double.tryParse(raw) ?? 0.0;
+  }
+
+  double get _dpAmount {
+    final raw = _dpAmountController.text.replaceAll('.', '').replaceAll(',', '').trim();
+    return double.tryParse(raw) ?? 0.0;
+  }
+
+  double get _remainingBalance => (_totalPrice - _dpAmount).clamp(0.0, double.infinity);
+
   int get _durationDays => _endDate.difference(_startDate).inDays + 1;
 
   double? get _recommendedPrice {
@@ -323,9 +340,21 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     final parsedPrice = double.tryParse(rawPrice);
     final okPrice = parsedPrice != null && parsedPrice > 0;
 
+    String? dpErr;
+    if (_paymentStatus == RentalPaymentStatus.dpPaid) {
+      final rawDp = _dpAmountController.text.replaceAll('.', '').replaceAll(',', '').trim();
+      final parsedDp = double.tryParse(rawDp);
+      if (parsedDp == null || parsedDp <= 0) {
+        dpErr = 'Nominal DP wajib diisi (minimal Rp 1.000)';
+      } else if (okPrice && parsedDp >= parsedPrice) {
+        dpErr = 'Nominal DP harus lebih kecil dari total harga (gunakan status Lunas)';
+      }
+    }
+
     setState(() {
       _costumeError = okCostume ? null : 'Pilih kostum dulu';
       _dateError = okDate ? null : 'Tanggal selesai harus setelah mulai';
+      _dpError = dpErr;
     });
     if (!okName) {
       _showErrorSnack('Nama penyewa wajib diisi');
@@ -358,6 +387,10 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       _showErrorSnack('Total harga sewa wajib diisi (minimal Rp 1.000)');
       return false;
     }
+    if (dpErr != null) {
+      _showErrorSnack(dpErr);
+      return false;
+    }
     return true;
   }
 
@@ -366,6 +399,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     setState(() => _isSaving = true);
 
     try {
+      final parsedCandidateTotal = double.tryParse(_totalPriceController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0.0;
       final candidate = Rental(
         id: 'temp_candidate',
         costumeId: _selectedCostume!.id,
@@ -374,7 +408,11 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         endDate: _endDate,
         durationDays: _endDate.difference(_startDate).inDays + 1,
         purpose: _purpose,
-        totalPrice: double.tryParse(_totalPriceController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0,
+        totalPrice: parsedCandidateTotal,
+        dpAmount: _paymentStatus == RentalPaymentStatus.dpPaid
+            ? (double.tryParse(_dpAmountController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0.0)
+            : (_paymentStatus == RentalPaymentStatus.paid ? parsedCandidateTotal : 0.0),
+        paymentStatus: _paymentStatus,
       );
 
       final allRentals = await widget.rentalRepository.getAllRentals();
@@ -424,6 +462,11 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         await widget.rentalRepository.insertCustomer(customer);
       }
 
+      final cleanTotalPrice = double.tryParse(_totalPriceController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0.0;
+      final cleanDpAmount = _paymentStatus == RentalPaymentStatus.dpPaid
+          ? (double.tryParse(_dpAmountController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0.0)
+          : (_paymentStatus == RentalPaymentStatus.paid ? cleanTotalPrice : 0.0);
+
       final rentalId = 'rent_${DateTime.now().millisecondsSinceEpoch}';
       final rental = Rental(
         id: rentalId,
@@ -433,9 +476,10 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         endDate: _endDate,
         durationDays: _endDate.difference(_startDate).inDays + 1,
         purpose: _purpose,
-        totalPrice: double.tryParse(_totalPriceController.text.replaceAll('.', '').replaceAll(',', '')) ?? 0,
+        totalPrice: cleanTotalPrice,
+        dpAmount: cleanDpAmount,
         itemStatus: RentalItemStatus.booked,
-        paymentStatus: RentalPaymentStatus.unpaid,
+        paymentStatus: _paymentStatus,
       );
       await widget.rentalRepository.insertRental(rental);
 
@@ -1005,19 +1049,112 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       title: CupertinoTextField(
                         key: const Key('manual_total_price_field'),
                         controller: _totalPriceController,
-                        placeholder: 'Total harga (opsional)',
+                        placeholder: 'Total harga sewa',
                         placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
                         keyboardType: TextInputType.number,
-                        textInputAction: TextInputAction.done,
+                        textInputAction: TextInputAction.next,
                         onChanged: (_) {
                           _isPriceManuallyEdited = true;
                           setState(() {});
                         },
                       ),
                     ),
+                    CupertinoListTile(
+                      key: const Key('manual_payment_status_row'),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.creditcard_fill,
+                        color: Color(0xFF5856D6),
+                      ),
+                      title: AppleSlidingSegmentedControl<RentalPaymentStatus>(
+                        key: const Key('manual_payment_status_control'),
+                        groupValue: _paymentStatus,
+                        height: 36,
+                        items: const [
+                          SegmentItem(
+                            key: Key('payment_status_unpaid'),
+                            value: RentalPaymentStatus.unpaid,
+                            label: 'Belum Bayar',
+                          ),
+                          SegmentItem(
+                            key: Key('payment_status_dp'),
+                            value: RentalPaymentStatus.dpPaid,
+                            label: 'DP',
+                          ),
+                          SegmentItem(
+                            key: Key('payment_status_paid'),
+                            value: RentalPaymentStatus.paid,
+                            label: 'Lunas',
+                          ),
+                        ],
+                        onValueChanged: (val) {
+                          HapticFeedback.selectionClick();
+                          setState(() {
+                            _paymentStatus = val;
+                            if (val != RentalPaymentStatus.dpPaid) {
+                              _dpError = null;
+                            }
+                          });
+                        },
+                      ),
+                    ),
+                    if (_paymentStatus == RentalPaymentStatus.dpPaid) ...[
+                      CupertinoListTile(
+                        key: const Key('manual_dp_input'),
+                        leading: const SquircleIcon(
+                          icon: CupertinoIcons.arrow_down_circle_fill,
+                          color: Color(0xFFFF9500),
+                        ),
+                        title: CupertinoTextField(
+                          key: const Key('manual_dp_amount_field'),
+                          controller: _dpAmountController,
+                          placeholder: 'Nominal DP (Rp)',
+                          placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                          style: const TextStyle(fontSize: 15, color: AppColors.textDark),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          decoration: null,
+                          keyboardType: TextInputType.number,
+                          textInputAction: TextInputAction.done,
+                          onChanged: (_) {
+                            setState(() {
+                              _dpError = null;
+                            });
+                          },
+                        ),
+                        subtitle: _dpError == null
+                            ? null
+                            : Text(
+                                _dpError!,
+                                style: const TextStyle(fontSize: 12, color: AppColors.dangerRose),
+                              ),
+                      ),
+                      CupertinoListTile(
+                        key: const Key('manual_remaining_balance_tile'),
+                        leading: const SquircleIcon(
+                          icon: CupertinoIcons.hourglass,
+                          color: AppColors.dangerRose,
+                        ),
+                        title: const Text(
+                          'Sisa Tagihan Pelunasan',
+                          style: TextStyle(fontWeight: FontWeight.w500, fontSize: 15, color: AppColors.textDark),
+                        ),
+                        subtitle: const Text(
+                          'Perlu dilunasi saat serah terima kostum',
+                          style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                        ),
+                        trailing: Text(
+                          _formatCurrency(_remainingBalance),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 15,
+                            color: AppColors.dangerRose,
+                          ),
+                        ),
+                      ),
+                    ],
                     if (_selectedCostume != null && _selectedCostume!.rentPrice3Days > 0) ...[
                       if (_durationDays > 3)
                         CupertinoListTile(

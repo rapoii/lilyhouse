@@ -657,5 +657,109 @@ void main() {
       expect(find.text('Staff of Homa R5'), findsOneWidget);
       expect(find.text('Official Genshin Store'), findsOneWidget);
     });
+
+    testWidgets('InstallmentListScreen displays Apple HIG Financial Summary Card with total debt and active count', (tester) async {
+      final summaryRepo = MockInstallmentRepository(
+        installments: [
+          Installment(
+            id: 'inst_sum_1',
+            itemName: 'Costume Raiden Shogun',
+            storeName: 'Uwowo',
+            totalCost: 1500000.0,
+            totalPaid: 500000.0,
+            remainingBalance: 1000000.0,
+            status: InstallmentStatus.ongoing,
+          ),
+          Installment(
+            id: 'inst_sum_2',
+            itemName: 'Wig Arlecchino',
+            storeName: 'DokiDoki',
+            totalCost: 350000.0,
+            totalPaid: 150000.0,
+            remainingBalance: 200000.0,
+            status: InstallmentStatus.ongoing,
+          ),
+          Installment(
+            id: 'inst_sum_3',
+            itemName: 'Sepatu Furina',
+            storeName: 'Taobao',
+            totalCost: 250000.0,
+            totalPaid: 250000.0,
+            remainingBalance: 0.0,
+            status: InstallmentStatus.paidOff,
+          ),
+        ],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: InstallmentListScreen(repository: summaryRepo),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      // Verify Summary Card exists
+      expect(find.byKey(const Key('installment_summary_card')), findsOneWidget);
+      expect(find.text('RINGKASAN FINANSIAL CICILAN'), findsOneWidget);
+      expect(find.text('Total Sisa Hutang'), findsOneWidget);
+
+      // Remaining debt: 1.000.000 + 200.000 = 1.200.000
+      expect(find.text('Rp 1.200.000'), findsOneWidget);
+
+      // Active count badge: 2 aktif (since 1 is paid off)
+      expect(find.text('2 Aktif'), findsOneWidget);
+    });
+
+    testWidgets('InstallmentListScreen creates new installment sanitizing dot and comma thousand separators', (tester) async {
+      final newRepo = MockInstallmentRepository(installments: []);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: InstallmentListScreen(repository: newRepo),
+        ),
+      );
+      await tester.pump();
+      await tester.pump();
+
+      // Open Add Installment dialog
+      final addButton = find.byKey(const Key('add_installment_button'));
+      expect(addButton, findsOneWidget);
+      await tester.tap(addButton);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Check dialog opened
+      expect(find.text('Cicilan Baru'), findsOneWidget);
+
+      // Enter form data with dots and commas in numbers
+      await tester.enterText(find.byKey(const Key('installment_name_input')), 'Kostum Nahida');
+      await tester.enterText(find.byKey(const Key('installment_store_input')), 'Uwowo Store');
+      await tester.enterText(find.byKey(const Key('installment_cost_input')), '1.500.000');
+      await tester.enterText(find.byKey(const Key('installment_dp_input')), '500,000');
+      await tester.pump();
+
+      // Tap Simpan
+      await tester.tap(find.text('Simpan'));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 3));
+
+      // Verify repository has the properly parsed installment
+      final all = await newRepo.getAllInstallments();
+      expect(all.length, 1);
+      final created = all.first;
+      expect(created.itemName, 'Kostum Nahida');
+      expect(created.totalCost, 1500000.0);
+      expect(created.totalPaid, 500000.0);
+      expect(created.remainingBalance, 1000000.0);
+      expect(created.status, InstallmentStatus.ongoing);
+
+      // Verify Summary Card updates on screen
+      expect(find.byKey(const Key('installment_summary_card')), findsOneWidget);
+      expect(find.text('Rp 1.000.000'), findsWidgets);
+      expect(find.text('1 Aktif'), findsOneWidget);
+    });
   });
 }

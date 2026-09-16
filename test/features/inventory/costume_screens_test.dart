@@ -312,4 +312,162 @@ void main() {
     final accs = await repository.getAccessoriesByCostumeId('cos-2');
     expect(accs, isEmpty);
   });
+
+  testWidgets('CostumeListScreen filter button has min 44x44pt touch target and opens filter sheet', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: CostumeListScreen(repository: repository),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Verify filter button exists and meets Apple HIG >= 44x44pt
+    final filterButtonFinder = find.byWidgetPredicate(
+      (w) => w is CupertinoButton && w.child is Container && (w.child as Container).child is Stack,
+    );
+    expect(filterButtonFinder, findsOneWidget);
+
+    final RenderBox filterBox = tester.renderObject(filterButtonFinder);
+    expect(filterBox.size.width, greaterThanOrEqualTo(44.0));
+    expect(filterBox.size.height, greaterThanOrEqualTo(44.0));
+
+    // Tap filter button to open sheet
+    await tester.tap(filterButtonFinder);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Filter & Urutkan'), findsOneWidget);
+  });
+
+  testWidgets('CostumeListScreen shows interactive active filter chips with individual remove and reset all', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: CostumeListScreen(repository: repository),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Open filter sheet
+    final filterButtonFinder = find.byWidgetPredicate(
+      (w) => w is CupertinoButton && w.child is Container && (w.child as Container).child is Stack,
+    );
+    await tester.tap(filterButtonFinder);
+    await tester.pumpAndSettle();
+
+    // Select Vocaloid series
+    await tester.tap(find.text('Vocaloid').last);
+    await tester.pumpAndSettle();
+
+    // Select Size M: scroll down in sheet if needed
+    final sizeMFinder = find.widgetWithText(CupertinoListTile, 'M');
+    await tester.scrollUntilVisible(
+      sizeMFinder,
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(sizeMFinder);
+    await tester.pumpAndSettle();
+
+    // Scroll to Terapkan or tap directly
+    final applyFinder = find.text('Terapkan');
+    await tester.scrollUntilVisible(
+      applyFinder,
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(applyFinder);
+    await tester.pumpAndSettle();
+
+    // Verify both active filter chips and "Reset Filter" chip are visible
+    expect(find.text('Vocaloid'), findsWidgets);
+    expect(find.text('Size M'), findsOneWidget);
+    final resetAllChips = find.widgetWithText(CupertinoButton, 'Reset Filter');
+    expect(resetAllChips, findsOneWidget);
+
+    // Verify filter chip touch target >= 44pt
+    final vocaloidChip = find.widgetWithText(CupertinoButton, 'Vocaloid');
+    expect(vocaloidChip, findsOneWidget);
+    final RenderBox chipBox = tester.renderObject(vocaloidChip);
+    expect(chipBox.size.height, greaterThanOrEqualTo(44.0));
+
+    // Remove one individual filter chip (Size M)
+    final sizeChip = find.widgetWithText(CupertinoButton, 'Size M');
+    expect(sizeChip, findsOneWidget);
+    await tester.tap(sizeChip);
+    await tester.pumpAndSettle();
+
+    // Size chip should now be gone, Vocaloid remains
+    expect(find.text('Size M'), findsNothing);
+    expect(find.text('Vocaloid'), findsWidgets);
+
+    // Open filter sheet to add another filter to test "Reset Filter" chip
+    await tester.tap(filterButtonFinder);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      sizeMFinder,
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(sizeMFinder);
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      applyFinder,
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    await tester.tap(applyFinder);
+    await tester.pumpAndSettle();
+
+    // Reset all filters using the interactive reset chip
+    await tester.tap(find.widgetWithText(CupertinoButton, 'Reset Filter'));
+    await tester.pumpAndSettle();
+
+    // Active chips should be gone
+    expect(find.widgetWithText(CupertinoButton, 'Reset Filter'), findsNothing);
+    expect(find.text('Size M'), findsNothing);
+    // Both costumes shown
+    expect(find.text('Hatsune Miku'), findsOneWidget);
+    expect(find.text('Makima Suit'), findsOneWidget);
+  });
+
+  testWidgets('CostumeListScreen displays friendly empty state and instant Reset Filter & Pencarian button', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: CostumeListScreen(repository: repository),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Search something nonexistent
+    final searchField = find.byType(CupertinoSearchTextField);
+    await tester.enterText(searchField, 'NonExistentCostume12345');
+    await tester.pump();
+    await tester.pump();
+
+    // Verify empty state UI elements
+    expect(find.text('Tidak ada hasil yang cocok'), findsOneWidget);
+    expect(find.text('Coba sesuaikan kata kunci atau filter pencarian'), findsOneWidget);
+
+    final resetBtnFinder = find.widgetWithText(CupertinoButton, 'Reset Filter & Pencarian');
+    expect(resetBtnFinder, findsOneWidget);
+
+    // Verify touch target min 44pt
+    final RenderBox resetBox = tester.renderObject(resetBtnFinder);
+    expect(resetBox.size.width, greaterThanOrEqualTo(44.0));
+    expect(resetBox.size.height, greaterThanOrEqualTo(44.0));
+
+    // Tap reset button
+    await tester.tap(resetBtnFinder);
+    await tester.pumpAndSettle();
+
+    // Search query should be cleared and full catalog restored
+    expect(find.text('Tidak ada hasil yang cocok'), findsNothing);
+    expect(find.text('Hatsune Miku'), findsOneWidget);
+    expect(find.text('Makima Suit'), findsOneWidget);
+  });
 }

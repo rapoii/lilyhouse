@@ -586,6 +586,49 @@ class RentalDetailSheet extends StatelessWidget {
     return digits;
   }
 
+  String _buildWhatsAppConfirmationMessage({
+    required String customerName,
+    required String costumeName,
+    required String costumeSeries,
+    required String startDateFormatted,
+    required String endDateFormatted,
+    required int durationDays,
+    required double totalPrice,
+    required double dpAmount,
+    required double sisaTagihan,
+    required RentalPaymentStatus paymentStatus,
+    required NumberFormat currencyFormat,
+  }) {
+    final paymentStatusLabel = paymentStatus == RentalPaymentStatus.paid
+        ? 'Lunas'
+        : (paymentStatus == RentalPaymentStatus.dpPaid
+            ? 'DP Terbayar (Sisa Rp ${currencyFormat.format(sisaTagihan)})'
+            : 'Belum Lunas (Sisa Rp ${currencyFormat.format(sisaTagihan)})');
+
+    final buffer = StringBuffer();
+    buffer.writeln('*KONFIRMASI RESERVASI SEWA KOSTUM - LILYHOUSE*');
+    buffer.writeln('Halo Kak $customerName, pesanan sewa kostum kamu telah tercatat di sistem LilyHouse.');
+    buffer.writeln();
+    buffer.writeln('*Rincian Sewa:*');
+    buffer.writeln('- Kostum: $costumeName ($costumeSeries)');
+    buffer.writeln('- Jadwal Sewa: $startDateFormatted - $endDateFormatted ($durationDays Hari)');
+    buffer.writeln('- Total Biaya: Rp ${currencyFormat.format(totalPrice)}');
+    if (dpAmount > 0) {
+      buffer.writeln('- Uang Muka (DP): Rp ${currencyFormat.format(dpAmount)}');
+    }
+    buffer.writeln('- Status Pembayaran: $paymentStatusLabel');
+    buffer.writeln();
+    buffer.writeln('*Petunjuk & Peraturan Rental:*');
+    buffer.writeln('1. Mohon menjaga kebersihan dan kelengkapan kostum beserta seluruh aksesoris.');
+    buffer.writeln('2. Kostum tidak perlu dicuci saat dikembalikan, tim LilyHouse yang akan menangani proses laundry.');
+    buffer.writeln('3. Pengembalian maksimal dilakukan pada hari terakhir masa sewa.');
+    buffer.writeln('4. Keterlambatan pengembalian atau kerusakan properti akan dikenakan biaya kompensasi.');
+    buffer.writeln();
+    buffer.write('Terima kasih telah mempercayakan kebutuhan cosplay kamu di LilyHouse.');
+
+    return buffer.toString();
+  }
+
   @override
   Widget build(BuildContext context) {
     final custName = (customer?.fullName.isNotEmpty == true ? customer!.fullName : (rental.customerId.isNotEmpty ? rental.customerId : 'Penyewa')).replaceAll('_', ' ');
@@ -921,7 +964,7 @@ class RentalDetailSheet extends StatelessWidget {
                       trailing: (custPhone != '-')
                           ? CupertinoButton(
                               padding: EdgeInsets.zero,
-                              minimumSize: const Size(32, 32),
+                              minimumSize: const Size(44, 44),
                               onPressed: () {
                                 HapticFeedback.lightImpact();
                                 Clipboard.setData(ClipboardData(text: _normalizePhoneForCopy(custPhone)));
@@ -963,7 +1006,7 @@ class RentalDetailSheet extends StatelessWidget {
                         },
                         trailing: CupertinoButton(
                           padding: EdgeInsets.zero,
-                          minimumSize: const Size(32, 32),
+                          minimumSize: const Size(44, 44),
                           onPressed: () {
                             HapticFeedback.lightImpact();
                             Clipboard.setData(ClipboardData(text: customer!.parentPhone!));
@@ -1011,7 +1054,7 @@ class RentalDetailSheet extends StatelessWidget {
                       trailing: (custSosmed != '-')
                           ? CupertinoButton(
                               padding: EdgeInsets.zero,
-                              minimumSize: const Size(32, 32),
+                              minimumSize: const Size(44, 44),
                               onPressed: () {
                                 HapticFeedback.lightImpact();
                                 Clipboard.setData(ClipboardData(text: custSosmed));
@@ -1060,7 +1103,7 @@ class RentalDetailSheet extends StatelessWidget {
                       trailing: (custAddr != '-')
                           ? CupertinoButton(
                               padding: EdgeInsets.zero,
-                              minimumSize: const Size(32, 32),
+                              minimumSize: const Size(44, 44),
                               onPressed: () {
                                 HapticFeedback.lightImpact();
                                 Clipboard.setData(ClipboardData(text: custAddr));
@@ -1083,6 +1126,79 @@ class RentalDetailSheet extends StatelessWidget {
                               ),
                             )
                           : null,
+                    ),
+                    CupertinoListTile(
+                      leading: const SquircleIcon(
+                        icon: CupertinoIcons.chat_bubble_text_fill,
+                        color: Color(0xFF25D366),
+                      ),
+                      title: const Text(
+                        'Salin Pesan Konfirmasi WA',
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          color: Color(0xFF1B5E20),
+                        ),
+                      ),
+                      subtitle: const Text(
+                        'Template rincian sewa & aturan rental untuk dikirim ke WhatsApp',
+                        style: TextStyle(fontSize: 12, color: Color(0xFF8E8E93)),
+                      ),
+                      onTap: () {
+                        HapticFeedback.lightImpact();
+                        final message = _buildWhatsAppConfirmationMessage(
+                          customerName: custName,
+                          costumeName: costName,
+                          costumeSeries: costSeries,
+                          startDateFormatted: startDateFormatted,
+                          endDateFormatted: endDateFormatted,
+                          durationDays: rental.durationDays,
+                          totalPrice: rental.totalPrice,
+                          dpAmount: rental.dpAmount,
+                          sisaTagihan: sisaTagihan,
+                          paymentStatus: rental.paymentStatus,
+                          currencyFormat: currencyFormat,
+                        );
+                        Clipboard.setData(ClipboardData(text: message));
+                        IosToast.show(context, 'Pesan konfirmasi WA berhasil disalin');
+                      },
+                      trailing: CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(44, 44),
+                        onPressed: () {
+                          HapticFeedback.lightImpact();
+                          final message = _buildWhatsAppConfirmationMessage(
+                            customerName: custName,
+                            costumeName: costName,
+                            costumeSeries: costSeries,
+                            startDateFormatted: startDateFormatted,
+                            endDateFormatted: endDateFormatted,
+                            durationDays: rental.durationDays,
+                            totalPrice: rental.totalPrice,
+                            dpAmount: rental.dpAmount,
+                            sisaTagihan: sisaTagihan,
+                            paymentStatus: rental.paymentStatus,
+                            currencyFormat: currencyFormat,
+                          );
+                          Clipboard.setData(ClipboardData(text: message));
+                          IosToast.show(context, 'Pesan konfirmasi WA berhasil disalin');
+                        },
+                        child: Container(
+                          width: 32,
+                          height: 32,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFE8F5E9),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Center(
+                            child: Icon(
+                              CupertinoIcons.doc_on_clipboard_fill,
+                              size: 15,
+                              color: Color(0xFF1B5E20),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
                   ],
                 ),

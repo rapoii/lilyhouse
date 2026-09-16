@@ -229,8 +229,10 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                       padding: EdgeInsets.zero,
                       onPressed: isSaving ? null : () async {
                         final name = nameController.text.trim();
-                        final cost = double.tryParse(costController.text.trim()) ?? 0.0;
-                        final dp = double.tryParse(dpController.text.trim()) ?? 0.0;
+                        final rawCost = costController.text.trim().replaceAll('.', '').replaceAll(',', '');
+                        final rawDp = dpController.text.trim().replaceAll('.', '').replaceAll(',', '');
+                        final cost = double.tryParse(rawCost) ?? 0.0;
+                        final dp = double.tryParse(rawDp) ?? 0.0;
                         if (name.isEmpty) {
                           _showFormAlert(ctx, 'Nama Wajib Diisi', 'Mohon masukkan nama barang atau kostum.');
                           return;
@@ -475,6 +477,111 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
           },
         );
       },
+    );
+  }
+
+  String _formatCurrency(double amount) {
+    final parts = amount.toInt().toString().replaceAllMapped(
+          RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+          (Match m) => '${m[1]}.',
+        );
+    return 'Rp $parts';
+  }
+
+  Widget _buildSummaryCard() {
+    double totalRemainingDebt = 0.0;
+    int activeCount = 0;
+
+    for (final inst in _installments) {
+      if (!inst.isPaidOff) {
+        totalRemainingDebt += inst.remainingBalance;
+        activeCount++;
+      }
+    }
+
+    return Container(
+      key: const Key('installment_summary_card'),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12.0),
+        border: Border.all(
+          color: const Color(0xFFE5E5EA),
+          width: 0.5,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 8.0,
+            offset: const Offset(0, 1),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const SquircleIcon(
+                icon: CupertinoIcons.chart_pie_fill,
+                color: AppColors.primaryPink,
+              ),
+              const SizedBox(width: 10),
+              const Expanded(
+                child: Text(
+                  'RINGKASAN FINANSIAL CICILAN',
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.5,
+                    color: Color(0xFF8E8E93),
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: activeCount > 0 ? AppColors.softPinkBg : const Color(0xFFE3F9EC),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  activeCount > 0 ? '$activeCount Aktif' : 'Semua Lunas',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: activeCount > 0 ? AppColors.deepPinkText : const Color(0xFF1E824C),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              const Text(
+                'Total Sisa Hutang',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textDark,
+                ),
+              ),
+              Text(
+                _formatCurrency(totalRemainingDebt),
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.3,
+                  color: totalRemainingDebt > 0 ? AppColors.deepPinkText : const Color(0xFF1E824C),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 
@@ -731,8 +838,14 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                   CupertinoSliverRefreshControl(
                     onRefresh: _loadInstallments,
                   ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16.0, 4.0, 16.0, 8.0),
+                      child: _buildSummaryCard(),
+                    ),
+                  ),
                   SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 12.0, 16.0, 160.0),
+                    padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 160.0),
                     sliver: SliverList.separated(
                       itemCount: _installments.length,
                       separatorBuilder: (context, index) => const SizedBox(height: 14),
