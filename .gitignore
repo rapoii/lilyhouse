@@ -63,3 +63,5 @@ GoogleService-Info.plist
 
 # Widget Preview related
 .widget_preview/
+LilyHouse-*.apk
+f*.png
