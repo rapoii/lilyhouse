@@ -4,8 +4,10 @@ import 'package:flutter/services.dart';
 import '../../../core/sync/sync_manager.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/debouncer.dart';
 import '../../../core/widgets/animated_list_item.dart';
 import '../../../core/widgets/header_action_button.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/state_crossfade.dart';
 import '../data/costume_repository.dart';
 import '../domain/costume.dart';
@@ -30,6 +32,9 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
   late ICostumeRepository _repository;
   final TextEditingController _searchController = TextEditingController();
 
+  /// Collapses rapid keystrokes so a query only runs once typing pauses.
+  final Debouncer _searchDebouncer = Debouncer();
+
   List<Costume> _costumes = [];
   bool _isLoading = true;
   UniqueKey _listKey = UniqueKey();
@@ -49,6 +54,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
   @override
   void dispose() {
     SyncManager.instance.dataVersion.removeListener(_onDataVersionChanged);
+    _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -60,6 +66,10 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
   }
 
   Future<void> _fetchCostumes() async {
+    // Any direct fetch supersedes a queued keystroke.  When this method is
+    // itself the debounced target the timer has already fired, so this is a
+    // harmless no-op.
+    _searchDebouncer.cancel();
     setState(() => _isLoading = true);
     final results = await _repository.searchCostumes(
       query: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
@@ -78,7 +88,41 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
   }
 
   void _onSearchChanged(String _) {
-    _fetchCostumes();
+    // Debounced: wait 300 ms of silence before hitting the repository so a
+    // fast typist triggers one query instead of one per character.
+    _searchDebouncer.run(_fetchCostumes);
+  }
+
+  /// True when the user has narrowed the list via search or any filter —
+  /// drives both the count label ("hasil" vs "kostum") and the empty state.
+  bool get _hasActiveQueryOrFilter =>
+      _searchController.text.trim().isNotEmpty ||
+      _selectedSeries != null ||
+      _selectedStatus != null ||
+      _selectedSize != null ||
+      _selectedSortBy != 'name_asc';
+
+  /// Compact "N kostum" / "N hasil" line shown above the list so the user
+  /// always knows how many items they are looking at.
+  Widget _buildResultCount() {
+    if (_isLoading || _costumes.isEmpty) return const SizedBox.shrink();
+    final int count = _costumes.length;
+    final String label = _hasActiveQueryOrFilter ? '$count hasil' : '$count kostum';
+    return Padding(
+      key: const Key('costume_result_count'),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textMuted,
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _showFilterSheet() async {
@@ -441,9 +485,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
             child: StateCrossfade(
               isLoading: _isLoading,
               isEmpty: _costumes.isEmpty,
-              loadingChild: const Center(
-                child: CupertinoActivityIndicator(radius: 14),
-              ),
+              loadingChild: const SkeletonLoader(),
               emptyChild: Column(
                 // Flex-based optical centering: content at 1/3 from
                 // top of available area (Apple HIG empty-state
@@ -547,32 +589,40 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                   const Spacer(flex: 8),
                 ],
               ),
-              contentChild: ListView.separated(
-                key: _listKey,
-                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 160),
-                itemCount: _costumes.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final costume = _costumes[index];
-                  return AnimatedListItem(
-                    index: index,
-                    child: CostumeCard(
-                      costume: costume,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          CupertinoPageRoute(
-                            builder: (_) => CostumeDetailScreen(
-                              costume: costume,
-                              repository: _repository,
-                            ),
+              contentChild: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildResultCount(),
+                  Expanded(
+                    child: ListView.separated(
+                      key: _listKey,
+                      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                      padding: const EdgeInsets.fromLTRB(16, 4, 16, 160),
+                      itemCount: _costumes.length,
+                      separatorBuilder: (context, index) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final costume = _costumes[index];
+                        return AnimatedListItem(
+                          index: index,
+                          child: CostumeCard(
+                            costume: costume,
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                CupertinoPageRoute(
+                                  builder: (_) => CostumeDetailScreen(
+                                    costume: costume,
+                                    repository: _repository,
+                                  ),
+                                ),
+                              ).then((_) => _fetchCostumes());
+                            },
                           ),
-                        ).then((_) => _fetchCostumes());
+                        );
                       },
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
             ),
           ),

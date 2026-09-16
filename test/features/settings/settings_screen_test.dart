@@ -233,5 +233,34 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(CupertinoAlertDialog), findsNothing);
     });
+
+    testWidgets('changelog merges the duplicate 1.0.90 header and drops non-standard wording', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            syncServiceProvider.overrideWithValue(mockSync),
+          ],
+          child: const MaterialApp(
+            home: SettingsScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final changelogTile = find.text('Catatan Rilis');
+      await tester.scrollUntilVisible(changelogTile, 300);
+      await tester.pumpAndSettle();
+      await tester.tap(changelogTile);
+      await tester.pumpAndSettle();
+
+      // A single release header per build — duplicates must be merged into one section.
+      expect(find.text('VERSI 1.0.91 (BUILD 126) - TERBARU'), findsOneWidget);
+      expect(find.text('VERSI 1.0.90 (BUILD 125)'), findsOneWidget);
+
+      // Non-standard KBBI spellings must not survive in the changelog copy.
+      expect(find.textContaining('Pulasan'), findsNothing);
+      expect(find.textContaining('Pulsan'), findsNothing);
+    });
   });
 }

@@ -9,6 +9,7 @@ import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/photo_source_picker_sheet.dart';
 import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
+import '../../../core/widgets/unsaved_changes_guard.dart';
 import '../data/costume_repository.dart';
 import '../domain/accessory.dart';
 import '../domain/costume.dart';
@@ -47,6 +48,21 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
   List<String> _accessories = [];
   bool _isLoadingAccessories = false;
   bool _isSaving = false;
+  bool _userEdited = false;
+
+  /// True when the user made at least one manual edit that is not yet saved.
+  bool get _hasUnsavedChanges => _userEdited && !_isSaving;
+
+  /// Confirms discarding edits before the sheet closes. Returns `true` when
+  /// the sheet should be allowed to close.
+  Future<bool> _confirmClose() async {
+    if (!_hasUnsavedChanges) return true;
+    return confirmDiscardChanges(context);
+  }
+
+  void _markEdited() {
+    if (!_userEdited) setState(() => _userEdited = true);
+  }
 
   final ImagePicker _picker = ImagePicker();
 
@@ -76,6 +92,16 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       _selectedSize = 'M';
       _selectedStatus = CostumeStatus.available;
       _selectedImagePath = null;
+    }
+    // Attach edit listeners AFTER initial values are set, so programmatic
+    // pre-fill does not count as a user edit.
+    for (final controller in [
+      _nameController,
+      _seriesController,
+      _priceController,
+      _notesController,
+    ]) {
+      controller.addListener(_markEdited);
     }
   }
 
@@ -145,6 +171,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       final picked = await _picker.pickImage(source: source, imageQuality: 85);
       if (picked != null) {
         setState(() => _selectedImagePath = picked.path);
+        _markEdited();
       }
     } catch (_) {
       if (mounted) {
@@ -173,6 +200,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       existingAccessoryNames: _accessories,
       onAddNameOnly: (name) {
         setState(() => _accessories.add(name));
+        _markEdited();
       },
     );
   }
@@ -466,10 +494,20 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return DraggableSheetContainer(
-      backgroundColor: AppColors.background,
-      onDismissed: () => Navigator.of(context).pop(),
-      builder: (context) => DefaultTextStyle(
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _confirmClose()) {
+          if (mounted) navigator.pop();
+        }
+      },
+      child: DraggableSheetContainer(
+        backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(context).pop(),
+        confirmDismiss: _confirmClose,
+        builder: (context) => DefaultTextStyle(
         style: const TextStyle(
           decoration: TextDecoration.none,
           fontFamily: '.SF Pro Text',
@@ -483,7 +521,12 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                if (await _confirmClose()) {
+                  if (mounted) navigator.pop();
+                }
+              },
               child: const Text('Batal', style: AppTypography.actionButton),
             ),
             middle: SizedBox(
@@ -630,6 +673,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                           items: items,
                         );
                         if (key != null) {
+                          _markEdited();
                           setState(() => _selectedSize = key);
                         }
                       },
@@ -705,6 +749,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                           items: items,
                         );
                         if (key != null) {
+                          _markEdited();
                           setState(() => _selectedStatus = CostumeStatus.fromString(key));
                         }
                       },
@@ -755,6 +800,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                                     minimumSize: const Size(44, 44),
                                     onPressed: () {
                                       HapticFeedback.lightImpact();
+                                      _markEdited();
                                       setState(() => _accessories.removeAt(idx));
                                     },
                                     child: const Icon(CupertinoIcons.minus_circle_fill, color: Color(0xFFFF3B30), size: 22),
@@ -828,6 +874,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
           ),
         ),
       ),
+    ),
     );
   }
 }

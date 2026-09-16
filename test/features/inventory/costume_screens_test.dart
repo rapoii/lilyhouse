@@ -187,11 +187,12 @@ void main() {
     expect(find.text('Hatsune Miku'), findsOneWidget);
     expect(find.text('Makima Suit'), findsOneWidget);
 
-    // Search
+    // Search (debounced 300 ms — advance past the delay, then let the
+    // fetch + crossfade settle)
     final searchField = find.byType(CupertinoSearchTextField);
     await tester.enterText(searchField, 'Makima');
-    await tester.pump();
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
 
     expect(find.text('Makima Suit'), findsOneWidget);
     expect(find.text('Hatsune Miku'), findsNothing);
@@ -453,11 +454,11 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    // Search something nonexistent
+    // Search something nonexistent (debounced 300 ms)
     final searchField = find.byType(CupertinoSearchTextField);
     await tester.enterText(searchField, 'NonExistentCostume12345');
-    await tester.pump();
-    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
 
     // Verify empty state UI elements
     expect(find.text('Tidak ada hasil yang cocok'), findsOneWidget);

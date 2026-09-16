@@ -248,10 +248,13 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
           onPressed: () => Navigator.maybePop(context),
-          child: const Icon(
-            CupertinoIcons.chevron_back,
-            color: AppColors.textDark,
-            size: 24,
+          child: Semantics(
+            label: 'Kembali',
+            child: const Icon(
+              CupertinoIcons.chevron_back,
+              color: AppColors.textDark,
+              size: 24,
+            ),
           ),
         ),
         middle: Text(
@@ -865,7 +868,10 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               padding: EdgeInsets.zero,
               minimumSize: const Size(44, 44),
               onPressed: () => _confirmDeleteAccessory(accessory.id, name),
-              child: const Icon(CupertinoIcons.trash, color: Color(0xFFFF3B30), size: 16),
+              child: Semantics(
+                label: 'Hapus aksesori',
+                child: const Icon(CupertinoIcons.trash, color: Color(0xFFFF3B30), size: 16),
+              ),
             )
           : null,
     );

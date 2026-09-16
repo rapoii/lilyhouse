@@ -77,20 +77,28 @@ void main() {
   });
 
   group('isOverdue & isDueSoon Tests', () {
+    // These getters read the real clock, so dates are expressed relative to
+    // "today" to keep the suite from expiring on a fixed calendar day.
+    final now = DateTime.now();
+    DateTime daysFromToday(int offset) {
+      final base = DateTime(now.year, now.month, now.day);
+      return base.add(Duration(days: offset));
+    }
+
     test('isOverdue only when unpaid and past the due date', () {
-      expect(ongoing(id: 'h', dueDate: DateTime(2026, 9, 10)).isOverdue, isTrue);
-      expect(ongoing(id: 'i', dueDate: DateTime(2026, 9, 16)).isOverdue, isFalse);
-      expect(ongoing(id: 'j', dueDate: DateTime(2026, 10, 1)).isOverdue, isFalse);
+      expect(ongoing(id: 'h', dueDate: daysFromToday(-1)).isOverdue, isTrue);
+      expect(ongoing(id: 'i', dueDate: daysFromToday(0)).isOverdue, isFalse);
+      expect(ongoing(id: 'j', dueDate: daysFromToday(15)).isOverdue, isFalse);
       expect(ongoing(id: 'k').isOverdue, isFalse,
           reason: 'no due date is never overdue');
     });
 
     test('isDueSoon covers overdue, today, and <=7 days', () {
-      expect(ongoing(id: 'l', dueDate: DateTime(2026, 9, 5)).isDueSoon, isTrue,
+      expect(ongoing(id: 'l', dueDate: daysFromToday(-3)).isDueSoon, isTrue,
           reason: 'already late still counts as due soon');
-      expect(ongoing(id: 'm', dueDate: DateTime(2026, 9, 16)).isDueSoon, isTrue);
-      expect(ongoing(id: 'n', dueDate: DateTime(2026, 9, 23)).isDueSoon, isTrue);
-      expect(ongoing(id: 'o', dueDate: DateTime(2026, 9, 24)).isDueSoon, isFalse,
+      expect(ongoing(id: 'm', dueDate: daysFromToday(0)).isDueSoon, isTrue);
+      expect(ongoing(id: 'n', dueDate: daysFromToday(7)).isDueSoon, isTrue);
+      expect(ongoing(id: 'o', dueDate: daysFromToday(8)).isDueSoon, isFalse,
           reason: '8 days away is outside the window');
       expect(ongoing(id: 'p').isDueSoon, isFalse);
     });

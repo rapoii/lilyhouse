@@ -4,10 +4,12 @@ import 'package:flutter/services.dart';
 import '../../../core/sync/sync_manager.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/debouncer.dart';
 import '../../../core/widgets/draggable_sheet_container.dart';
 import '../../../core/widgets/header_action_button.dart';
 import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/sheet_picker.dart';
+import '../../../core/widgets/skeleton_loader.dart';
 import '../../../core/widgets/squircle_icon.dart';
 import '../../../core/widgets/animated_list_item.dart';
 import '../../../core/widgets/state_crossfade.dart';
@@ -33,6 +35,10 @@ class InstallmentListScreen extends StatefulWidget {
 
 class _InstallmentListScreenState extends State<InstallmentListScreen> {
   final TextEditingController _searchController = TextEditingController();
+
+  /// Collapses rapid keystrokes so a query only runs once typing pauses.
+  final Debouncer _searchDebouncer = Debouncer();
+
   List<Installment> _installments = [];
   bool _isLoading = true;
   InstallmentStatus? _selectedStatus;
@@ -56,6 +62,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
   @override
   void dispose() {
     SyncManager.instance.dataVersion.removeListener(_onDataVersionChanged);
+    _searchDebouncer.dispose();
     _searchController.dispose();
     super.dispose();
   }
@@ -67,6 +74,9 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
   }
 
   Future<void> _loadInstallments() async {
+    // A direct load supersedes any queued keystroke.  When this method is the
+    // debounced target the timer already fired, so cancelling is a no-op.
+    _searchDebouncer.cancel();
     setState(() => _isLoading = true);
     final items = await widget.repository.searchInstallments(
       query: _searchController.text.trim().isEmpty ? null : _searchController.text.trim(),
@@ -84,7 +94,39 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
   }
 
   void _onSearchChanged(String _) {
-    _loadInstallments();
+    // Debounced: wait 300 ms of silence before querying so a fast typist
+    // triggers one query instead of one per character.
+    _searchDebouncer.run(_loadInstallments);
+  }
+
+  /// True when search or any filter is narrowing the list — drives both the
+  /// count label ("hasil" vs "cicilan") and the empty state.
+  bool get _hasActiveQueryOrFilter =>
+      _searchController.text.trim().isNotEmpty ||
+      _selectedStatus != null ||
+      _selectedSortBy != 'due_date_asc' ||
+      _selectedDueSoon;
+
+  /// Compact "N cicilan" / "N hasil" line shown above the list.
+  Widget _buildResultCount() {
+    if (_isLoading || _installments.isEmpty) return const SizedBox.shrink();
+    final int count = _installments.length;
+    final String label = _hasActiveQueryOrFilter ? '$count hasil' : '$count cicilan';
+    return Padding(
+      key: const Key('installment_result_count'),
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: AppColors.textMuted,
+          ),
+        ),
+      ),
+    );
   }
 
   String _getSortLabel(String sortBy) {
@@ -774,7 +816,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
             child: StateCrossfade(
               isLoading: _isLoading,
               isEmpty: _installments.isEmpty,
-              loadingChild: const Center(child: CupertinoActivityIndicator(radius: 14)),
+              loadingChild: const SkeletonLoader(layout: SkeletonLayout.card),
               emptyChild: Column(
                 children: [
                   const Spacer(flex: 5),
@@ -887,6 +929,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                       child: _buildSummaryCard(),
                     ),
                   ),
+                  SliverToBoxAdapter(child: _buildResultCount()),
                   SliverPadding(
                     padding: const EdgeInsets.fromLTRB(16.0, 6.0, 16.0, 160.0),
                     sliver: SliverList.separated(
@@ -988,7 +1031,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Hapus Catatan Pembayaran?'),
-        content: Text('Apakah Anda yakin ingin menghapus catatan pembayaran sebesar ${_formatCurrency(log.amountPaid)}?'),
+        content: Text('Apakah kamu yakin ingin menghapus catatan pembayaran sebesar ${_formatCurrency(log.amountPaid)}?'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),

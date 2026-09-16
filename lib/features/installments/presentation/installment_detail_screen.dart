@@ -117,7 +117,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Hapus Catatan Pembayaran?'),
-        content: Text('Apakah Anda yakin ingin menghapus catatan pembayaran sebesar ${_formatCurrency(log.amountPaid)}?'),
+        content: Text('Apakah kamu yakin ingin menghapus catatan pembayaran sebesar ${_formatCurrency(log.amountPaid)}?'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),
@@ -159,7 +159,10 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           leading: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () => Navigator.maybePop(context),
-            child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
+            child: Semantics(
+              label: 'Kembali',
+              child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
+            ),
           ),
         ),
         child: const Center(child: Text('Data cicilan tidak ditemukan')),
@@ -182,7 +185,10 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           leading: CupertinoButton(
             padding: EdgeInsets.zero,
             onPressed: () => Navigator.maybePop(context),
-            child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
+            child: Semantics(
+              label: 'Kembali',
+              child: const Icon(CupertinoIcons.chevron_back, color: AppColors.textDark, size: 24),
+            ),
           ),
           middle: const Text('Rincian Cicilan', style: AppTypography.navTitle),
           trailing: Row(
@@ -198,7 +204,10 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
               CupertinoButton(
                 padding: EdgeInsets.zero,
                 onPressed: () => _confirmDeleteInstallment(inst),
-                child: const Icon(CupertinoIcons.trash, color: AppColors.dangerRose, size: 20),
+                child: Semantics(
+                  label: 'Hapus cicilan',
+                  child: const Icon(CupertinoIcons.trash, color: AppColors.dangerRose, size: 20),
+                ),
               ),
             ],
           ),

@@ -12,6 +12,7 @@ import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/photo_source_picker_sheet.dart';
 import '../../../core/widgets/sheet_picker.dart';
 import '../../../core/widgets/squircle_icon.dart';
+import '../../../core/widgets/unsaved_changes_guard.dart';
 import '../../costumes/data/costume_repository.dart';
 import '../../costumes/domain/costume.dart';
 import '../../rentals/data/rental_repository.dart';
@@ -73,6 +74,24 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   String? _costumeError;
   String? _dateError;
   String? _dpError;
+  bool _userEdited = false;
+
+  /// True when the user made at least one manual edit that is not yet saved.
+  ///
+  /// Auto-filled values (Smart Paste pre-fill, customer auto-match, auto-price)
+  /// are deliberately excluded: only genuine user input flips this flag.
+  bool get _hasUnsavedChanges => _userEdited && !_isSaving;
+
+  /// Confirms discarding edits before the sheet closes. Returns `true` when
+  /// the sheet should be allowed to close.
+  Future<bool> _confirmClose() async {
+    if (!_hasUnsavedChanges) return true;
+    return confirmDiscardChanges(context);
+  }
+
+  void _markEdited() {
+    if (!_userEdited) setState(() => _userEdited = true);
+  }
 
   @override
   void initState() {
@@ -237,6 +256,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         maxHeight: 1600,
       );
       if (picked != null && mounted) {
+        _markEdited();
         setState(() {
           if (isKtp) {
             _ktpPhotoPath = picked.path;
@@ -565,10 +585,20 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     final dateFormat = DateFormat('d MMM y', 'id_ID');
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return DraggableSheetContainer(
-      backgroundColor: AppColors.background,
-      onDismissed: () => Navigator.of(context).pop(),
-      builder: (sheetCtx) => DefaultTextStyle(
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _confirmClose()) {
+          if (mounted) navigator.pop();
+        }
+      },
+      child: DraggableSheetContainer(
+        backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(context).pop(),
+        confirmDismiss: _confirmClose,
+        builder: (sheetCtx) => DefaultTextStyle(
         style: const TextStyle(
           decoration: TextDecoration.none,
           fontFamily: '.SF Pro Text',
@@ -581,7 +611,14 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
-              onPressed: _isSaving ? null : () => Navigator.of(sheetCtx).pop(),
+              onPressed: _isSaving
+                  ? null
+                  : () async {
+                      final navigator = Navigator.of(sheetCtx);
+                      if (await _confirmClose()) {
+                        if (mounted) navigator.pop();
+                      }
+                    },
               child: const Text('Batal', style: AppTypography.actionButton),
             ),
             middle: const SizedBox(
@@ -629,6 +666,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
                         textInputAction: TextInputAction.next,
+                        onChanged: (_) => _markEdited(),
                       ),
                     ),
                     CupertinoListTile(
@@ -649,6 +687,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           FilteringTextInputFormatter.allow(RegExp(r'[\d+\-\s]')),
                         ],
                         textInputAction: TextInputAction.next,
+                        onChanged: (_) => _markEdited(),
                       ),
                     ),
                     CupertinoListTile(
@@ -667,6 +706,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         maxLines: 3,
                         minLines: 1,
                         textInputAction: TextInputAction.next,
+                        onChanged: (_) => _markEdited(),
                       ),
                     ),
                     CupertinoListTile(
@@ -687,6 +727,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           FilteringTextInputFormatter.allow(RegExp(r'[\d+\-\s]')),
                         ],
                         textInputAction: TextInputAction.next,
+                        onChanged: (_) => _markEdited(),
                       ),
                     ),
                     CupertinoListTile(
@@ -703,6 +744,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
                         textInputAction: TextInputAction.done,
+                        onChanged: (_) => _markEdited(),
                       ),
                     ),
                   ],
@@ -883,6 +925,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                                   (x) => x.id == id,
                                   orElse: () => _costumes.first,
                                 );
+                                _markEdited();
                                 setState(() {
                                   _selectedCostume = c;
                                   _costumeError = null;
@@ -924,6 +967,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           minimumDate: DateTime(2020),
                         );
                         if (d != null) {
+                          _markEdited();
                           setState(() {
                             _startDate = d;
                             if (_endDate.isBefore(_startDate)) {
@@ -978,6 +1022,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           minimumDate: _startDate,
                         );
                         if (d != null) {
+                          _markEdited();
                           setState(() {
                             _endDate = d;
                             _dateError = null;
@@ -1025,6 +1070,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           items: items,
                         );
                         if (key != null) {
+                          _markEdited();
                           setState(() => _purpose = key);
                         }
                       },
@@ -1058,6 +1104,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         textInputAction: TextInputAction.next,
                         onChanged: (_) {
                           _isPriceManuallyEdited = true;
+                          _markEdited();
                           setState(() {});
                         },
                       ),
@@ -1092,6 +1139,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         ],
                         onValueChanged: (val) {
                           HapticFeedback.selectionClick();
+                          _markEdited();
                           setState(() {
                             _paymentStatus = val;
                             if (val != RentalPaymentStatus.dpPaid) {
@@ -1119,6 +1167,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           keyboardType: TextInputType.number,
                           textInputAction: TextInputAction.done,
                           onChanged: (_) {
+                            _markEdited();
                             setState(() {
                               _dpError = null;
                             });
@@ -1240,6 +1289,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
           ),
         ),
       ),
+    ),
     );
   }
 }

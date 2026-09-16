@@ -782,6 +782,12 @@ void main() {
           ),
         );
 
+    // Dates are relative to today because the badge reads the real clock.
+    DateTime daysFromToday(int offset) {
+      final now = DateTime.now();
+      return DateTime(now.year, now.month, now.day).add(Duration(days: offset));
+    }
+
     testWidgets('Renders overdue badge with "Terlambat X hari" for past due dates', (tester) async {
       await tester.pumpWidget(
         harness(Installment(
@@ -789,7 +795,7 @@ void main() {
           itemName: 'Nahida Cosplay',
           totalCost: 1000000.0,
           totalPaid: 400000.0,
-          dueDate: DateTime(2026, 9, 9),
+          dueDate: daysFromToday(-7),
           status: InstallmentStatus.ongoing,
         )),
       );
@@ -805,7 +811,7 @@ void main() {
           itemName: 'Nahida Cosplay',
           totalCost: 1000000.0,
           totalPaid: 400000.0,
-          dueDate: DateTime(2026, 9, 23),
+          dueDate: daysFromToday(7),
           status: InstallmentStatus.ongoing,
         )),
       );
@@ -861,12 +867,14 @@ void main() {
 
   group('AddPaymentSheet Running Summary Tests', () {
     testWidgets('Shows overdue warning, progress, and payment stats', (tester) async {
+      final now = DateTime.now();
+      final overdueDate = DateTime(now.year, now.month, now.day).subtract(const Duration(days: 7));
       final installment = Installment(
         id: 'inst-pay-late',
         itemName: 'Furina Gown',
         totalCost: 1000000.0,
         totalPaid: 400000.0,
-        dueDate: DateTime(2026, 9, 9),
+        dueDate: overdueDate,
         status: InstallmentStatus.ongoing,
       );
       final repo = MockInstallmentRepository(
@@ -876,7 +884,7 @@ void main() {
             itemName: 'Furina Gown',
             totalCost: 1000000.0,
             totalPaid: 400000.0,
-            dueDate: DateTime(2026, 9, 9),
+            dueDate: overdueDate,
             status: InstallmentStatus.ongoing,
           ),
         ],

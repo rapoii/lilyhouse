@@ -32,6 +32,13 @@ class DraggableSheetContainer extends StatefulWidget {
   /// Called when the user drags far enough to dismiss the sheet.
   final VoidCallback? onDismissed;
 
+  /// Optional guard invoked when a drag gesture would dismiss the sheet.
+  ///
+  /// The sheet snaps back to its initial height first, then this callback is
+  /// awaited. The sheet only dismisses when it returns `true`; returning
+  /// `false` leaves the sheet open (used for unsaved-changes confirmation).
+  final Future<bool> Function()? confirmDismiss;
+
   const DraggableSheetContainer({
     super.key,
     required this.builder,
@@ -40,6 +47,7 @@ class DraggableSheetContainer extends StatefulWidget {
     this.dismissThreshold = 0.25,
     this.backgroundColor,
     this.onDismissed,
+    this.confirmDismiss,
   });
 
   @override
@@ -67,7 +75,7 @@ class _DraggableSheetContainerState extends State<DraggableSheetContainer>
     _controller.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         if (_dragOffset >= _dismissDistance) {
-          widget.onDismissed?.call();
+          _handleDismissRequest();
         } else {
           setState(() {
             _dragOffset = 0.0;
@@ -76,6 +84,26 @@ class _DraggableSheetContainerState extends State<DraggableSheetContainer>
         }
       }
     });
+  }
+
+  /// Snaps the sheet back into place, then (if a [confirmDismiss] guard is
+  /// provided) asks it for permission before actually dismissing.
+  ///
+  /// Snapping back first avoids the trap where the sheet is already off-screen
+  /// while the user is still deciding in the confirmation dialog.
+  Future<void> _handleDismissRequest() async {
+    final guard = widget.confirmDismiss;
+    if (guard == null) {
+      widget.onDismissed?.call();
+      return;
+    }
+    setState(() {
+      _dragOffset = 0.0;
+      _isAnimating = false;
+    });
+    final shouldDismiss = await guard();
+    if (!mounted) return;
+    if (shouldDismiss) widget.onDismissed?.call();
   }
 
   @override

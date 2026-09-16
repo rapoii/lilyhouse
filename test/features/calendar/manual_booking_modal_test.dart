@@ -549,4 +549,105 @@ void main() {
     expect(savedRental.paymentStatus, RentalPaymentStatus.paid);
   });
 
+  testWidgets('ManualBookingModal guards unsaved edits when tapping Batal', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(buildModal());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Modal'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    // Type into a field so the form becomes "dirty".
+    await tester.enterText(find.byKey(const Key('manual_name_input')), 'Alya Rani');
+    await tester.pumpAndSettle();
+
+    // Tapping Batal must raise the discard confirmation instead of closing.
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+    expect(find.text('Batalkan Perubahan?'), findsOneWidget);
+
+    // Choosing "Lanjut Mengisi" keeps the sheet open with data intact.
+    await tester.tap(find.text('Lanjut Mengisi'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAlertDialog), findsNothing);
+    expect(find.byKey(const Key('manual_name_input')), findsOneWidget);
+    expect(find.text('Alya Rani'), findsOneWidget);
+
+    // Choosing "Keluar" finally discards and closes the sheet.
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Keluar'));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('manual_name_input')), findsNothing);
+  });
+
+  testWidgets('ManualBookingModal closes without prompting when nothing was edited', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(buildModal());
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Modal'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAlertDialog), findsNothing);
+    expect(find.byKey(const Key('manual_name_input')), findsNothing);
+  });
+
+  testWidgets('ManualBookingModal does not treat Smart Paste pre-fill as an edit', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    // Auto-filled values must not trigger the guard on their own.
+    await tester.pumpWidget(buildModal(
+      initialParsedData: ParsedRentalData(
+        fullName: 'Alya Rani',
+        phone: '081234567890',
+        costumeName: 'Furina Archon',
+        startDate: DateTime(2026, 9, 1),
+        endDate: DateTime(2026, 9, 3),
+      ),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Open Modal'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Alya Rani'), findsOneWidget);
+
+    await tester.tap(find.text('Batal'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(CupertinoAlertDialog), findsNothing);
+    expect(find.byKey(const Key('manual_name_input')), findsNothing);
+  });
+
 }

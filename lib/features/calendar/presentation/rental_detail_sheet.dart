@@ -1570,11 +1570,14 @@ class RentalDetailSheet extends StatelessWidget {
                                   color: AppColors.softPinkBg,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Center(
-                                  child: Icon(
-                                    CupertinoIcons.doc_on_doc,
-                                    size: 15,
-                                    color: AppColors.primaryPink,
+                                child: Center(
+                                  child: Semantics(
+                                    label: 'Salin nomor telepon',
+                                    child: const Icon(
+                                      CupertinoIcons.doc_on_doc,
+                                      size: 15,
+                                      color: AppColors.primaryPink,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1626,11 +1629,14 @@ class RentalDetailSheet extends StatelessWidget {
                               color: AppColors.softPinkBg,
                               shape: BoxShape.circle,
                             ),
-                            child: const Center(
-                              child: Icon(
-                                CupertinoIcons.doc_on_doc,
-                                size: 15,
-                                color: AppColors.primaryPink,
+                            child: Center(
+                              child: Semantics(
+                                label: 'Salin nomor HP orang tua',
+                                child: const Icon(
+                                  CupertinoIcons.doc_on_doc,
+                                  size: 15,
+                                  color: AppColors.primaryPink,
+                                ),
                               ),
                             ),
                           ),
@@ -1694,11 +1700,14 @@ class RentalDetailSheet extends StatelessWidget {
                                   color: AppColors.softPinkBg,
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Center(
-                                  child: Icon(
-                                    CupertinoIcons.doc_on_doc,
-                                    size: 15,
-                                    color: AppColors.primaryPink,
+                                child: Center(
+                                  child: Semantics(
+                                    label: 'Salin akun media sosial',
+                                    child: const Icon(
+                                      CupertinoIcons.doc_on_doc,
+                                      size: 15,
+                                      color: AppColors.primaryPink,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -1804,11 +1813,14 @@ class RentalDetailSheet extends StatelessWidget {
                             color: Color(0xFFFCE4EC),
                             shape: BoxShape.circle,
                           ),
-                          child: const Center(
-                            child: Icon(
-                              CupertinoIcons.doc_on_clipboard_fill,
-                              size: 15,
-                              color: Color(0xFFC2185B),
+                          child: Center(
+                            child: Semantics(
+                              label: 'Salin format DM Instagram',
+                              child: const Icon(
+                                CupertinoIcons.doc_on_clipboard_fill,
+                                size: 15,
+                                color: Color(0xFFC2185B),
+                              ),
                             ),
                           ),
                         ),

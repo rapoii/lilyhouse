@@ -5,6 +5,7 @@ import '../../../../core/widgets/draggable_sheet_container.dart';
 import '../../../../core/widgets/ios_toast.dart';
 import '../../../../core/widgets/sheet_picker.dart';
 import '../../../../core/widgets/squircle_icon.dart';
+import '../../../../core/widgets/unsaved_changes_guard.dart';
 import '../../data/installment_repository.dart';
 import '../../domain/installment.dart';
 
@@ -31,6 +32,21 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
   late final TextEditingController _storeController;
   DateTime? _selectedDueDate;
   bool _isSaving = false;
+  bool _userEdited = false;
+
+  /// True when the user made at least one manual edit that is not yet saved.
+  bool get _hasUnsavedChanges => _userEdited && !_isSaving;
+
+  /// Confirms discarding edits before the sheet closes. Returns `true` when
+  /// the sheet should be allowed to close.
+  Future<bool> _confirmClose() async {
+    if (!_hasUnsavedChanges) return true;
+    return confirmDiscardChanges(context);
+  }
+
+  void _markEdited() {
+    if (!_userEdited) setState(() => _userEdited = true);
+  }
 
   static const _months = [
     '', 'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'
@@ -107,12 +123,22 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return DraggableSheetContainer(
-      backgroundColor: AppColors.background,
-      initialHeightFraction: 0.50,
-      maxHeightFraction: 0.85,
-      onDismissed: () => Navigator.of(context).pop(),
-      builder: (ctx) => DefaultTextStyle(
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _confirmClose()) {
+          if (mounted) navigator.pop();
+        }
+      },
+      child: DraggableSheetContainer(
+        backgroundColor: AppColors.background,
+        initialHeightFraction: 0.50,
+        maxHeightFraction: 0.85,
+        onDismissed: () => Navigator.of(context).pop(),
+        confirmDismiss: _confirmClose,
+        builder: (ctx) => DefaultTextStyle(
         style: const TextStyle(
           decoration: TextDecoration.none,
           fontFamily: '.SF Pro Text',
@@ -126,7 +152,12 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
-              onPressed: () => Navigator.of(context).pop(),
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                if (await _confirmClose()) {
+                  if (mounted) navigator.pop();
+                }
+              },
               child: const Text('Batal', style: AppTypography.actionButton),
             ),
             middle: const Text('Ubah Cicilan', style: AppTypography.navTitle),
@@ -173,6 +204,7 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: null,
                               textInputAction: TextInputAction.next,
+                              onChanged: (_) => _markEdited(),
                             ),
                           ),
                         ],
@@ -199,6 +231,7 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
                               style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: null,
+                              onChanged: (_) => _markEdited(),
                             ),
                           ),
                         ],
@@ -241,6 +274,7 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
                               padding: EdgeInsets.zero,
                               minimumSize: const Size(28, 28),
                               onPressed: () {
+                                _markEdited();
                                 setState(() => _selectedDueDate = null);
                               },
                               child: const Icon(
@@ -272,6 +306,7 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
                               DateTime.now().add(const Duration(days: 30)),
                         );
                         if (d != null) {
+                          _markEdited();
                           setState(() => _selectedDueDate = d);
                         }
                       },
@@ -283,6 +318,7 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
           ),
         ),
       ),
+    ),
     );
   }
 }

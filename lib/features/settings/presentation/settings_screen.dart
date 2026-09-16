@@ -93,7 +93,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               rawError.contains('Failed host lookup') ||
               rawError.contains('TimeoutException') ||
               rawError.contains('ClientException')
-          ? 'Gagal terhubung ke cloud. Periksa koneksi internet Anda'
+          ? 'Gagal terhubung ke cloud. Periksa koneksi internet kamu'
           : (rawError.isNotEmpty ? rawError : 'Gagal melakukan sinkronisasi');
       _showIosToast(
         humanMsg,
@@ -111,7 +111,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         content: const Text(
           'Seluruh data lokal akan diganti dengan data dari cloud. '
           'Data offline yang belum disinkronkan akan hilang secara permanen. '
-          'Lanjutkan hanya jika Anda yakin atau baru selesai menginstall ulang aplikasi.',
+          'Lanjutkan hanya jika kamu yakin atau baru selesai menginstall ulang aplikasi.',
         ),
         actions: [
           CupertinoDialogAction(
@@ -525,7 +525,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.90',
+                    'Versi 1.0.91',
                     style: TextStyle(fontSize: 14, color: Color(0xFF8E8E93)),
                   ),
                 ),
@@ -690,7 +690,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.90 (BUILD 125) - TERBARU'),
+                  header: const Text('VERSI 1.0.91 (BUILD 126) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.lock_shield_fill,
+                        color: Color(0xFFFF9500),
+                      ),
+                      title: Text('Proteksi Perubahan Belum Tersimpan', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Form kostum, booking manual, dan ubah cicilan kini menampilkan konfirmasi Apple HIG sebelum ditutup saat masih ada isian yang belum disimpan, sehingga data tidak hilang tanpa sengaja.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.search_circle_fill,
+                        color: Color(0xFF007AFF),
+                      ),
+                      title: Text('Pencarian Tanggap & Skeleton Loading', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Pencarian katalog dan cicilan kini memakai jeda 300 milidetik, indikator jumlah hasil, serta kerangka pemuatan agar daftar tidak berkedip saat mengetik.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.eye_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Label Aksesibilitas & Bahasa Seragam', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Tombol ikon kini memiliki label pembaca layar, catatan rilis duplikat digabung, dan istilah non-baku diselaraskan ke ejaan resmi.',
+                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.90 (BUILD 125)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -699,9 +739,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: CupertinoIcons.bolt_fill,
                         color: AppColors.primaryPink,
                       ),
-                      title: Text('Pulasan Operasional Harian', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      title: Text('Ringkasan Operasional Harian', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
-                        'Kartu ringkasan di kalender kini menampilkan jumlah booking aktif, DP belum lunas, dan sewa yang jatuh tempo pada hari yang dipilih, beserta badge peringatan jatuh tempo.',
+                        'Kartu ringkasan di kalender kini menampilkan booking aktif, DP belum lunas, dan sewa yang jatuh tempo pada hari yang dipilih, kartu Sisa Tagihan dan banner jatuh tempo di rincian rental, serta ringkasan pembayaran berjalan di form cicilan.',
                         style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
                       ),
                     ),
@@ -713,24 +753,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       title: Text('Filter "Sedang Disewa" & Status Kostum Real-time', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Filter katalog kini menyertakan opsi "Sedang Disewa" dengan sublabel keterangan, dan status ketersediaan kostum otomatis tersinkron saat rental ditandai disewa, dikembalikan, atau dibatalkan.',
-                        style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
-                      ),
-                    ),
-                  ],
-                ),
-                CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.90 (BUILD 125) - TERBARU'),
-                  backgroundColor: Colors.transparent,
-                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  children: const [
-                    CupertinoListTile(
-                      leading: SquircleIcon(
-                        icon: CupertinoIcons.chart_bar_alt_fill,
-                        color: Color(0xFF007AFF),
-                      ),
-                      title: Text('Pulsan Operasional & Ringkasan Finansial', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                      subtitle: Text(
-                        'Kartu Pulsan Operasional di kalender (Booking Aktif, DP Belum Lunas, Jatuh Tempo), kartu Sisa Tagihan dan banner jatuh tempo di rincian rental, serta ringkasan pembayaran berjalan di form cicilan.',
                         style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93)),
                       ),
                     ),
@@ -1625,7 +1647,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.90', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
+                additionalInfo: const Text('v1.0.91', style: TextStyle(color: Color(0xFF8E8E93), fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),
