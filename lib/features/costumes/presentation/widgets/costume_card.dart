@@ -183,7 +183,7 @@ class CostumeCard extends StatelessWidget {
                     const SizedBox(height: 6),
                     // Element 3: Angka Kunci (Harga sewa per 3 hari)
                     Text(
-                      '${_formatCurrency(costume.rentPrice3Days)} / 3d',
+                      '${_formatCurrency(costume.rentPrice3Days)} / 3 hari',
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,

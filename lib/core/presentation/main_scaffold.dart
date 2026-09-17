@@ -102,7 +102,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
           ? const Center(child: Text('Katalog Kostum'))
           : CostumeListScreen(repository: widget.costumeRepository),
       widget.isTestMode && widget.rentalRepository == null
-          ? const Center(child: Text('Kalender Rental'))
+          ? const Center(child: Text('Kalender Sewa'))
           : CalendarScreen(
               rentalRepository: widget.rentalRepository,
               costumeRepository: widget.costumeRepository,

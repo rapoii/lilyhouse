@@ -38,8 +38,8 @@ void main() {
     // Element 2: Status Pill
     expect(find.text('Tersedia'), findsOneWidget);
 
-    // Element 3: Formatted Price
-    expect(find.textContaining('135.000'), findsOneWidget);
+    // Element 3: Formatted Price with standard Indonesian '/ 3 hari'
+    expect(find.text('Rp 135.000 / 3 hari'), findsOneWidget);
 
     // Removed elements should not be displayed
     expect(find.text('Spy x Family'), findsNothing);

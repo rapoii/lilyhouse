@@ -819,7 +819,7 @@ class RentalDetailSheet extends StatelessWidget {
           ? () {
               HapticFeedback.lightImpact();
               Clipboard.setData(ClipboardData(text: address.trim()));
-              IosToast.show(context, 'Alamat pengiriman disalin ke clipboard');
+              IosToast.show(context, 'Alamat pengiriman disalin ke papan klip');
             }
           : null,
     );
@@ -1442,7 +1442,7 @@ class RentalDetailSheet extends StatelessWidget {
                           const SizedBox(height: 6),
                           CupertinoButton(
                             padding: EdgeInsets.zero,
-                            minimumSize: const Size(0, 36),
+                            minimumSize: const Size(0, 44),
                             onPressed: () {
                               HapticFeedback.lightImpact();
                               Navigator.of(context).push(
@@ -1557,7 +1557,7 @@ class RentalDetailSheet extends StatelessWidget {
                               );
                               IosToast.show(
                                 context,
-                                'Nomor HP disalin ke clipboard',
+                                'Nomor HP disalin ke papan klip',
                               );
                             }
                           : null,
@@ -1574,7 +1574,7 @@ class RentalDetailSheet extends StatelessWidget {
                                 );
                                 IosToast.show(
                                   context,
-                                  'Nomor HP disalin ke clipboard',
+                                  'Nomor HP disalin ke papan klip',
                                 );
                               },
                               child: Container(

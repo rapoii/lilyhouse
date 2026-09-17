@@ -726,7 +726,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       title: CupertinoTextField(
                         key: const Key('manual_parent_phone_input'),
                         controller: _parentPhoneController,
-                        placeholder: 'No HP ortu / keluarga terdekat',
+                        placeholder: 'Nomor HP orang tua / keluarga terdekat',
                         placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),
@@ -1271,7 +1271,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                               ? CupertinoButton(
                                   key: const Key('manual_apply_recommended_price_btn'),
                                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                  minimumSize: const Size(44, 32),
+                                  minimumSize: const Size(44, 44),
                                   color: AppColors.softPinkBg,
                                   borderRadius: BorderRadius.circular(8),
                                   onPressed: () {

@@ -275,7 +275,7 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
                             CupertinoButton(
                               key: const Key('clear_due_date_button'),
                               padding: EdgeInsets.zero,
-                              minimumSize: const Size(28, 28),
+                              minimumSize: const Size(44, 44),
                               onPressed: () {
                                 _markEdited();
                                 setState(() => _selectedDueDate = null);

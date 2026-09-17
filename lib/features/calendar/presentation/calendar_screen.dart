@@ -298,11 +298,27 @@ class _CalendarScreenState extends State<CalendarScreen> {
         backgroundColor: AppColors.background,
         elevation: 0,
         title: const Text(
-          'Kalender Rental',
+          'Kalender Sewa',
           style: AppTypography.largeTitle,
         ),
         centerTitle: false,
         actions: [
+          if (!isSameDay(_selectedDay, DateTime.now()) || !isSameDay(_focusedDay, DateTime.now()))
+            HeaderActionButton(
+              buttonKey: const Key('today_jump_button'),
+              label: 'Hari Ini',
+              icon: CupertinoIcons.calendar_today,
+              onPressed: () {
+                try {
+                  HapticFeedback.selectionClick();
+                } catch (_) {}
+                setState(() {
+                  _selectedDay = DateTime.now();
+                  _focusedDay = DateTime.now();
+                  _slotsKey = UniqueKey();
+                });
+              },
+            ),
           // Single Tambah button — opens entry method chooser (Smart Paste / Manual)
           HeaderActionButton(
             buttonKey: const Key('add_booking_button'),
@@ -1232,7 +1248,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                     ),
                     CupertinoButton(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      minimumSize: const Size(28, 28),
+                      minimumSize: const Size(44, 44),
                       onPressed: _pasteFromClipboard,
                       child: const Row(
                         mainAxisSize: MainAxisSize.min,

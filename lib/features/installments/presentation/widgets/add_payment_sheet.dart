@@ -542,7 +542,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                                         CupertinoButton(
                                           key: const Key('shortcut_pay_in_full_button'),
                                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                          minimumSize: const Size(32, 28),
+                                          minimumSize: const Size(44, 44),
                                           color: AppColors.primaryPink.withValues(alpha: 0.12),
                                           borderRadius: BorderRadius.circular(16),
                                           onPressed: _applyPayInFull,

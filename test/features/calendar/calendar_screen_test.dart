@@ -249,7 +249,7 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      expect(find.text('Kalender Rental'), findsOneWidget);
+      expect(find.text('Kalender Sewa'), findsOneWidget);
       expect(find.byKey(const Key('add_booking_button')), findsOneWidget);
       expect(find.text('Tambah'), findsOneWidget);
     });
@@ -456,6 +456,24 @@ void main() {
       await tester.tap(find.text('Keluar'));
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('smart_paste_input')), findsNothing);
+    });
+
+    testWidgets('tapping Hari Ini button jumps calendar focus and selection to current date', (tester) async {
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pump();
+      await tester.pump();
+
+      // Since initialFocusedDay is 2026-09-06 (not today), today_jump_button is visible
+      final todayBtn = find.byKey(const Key('today_jump_button'));
+      expect(todayBtn, findsOneWidget);
+      expect(find.text('Hari Ini'), findsOneWidget);
+
+      await tester.tap(todayBtn);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      // Once jumped to today, the today jump button hides since selectedDay == today
+      expect(find.byKey(const Key('today_jump_button')), findsNothing);
     });
   });
 }

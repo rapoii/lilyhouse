@@ -1173,7 +1173,7 @@ void main() {
     await tester.pump();
 
     // Toast confirmation
-    expect(find.text('Alamat pengiriman disalin ke clipboard'), findsOneWidget);
+    expect(find.text('Alamat pengiriman disalin ke papan klip'), findsOneWidget);
 
     // Clipboard got the exact address from the customer record
     final clipboardCalls = log

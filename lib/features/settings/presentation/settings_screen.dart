@@ -545,7 +545,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.99',
+                    'Versi 1.1.0',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ),
@@ -749,7 +749,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.99 (BUILD 134) - TERBARU'),
+                  header: const Text('VERSI 1.1.0 (BUILD 135) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.calendar_today,
+                        color: Color(0xFF007AFF),
+                      ),
+                      title: Text('Aksi Cepat Hari Ini pada Kalender Sewa', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Tombol aksi cepat Hari Ini kini muncul di bilah atas kalender saat melihat tanggal selain hari ini untuk langsung kembali ke jadwal operasional terkini.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.textformat,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Standar Bahasa KBBI Papan Klip & Tarif', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Penyelarasan seluruh toast salin data ke papan klip, tarif katalog resmi / 3 hari, dan standarisasi judul utama menjadi Kalender Sewa.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.hand_draw_fill,
+                        color: Color(0xFFFF9500),
+                      ),
+                      title: Text('Penyempurnaan Area Sentuh Apple HIG 44pt', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Perluasan area sentuh pada tombol Tempel Klip, shortcut Bayar Lunas cicilan, Pakai rekomendasi tarif, dan hapus jatuh tempo ke standar minimal 44x44 pt.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.99 (BUILD 134)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1968,7 +2008,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.99', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                additionalInfo: const Text('v1.1.0', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),
