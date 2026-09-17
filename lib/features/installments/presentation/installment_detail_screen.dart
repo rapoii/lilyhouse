@@ -172,6 +172,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           middle: const Text('Rincian Cicilan', style: AppTypography.navTitle),
           leading: CupertinoButton(
             padding: EdgeInsets.zero,
+            minimumSize: const Size(44, 44),
             onPressed: () => Navigator.maybePop(context),
             child: Semantics(
               label: 'Kembali',
@@ -197,6 +198,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           middle: const Text('Rincian Cicilan', style: AppTypography.navTitle),
           leading: CupertinoButton(
             padding: EdgeInsets.zero,
+            minimumSize: const Size(44, 44),
             onPressed: () => Navigator.maybePop(context),
             child: Semantics(
               label: 'Kembali',
@@ -223,6 +225,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
           border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
           leading: CupertinoButton(
             padding: EdgeInsets.zero,
+            minimumSize: const Size(44, 44),
             onPressed: () => Navigator.maybePop(context),
             child: Semantics(
               label: 'Kembali',
@@ -236,12 +239,14 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
               CupertinoButton(
                 key: const Key('edit_installment_button'),
                 padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
                 onPressed: _showEditInstallmentSheet,
                 child: const Text('Ubah', style: AppTypography.actionButton),
               ),
               const SizedBox(width: 8),
               CupertinoButton(
                 padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
                 onPressed: () => _confirmDeleteInstallment(inst),
                 child: Semantics(
                   label: 'Hapus cicilan',
@@ -491,6 +496,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                 child: CupertinoButton(
                   color: AppColors.primaryPink,
                   padding: const EdgeInsets.symmetric(vertical: 12),
+                  minimumSize: const Size(44, 44),
                   borderRadius: BorderRadius.circular(12),
                   onPressed: _showAddPaymentSheet,
                   child: const Row(

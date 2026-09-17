@@ -102,6 +102,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: _resetFilters,
               child: const Text('Atur Ulang', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.deepPinkText)),
             ),
@@ -113,6 +114,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
             ),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: _apply,
               child: const Text('Terapkan', style: AppTypography.actionButton),
             ),

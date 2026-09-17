@@ -173,6 +173,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               middle: const Text('Antrean Offline', style: AppTypography.navTitle),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
                 onPressed: () => Navigator.pop(sheetCtx),
                 child: const Text('Tutup', style: AppTypography.actionButton),
               ),
@@ -308,6 +309,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               middle: const Text('Statistik Database', style: AppTypography.navTitle),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
                 onPressed: () => Navigator.pop(sheetCtx),
                 child: const Text('Tutup', style: AppTypography.actionButton),
               ),
@@ -501,6 +503,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               middle: const Text('Tentang Aplikasi', style: AppTypography.navTitle),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
                 onPressed: () => Navigator.pop(sheetCtx),
                 child: const Text('Tutup', style: AppTypography.actionButton),
               ),
@@ -542,7 +545,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.98',
+                    'Versi 1.0.99',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ),
@@ -658,6 +661,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               middle: const Text('Apple HIG Specs', style: AppTypography.navTitle),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
                 onPressed: () => Navigator.pop(sheetCtx),
                 child: const Text('Tutup', style: AppTypography.actionButton),
               ),
@@ -736,6 +740,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               middle: const Text('Catatan Rilis', style: AppTypography.navTitle),
               trailing: CupertinoButton(
                 padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
                 onPressed: () => Navigator.pop(sheetCtx),
                 child: const Text('Tutup', style: AppTypography.actionButton),
               ),
@@ -744,7 +749,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.98 (BUILD 133) - TERBARU'),
+                  header: const Text('VERSI 1.0.99 (BUILD 134) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.checkmark_seal_fill,
+                        color: Color(0xFF007AFF),
+                      ),
+                      title: Text('Standar Bahasa Pesanan Sewa Seluruh Sistem', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Penyelarasan seluruh judul, pesan, dan notifikasi dari istilah asing rental dan booking ke kata baku Pesanan Sewa di kalender, rincian, dan validasi jadwal.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.hand_draw_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Area Sentuh Standar Apple HIG 44pt', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Seluruh tombol navigasi, aksi, dan empty state kini memiliki area sentuh minimal 44x44 pt sesuai Apple Human Interface Guidelines tanpa mengubah tata letak.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.shield_lefthalf_fill,
+                        color: Color(0xFFFF9500),
+                      ),
+                      title: Text('Proteksi Draf Form Aksesori Kostum', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Form tambah aksesori kini terproteksi dialog konfirmasi saat ada nama aksesori yang belum disimpan dan lembar ditutup atau digeser ke bawah.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.98 (BUILD 133)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1923,7 +1968,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.98', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                additionalInfo: const Text('v1.0.99', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),

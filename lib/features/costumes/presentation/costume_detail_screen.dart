@@ -166,6 +166,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
             ),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text(
                 'Tutup',
@@ -249,6 +250,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
         ),
         leading: CupertinoButton(
           padding: EdgeInsets.zero,
+          minimumSize: const Size(44, 44),
           onPressed: () => Navigator.maybePop(context),
           child: Semantics(
             label: 'Kembali',
@@ -266,6 +268,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
         ),
         trailing: CupertinoButton(
           padding: EdgeInsets.zero,
+          minimumSize: const Size(44, 44),
           onPressed: _showEditCostumeSheet,
           child: const Text('Ubah', style: AppTypography.actionButton),
         ),

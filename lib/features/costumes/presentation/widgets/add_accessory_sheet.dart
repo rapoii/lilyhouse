@@ -6,6 +6,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/draggable_sheet_container.dart';
 import '../../../../core/widgets/ios_toast.dart';
 import '../../../../core/widgets/squircle_icon.dart';
+import '../../../../core/widgets/unsaved_changes_guard.dart';
 import '../../domain/accessory.dart';
 
 class AddAccessorySheet extends StatefulWidget {
@@ -48,6 +49,14 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
   final _nameController = TextEditingController();
   AccessoryCondition _selectedCondition = AccessoryCondition.good;
   bool _isSubmitting = false;
+
+  bool get _hasUnsavedChanges =>
+      _nameController.text.trim().isNotEmpty && !_isSubmitting;
+
+  Future<bool> _confirmClose() async {
+    if (!_hasUnsavedChanges) return true;
+    return confirmDiscardChanges(context);
+  }
 
   @override
   void dispose() {
@@ -127,39 +136,54 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
     final showCondition = widget.onSaveAccessory != null;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return DraggableSheetContainer(
-      initialHeightFraction: 0.60,
-      maxHeightFraction: 0.75,
-      backgroundColor: AppColors.background,
-      onDismissed: () => Navigator.of(context).pop(),
-      builder: (ctx) => DefaultTextStyle(
-        style: const TextStyle(
-          decoration: TextDecoration.none,
-          fontFamily: '.SF Pro Text',
-          color: AppColors.textDark,
-        ),
-        child: CupertinoPageScaffold(
-          backgroundColor: AppColors.background,
-          navigationBar: CupertinoNavigationBar(
-            automaticallyImplyLeading: false,
-            backgroundColor: AppColors.background,
-            border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
-            leading: CupertinoButton(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(44, 44),
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Batal', style: TextStyle(fontSize: 15, color: AppColors.deepPinkText)),
-            ),
-            middle: const Text('Tambah Aksesori', style: AppTypography.navTitle),
-            trailing: CupertinoButton(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(44, 44),
-              onPressed: _isSubmitting ? null : _submit,
-              child: _isSubmitting
-                  ? const CupertinoActivityIndicator(radius: 10)
-                  : const Text('Simpan', style: AppTypography.actionButton),
-            ),
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (await _confirmClose()) {
+          if (mounted) navigator.pop();
+        }
+      },
+      child: DraggableSheetContainer(
+        initialHeightFraction: 0.60,
+        maxHeightFraction: 0.75,
+        backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(context).pop(),
+        confirmDismiss: _confirmClose,
+        builder: (ctx) => DefaultTextStyle(
+          style: const TextStyle(
+            decoration: TextDecoration.none,
+            fontFamily: '.SF Pro Text',
+            color: AppColors.textDark,
           ),
+          child: CupertinoPageScaffold(
+            backgroundColor: AppColors.background,
+            navigationBar: CupertinoNavigationBar(
+              automaticallyImplyLeading: false,
+              backgroundColor: AppColors.background,
+              border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
+              leading: CupertinoButton(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
+                onPressed: () async {
+                  final navigator = Navigator.of(context);
+                  if (await _confirmClose()) {
+                    if (mounted) navigator.pop();
+                  }
+                },
+                child: const Text('Batal', style: TextStyle(fontSize: 15, color: AppColors.deepPinkText)),
+              ),
+              middle: const Text('Tambah Aksesori', style: AppTypography.navTitle),
+              trailing: CupertinoButton(
+                padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
+                onPressed: _isSubmitting ? null : _submit,
+                child: _isSubmitting
+                    ? const CupertinoActivityIndicator(radius: 10)
+                    : const Text('Simpan', style: AppTypography.actionButton),
+              ),
+            ),
           child: SafeArea(
             top: false,
             child: ListView(
@@ -252,6 +276,7 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

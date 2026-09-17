@@ -537,6 +537,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: () async {
                 final navigator = Navigator.of(context);
                 if (await _confirmClose()) {
@@ -553,6 +554,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
             ),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: (_isSaving || !_canSave) ? null : _save,
               child: _isSaving
                   ? const CupertinoActivityIndicator(radius: 10)

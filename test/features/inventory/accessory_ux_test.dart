@@ -157,6 +157,63 @@ void main() {
 
       await tester.pumpAndSettle(const Duration(seconds: 3));
     });
+
+    testWidgets('Unsaved changes protection: shows discard dialog when canceling with text entered', (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: Builder(
+              builder: (context) => CupertinoButton(
+                child: const Text('Buka'),
+                onPressed: () {
+                  AddAccessorySheet.show(
+                    context: context,
+                    costumeId: 'cos-10',
+                  );
+                },
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Buka'));
+      await tester.pumpAndSettle();
+
+      // Form initially empty: tap Batal directly pops without alert
+      await tester.tap(find.widgetWithText(CupertinoButton, 'Batal'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tambah Aksesori'), findsNothing);
+
+      // Re-open sheet
+      await tester.tap(find.text('Buka'));
+      await tester.pumpAndSettle();
+
+      // Enter text
+      await tester.enterText(find.byType(CupertinoTextField), 'Mahkota Emas');
+      await tester.pumpAndSettle();
+
+      // Tap Batal -> should show discard confirmation dialog
+      await tester.tap(find.widgetWithText(CupertinoButton, 'Batal'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Batalkan Perubahan?'), findsOneWidget);
+      expect(find.text('Perubahan yang belum disimpan akan hilang.'), findsOneWidget);
+
+      // Tap 'Lanjut Mengisi' -> should stay open
+      await tester.tap(find.text('Lanjut Mengisi'));
+      await tester.pumpAndSettle();
+      expect(find.text('Tambah Aksesori'), findsOneWidget);
+
+      // Tap Batal again and tap 'Keluar' -> should dismiss
+      await tester.tap(find.widgetWithText(CupertinoButton, 'Batal'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Keluar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Tambah Aksesori'), findsNothing);
+    });
   });
 
   group('ChangeAccessoryConditionSheet UX tests', () {

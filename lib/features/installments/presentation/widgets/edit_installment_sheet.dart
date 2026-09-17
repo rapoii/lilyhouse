@@ -152,6 +152,7 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: () async {
                 final navigator = Navigator.of(context);
                 if (await _confirmClose()) {
@@ -164,6 +165,7 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
             trailing: CupertinoButton(
               key: const Key('save_edit_installment_button'),
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: _isSaving ? null : _submit,
               child: _isSaving
                   ? const CupertinoActivityIndicator()

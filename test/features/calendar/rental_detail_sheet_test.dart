@@ -226,7 +226,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify Nav title
-    expect(find.text('Rincian Rental'), findsOneWidget);
+    expect(find.text('Rincian Pesanan Sewa'), findsOneWidget);
 
     // Verify Hero card info
     expect(find.text('Furina Archon'), findsOneWidget);
@@ -242,7 +242,7 @@ void main() {
     expect(find.text('08123456789'), findsOneWidget);
     expect(find.text('@alyacosplay'), findsOneWidget);
     expect(find.text('Jl. Merdeka No. 10, Jakarta'), findsOneWidget);
-    expect(find.text('Salin Format DM Instagram'), findsOneWidget);
+    expect(find.text('Salin Format Pesan Instagram'), findsOneWidget);
 
     // Verify Identity Documents Section
     expect(find.text('DOKUMEN IDENTITAS & JAMINAN'), findsOneWidget);
@@ -262,7 +262,7 @@ void main() {
     expect(find.text('Harap packing rapi wig dan aksesori'), findsOneWidget);
 
     // Scroll to Actions Section if needed
-    final actionSection = find.text('KELOLA STATUS RENTAL');
+    final actionSection = find.text('KELOLA STATUS PESANAN SEWA');
     await tester.scrollUntilVisible(
       actionSection,
       200,
@@ -655,7 +655,7 @@ void main() {
   );
 
   testWidgets(
-    'Tapping Salin Format DM Instagram copies formatted Instagram message to clipboard with IosToast',
+    'Tapping Salin Format Pesan Instagram copies formatted Instagram message to clipboard with IosToast',
     (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -697,7 +697,7 @@ void main() {
       await tester.tap(find.text('Open Sheet'));
       await tester.pumpAndSettle();
 
-      final copyTile = find.text('Salin Format DM Instagram');
+      final copyTile = find.text('Salin Format Pesan Instagram');
       expect(copyTile, findsOneWidget);
 
       // Tap tile
@@ -706,7 +706,7 @@ void main() {
 
       // Verify toast appeared
       expect(
-        find.text('Format konfirmasi Instagram berhasil disalin'),
+        find.text('Pesan konfirmasi Instagram berhasil disalin'),
         findsOneWidget,
       );
 
@@ -722,7 +722,7 @@ void main() {
       expect(
         copiedText,
         contains(
-          'Halo Kak Alya Rani, pesanan sewa kostum kamu telah tercatat di sistem LilyHouse (@lilycosrent).',
+          'Halo Kak Alya Rani, pesanan sewa kostum telah tercatat di sistem LilyHouse (@lilycosrent).',
         ),
       );
       expect(copiedText, contains('- Kostum: Furina Archon'));
@@ -735,7 +735,7 @@ void main() {
       expect(copiedText, contains('- Uang Muka (DP): Rp 50.000'));
       expect(copiedText, contains('- Status Pembayaran: DP'));
       expect(copiedText, contains('- Sisa Tagihan: Rp 100.000'));
-      expect(copiedText, contains('*Petunjuk & Peraturan Rental:*'));
+      expect(copiedText, contains('*Petunjuk & Peraturan Sewa:*'));
       expect(
         copiedText,
         contains(
@@ -831,7 +831,7 @@ void main() {
 
       // Verify toast
       expect(
-        find.text('Format konfirmasi Instagram berhasil disalin'),
+        find.text('Pesan konfirmasi Instagram berhasil disalin'),
         findsOneWidget,
       );
 

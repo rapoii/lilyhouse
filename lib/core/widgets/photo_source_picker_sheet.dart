@@ -56,6 +56,7 @@ class PhotoSourcePickerSheet extends StatelessWidget {
             middle: Text(title, style: AppTypography.navTitle),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: () => Navigator.of(context).pop(),
               child: const Text('Tutup', style: TextStyle(color: AppColors.deepPinkText, fontSize: 15, fontWeight: FontWeight.w600)),
             ),

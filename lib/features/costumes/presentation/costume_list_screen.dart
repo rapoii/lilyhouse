@@ -582,6 +582,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                             else
                               CupertinoButton(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                minimumSize: const Size(44, 44),
                                 color: AppColors.softPinkBg,
                                 borderRadius: BorderRadius.circular(20),
                                 onPressed: () {

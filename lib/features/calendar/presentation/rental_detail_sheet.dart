@@ -227,6 +227,7 @@ class RentalDetailSheet extends StatelessWidget {
             ),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text(
                 'Tutup',
@@ -982,7 +983,7 @@ class RentalDetailSheet extends StatelessWidget {
               if (!context.mounted) return;
               IosToast.show(
                 context,
-                'Status rental diubah ke "Sudah Dikembalikan"',
+                'Status pesanan sewa diubah ke "Sudah Dikembalikan"',
               );
               Navigator.pop(context);
             },
@@ -1045,7 +1046,7 @@ class RentalDetailSheet extends StatelessWidget {
     final buffer = StringBuffer();
     buffer.writeln('*KONFIRMASI SEWA KOSTUM - LILYHOUSE*');
     buffer.writeln(
-      'Halo Kak $customerName, pesanan sewa kostum kamu telah tercatat di sistem LilyHouse (@lilycosrent).',
+      'Halo Kak $customerName, pesanan sewa kostum telah tercatat di sistem LilyHouse (@lilycosrent).',
     );
     buffer.writeln();
     buffer.writeln('*Rincian Sewa:*');
@@ -1061,7 +1062,7 @@ class RentalDetailSheet extends StatelessWidget {
     buffer.writeln('- Status Pembayaran: $paymentStatusLabel');
     buffer.writeln('- Sisa Tagihan: Rp ${currencyFormat.format(sisaTagihan)}');
     buffer.writeln();
-    buffer.writeln('*Petunjuk & Peraturan Rental:*');
+    buffer.writeln('*Petunjuk & Peraturan Sewa:*');
     buffer.writeln(
       '1. Mohon menjaga kebersihan dan kelengkapan kostum beserta seluruh aksesori.',
     );
@@ -1101,7 +1102,7 @@ class RentalDetailSheet extends StatelessWidget {
     final costSeries =
         (costume?.animeSeries.isNotEmpty == true
                 ? costume!.animeSeries
-                : 'Kostum Rental')
+                : 'Kostum Tidak Dikenal')
             .replaceAll('_', ' ');
 
     final hasCover =
@@ -1168,9 +1169,10 @@ class RentalDetailSheet extends StatelessWidget {
             border: const Border(
               bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5),
             ),
-            middle: const Text('Rincian Rental', style: AppTypography.navTitle),
+            middle: const Text('Rincian Pesanan Sewa', style: AppTypography.navTitle),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: () => Navigator.of(context).pop(),
               child: const Text(
                 'Tutup',
@@ -1236,7 +1238,7 @@ class RentalDetailSheet extends StatelessWidget {
                                 SizedBox(width: 6),
                                 Expanded(
                                   child: Text(
-                                    'Konflik Jadwal: Tanggal booking bentrok dengan sewa lain!',
+                                    'Konflik Jadwal: Tanggal pesanan sewa bentrok dengan sewa lain!',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
@@ -1759,7 +1761,7 @@ class RentalDetailSheet extends StatelessWidget {
                         color: Color(0xFFE1306C),
                       ),
                       title: const Text(
-                        'Salin Format DM Instagram',
+                        'Salin Format Pesan Instagram',
                         style: TextStyle(
                           fontWeight: FontWeight.w600,
                           fontSize: 15,
@@ -1767,7 +1769,7 @@ class RentalDetailSheet extends StatelessWidget {
                         ),
                       ),
                       subtitle: const Text(
-                        'Template rincian sewa & aturan rental untuk dikirim via DM Instagram',
+                        'Template rincian sewa & aturan sewa untuk dikirim via pesan Instagram',
                         style: TextStyle(
                           fontSize: 12,
                           color: Color(0xFF636366),
@@ -1791,7 +1793,7 @@ class RentalDetailSheet extends StatelessWidget {
                         Clipboard.setData(ClipboardData(text: message));
                         IosToast.show(
                           context,
-                          'Format konfirmasi Instagram berhasil disalin',
+                          'Pesan konfirmasi Instagram berhasil disalin',
                         );
                       },
                       trailing: CupertinoButton(
@@ -1815,7 +1817,7 @@ class RentalDetailSheet extends StatelessWidget {
                           Clipboard.setData(ClipboardData(text: message));
                           IosToast.show(
                             context,
-                            'Format konfirmasi Instagram berhasil disalin',
+                            'Pesan konfirmasi Instagram berhasil disalin',
                           );
                         },
                         child: Container(
@@ -1827,7 +1829,7 @@ class RentalDetailSheet extends StatelessWidget {
                           ),
                           child: Center(
                             child: Semantics(
-                              label: 'Salin format DM Instagram',
+                              label: 'Salin format pesan Instagram',
                               child: const Icon(
                                 CupertinoIcons.doc_on_clipboard_fill,
                                 size: 15,
@@ -2003,7 +2005,7 @@ class RentalDetailSheet extends StatelessWidget {
                 // 4. Actions & Status Management
                 CupertinoListSection.insetGrouped(
                   header: const Text(
-                    'KELOLA STATUS RENTAL',
+                    'KELOLA STATUS PESANAN SEWA',
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
@@ -2051,7 +2053,7 @@ class RentalDetailSheet extends StatelessWidget {
                           if (!context.mounted) return;
                           IosToast.show(
                             context,
-                            'Status rental diubah ke "Sedang Disewa"',
+                            'Status pesanan sewa diubah ke "Sedang Disewa"',
                           );
                           Navigator.pop(context);
                         },
@@ -2145,7 +2147,7 @@ class RentalDetailSheet extends StatelessWidget {
                           if (!context.mounted) return;
                           IosToast.show(
                             context,
-                            'Pembayaran rental berhasil ditandai Lunas',
+                            'Pembayaran pesanan sewa berhasil ditandai lunas',
                           );
                           Navigator.pop(context);
                         },
@@ -2160,7 +2162,7 @@ class RentalDetailSheet extends StatelessWidget {
                           color: Color(0xFF34C759),
                         ),
                         title: const Text(
-                          'Selesaikan Rental',
+                          'Selesaikan Pesanan Sewa',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
@@ -2178,9 +2180,9 @@ class RentalDetailSheet extends StatelessWidget {
                           final confirm = await showCupertinoDialog<bool>(
                             context: context,
                             builder: (dialogCtx) => CupertinoAlertDialog(
-                              title: const Text('Selesaikan Rental'),
+                              title: const Text('Selesaikan Pesanan Sewa'),
                               content: const Text(
-                                'Tandai seluruh siklus rental ini telah selesai dan tuntas?',
+                                'Tandai seluruh siklus pesanan sewa ini telah selesai dan tuntas?',
                               ),
                               actions: [
                                 CupertinoDialogAction(
@@ -2208,7 +2210,7 @@ class RentalDetailSheet extends StatelessWidget {
                           if (!context.mounted) return;
                           IosToast.show(
                             context,
-                            'Rental berhasil diselesaikan sepenuhnya',
+                            'Pesanan sewa berhasil diselesaikan sepenuhnya',
                           );
                           Navigator.pop(context);
                         },
@@ -2245,7 +2247,7 @@ class RentalDetailSheet extends StatelessWidget {
                           color: Color(0xFF34C759),
                         ),
                         title: Text(
-                          'Rental Selesai & Lunas',
+                          'Pesanan Sewa Selesai & Lunas',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
@@ -2253,7 +2255,7 @@ class RentalDetailSheet extends StatelessWidget {
                           ),
                         ),
                         subtitle: Text(
-                          'Transaksi rental ini telah sukses terselesaikan',
+                          'Transaksi pesanan sewa ini telah sukses terselesaikan',
                           style: TextStyle(
                             fontSize: 12,
                             color: Color(0xFF636366),

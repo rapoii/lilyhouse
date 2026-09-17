@@ -303,6 +303,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                       border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
                       leading: CupertinoButton(
                         padding: EdgeInsets.zero,
+                        minimumSize: const Size(44, 44),
                         onPressed: () async {
                           if (hasUnsaved()) {
                             final shouldDiscard = await confirmDiscardChanges(ctx);
@@ -320,6 +321,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                     ),
                     trailing: CupertinoButton(
                       padding: EdgeInsets.zero,
+                      minimumSize: const Size(44, 44),
                       onPressed: isSaving ? null : () async {
                         final name = nameController.text.trim();
                         final rawCost = costController.text.trim().replaceAll('.', '').replaceAll(',', '');
@@ -933,6 +935,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                             if (hasFilterOrQuery)
                               CupertinoButton(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                minimumSize: const Size(44, 44),
                                 color: AppColors.softPinkBg,
                                 borderRadius: BorderRadius.circular(20),
                                 onPressed: () {
@@ -955,6 +958,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                             else
                               CupertinoButton(
                                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                                minimumSize: const Size(44, 44),
                                 color: AppColors.softPinkBg,
                                 borderRadius: BorderRadius.circular(20),
                                 onPressed: () {
@@ -1168,6 +1172,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('Tutup', style: AppTypography.actionButton),
             ),
@@ -1175,6 +1180,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
             trailing: widget.onOpenDetail != null
                 ? CupertinoButton(
                     padding: EdgeInsets.zero,
+                    minimumSize: const Size(44, 44),
                     onPressed: widget.onOpenDetail,
                     child: const Text('Rincian Lengkap', style: AppTypography.actionButton),
                   )
@@ -1361,6 +1367,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                       child: CupertinoButton(
                         color: AppColors.primaryPink,
                         padding: const EdgeInsets.symmetric(vertical: 12),
+                        minimumSize: const Size(44, 44),
                         borderRadius: BorderRadius.circular(12),
                         onPressed: _showAddPaymentSheet,
                         child: const Row(

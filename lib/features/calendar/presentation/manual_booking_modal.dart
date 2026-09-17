@@ -618,6 +618,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
             border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: _isSaving
                   ? null
                   : () async {
@@ -637,6 +638,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
             trailing: CupertinoButton(
               key: const Key('manual_save_booking_button'),
               padding: EdgeInsets.zero,
+              minimumSize: const Size(44, 44),
               onPressed: _isSaving ? null : _save,
               child: _isSaving
                   ? const CupertinoActivityIndicator(radius: 10)

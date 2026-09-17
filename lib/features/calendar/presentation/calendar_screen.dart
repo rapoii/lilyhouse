@@ -191,6 +191,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 middle: const Text('Tambah Pesanan', style: AppTypography.navTitle),
                 trailing: CupertinoButton(
                   padding: EdgeInsets.zero,
+                  minimumSize: const Size(44, 44),
                   onPressed: () => Navigator.of(sheetCtx).pop(),
                   child: const Text('Tutup', style: TextStyle(color: AppColors.deepPinkText, fontSize: 15, fontWeight: FontWeight.w600)),
                 ),
@@ -489,7 +490,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ),
                             const SizedBox(height: 16),
                             const Text(
-                              'Tidak ada booking',
+                              'Tidak Ada Pesanan Sewa',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -498,7 +499,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             ),
                             const SizedBox(height: 6),
                             const Text(
-                              'Belum ada pesanan rental di tanggal ini',
+                              'Belum ada pesanan sewa di tanggal ini',
                               style: TextStyle(
                                 fontSize: 13,
                                 color: AppColors.textSecondary,
@@ -508,6 +509,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             const SizedBox(height: 14),
                             CupertinoButton(
                               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              minimumSize: const Size(44, 44),
                               color: AppColors.softPinkBg,
                               borderRadius: BorderRadius.circular(20),
                               onPressed: () {
@@ -1187,6 +1189,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
               border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
               leading: CupertinoButton(
                 padding: EdgeInsets.zero,
+                minimumSize: const Size(44, 44),
                 onPressed: () async {
                   if (_textController.text.trim().isNotEmpty) {
                     final discard = await confirmDiscardChanges(sheetCtx);
@@ -1276,6 +1279,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                   color: AppColors.primaryPink,
                   onPressed: _handleParse,
                   padding: const EdgeInsets.symmetric(vertical: 12),
+                  minimumSize: const Size(44, 44),
                   borderRadius: BorderRadius.circular(12),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -1403,6 +1407,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                     color: AppColors.primaryPink,
                     onPressed: _continueToManual,
                     padding: const EdgeInsets.symmetric(vertical: 12),
+                    minimumSize: const Size(44, 44),
                     borderRadius: BorderRadius.circular(12),
                     child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
