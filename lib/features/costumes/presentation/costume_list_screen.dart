@@ -344,7 +344,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
               if (hasSize)
                 _buildFilterChip(
                   icon: CupertinoIcons.tag_fill,
-                  label: 'Size ${_selectedSize!}',
+                  label: 'Ukuran ${_selectedSize!}',
                   color: AppColors.textAmber,
                   backgroundColor: const Color(0xFFFFF4E5),
                   borderColor: const Color(0xFFFFD199),

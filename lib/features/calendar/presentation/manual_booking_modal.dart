@@ -65,7 +65,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   List<Customer> _existingCustomers = [];
   Costume? _selectedCostume;
   DateTime _startDate = DateTime.now();
-  DateTime _endDate = DateTime.now().add(const Duration(days: 3));
+  DateTime _endDate = DateTime.now().add(const Duration(days: 2));
   String _purpose = 'homecos';
   bool _isLoadingCostumes = true;
   bool _isSaving = false;
@@ -152,7 +152,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         widget.initialDate!.month,
         widget.initialDate!.day,
       );
-      _endDate = _startDate.add(const Duration(days: 3));
+      _endDate = _startDate.add(const Duration(days: 2));
     }
     _loadCostumes();
   }
@@ -984,7 +984,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           setState(() {
                             _startDate = d;
                             if (_endDate.isBefore(_startDate)) {
-                              _endDate = _startDate.add(const Duration(days: 3));
+                              _endDate = _startDate.add(const Duration(days: 2));
                             }
                             _dateError = null;
                             _syncPriceWithDates();

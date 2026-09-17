@@ -428,7 +428,7 @@ void main() {
 
     // Verify both active filter chips and "Reset Filter" chip are visible
     expect(find.text('Vocaloid'), findsWidgets);
-    expect(find.text('Size M'), findsOneWidget);
+    expect(find.text('Ukuran M'), findsOneWidget);
     final resetAllChips = find.widgetWithText(CupertinoButton, 'Atur Ulang Filter');
     expect(resetAllChips, findsOneWidget);
 
@@ -438,14 +438,14 @@ void main() {
     final RenderBox chipBox = tester.renderObject(vocaloidChip);
     expect(chipBox.size.height, greaterThanOrEqualTo(44.0));
 
-    // Remove one individual filter chip (Size M)
-    final sizeChip = find.widgetWithText(CupertinoButton, 'Size M');
+    // Remove one individual filter chip (Ukuran M)
+    final sizeChip = find.widgetWithText(CupertinoButton, 'Ukuran M');
     expect(sizeChip, findsOneWidget);
     await tester.tap(sizeChip);
     await tester.pumpAndSettle();
 
     // Size chip should now be gone, Vocaloid remains
-    expect(find.text('Size M'), findsNothing);
+    expect(find.text('Ukuran M'), findsNothing);
     expect(find.text('Vocaloid'), findsWidgets);
 
     // Open filter sheet to add another filter to test "Reset Filter" chip
@@ -472,7 +472,7 @@ void main() {
 
     // Active chips should be gone
     expect(find.widgetWithText(CupertinoButton, 'Atur Ulang Filter'), findsNothing);
-    expect(find.text('Size M'), findsNothing);
+    expect(find.text('Ukuran M'), findsNothing);
     // Both costumes shown
     expect(find.text('Hatsune Miku'), findsOneWidget);
     expect(find.text('Makima Suit'), findsOneWidget);

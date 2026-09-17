@@ -233,4 +233,71 @@ void main() {
       expect(find.text('Kamisato Ayaka Kimono'), findsOneWidget);
     });
   });
+
+  group('InstallmentListScreen filter chips and reset all', () {
+    testWidgets('tap filter chip removes single filter and conforms to 44x44 minimum touch target', (tester) async {
+      final repo = _InstallmentRepo(installments: [
+        _inst('i1', 'Kamisato Ayaka Kimono', 'Miaowu'),
+      ]);
+      await tester.pumpWidget(_wrap(repo));
+      await tester.pumpAndSettle();
+
+      // Open filter sheet
+      await tester.tap(find.byIcon(CupertinoIcons.slider_horizontal_3));
+      await tester.pumpAndSettle();
+
+      // Toggle switch "Jatuh Tempo Dekat"
+      await tester.tap(find.byKey(const Key('filter_due_soon_switch')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Terapkan'));
+      await tester.pumpAndSettle();
+
+      // Verify chip is visible
+      final dueSoonChipFinder = find.widgetWithText(CupertinoButton, 'Jatuh Tempo Dekat');
+      expect(dueSoonChipFinder, findsOneWidget);
+      final RenderBox box = tester.renderObject(dueSoonChipFinder);
+      expect(box.size.height, greaterThanOrEqualTo(44.0));
+      expect(box.size.width, greaterThanOrEqualTo(44.0));
+
+      // Tap chip to remove
+      await tester.tap(dueSoonChipFinder);
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(CupertinoButton, 'Jatuh Tempo Dekat'), findsNothing);
+    });
+
+    testWidgets('shows "Atur Ulang Filter" chip when multi-filter is active and resets all', (tester) async {
+      final repo = _InstallmentRepo(installments: [
+        _inst('i1', 'Kamisato Ayaka Kimono', 'Miaowu'),
+      ]);
+      await tester.pumpWidget(_wrap(repo));
+      await tester.pumpAndSettle();
+
+      // Open filter sheet and select multiple filters
+      await tester.tap(find.byIcon(CupertinoIcons.slider_horizontal_3));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('filter_due_soon_switch')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Sudah Lunas'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Terapkan'));
+      await tester.pumpAndSettle();
+
+      // Multi-filter active (>1) -> "Atur Ulang Filter" chip must be visible
+      final resetChipFinder = find.widgetWithText(CupertinoButton, 'Atur Ulang Filter');
+      expect(resetChipFinder, findsOneWidget);
+      final RenderBox resetBox = tester.renderObject(resetChipFinder);
+      expect(resetBox.size.height, greaterThanOrEqualTo(44.0));
+      expect(resetBox.size.width, greaterThanOrEqualTo(44.0));
+
+      // Tap reset all filters chip
+      await tester.tap(resetChipFinder);
+      await tester.pumpAndSettle();
+
+      expect(find.widgetWithText(CupertinoButton, 'Atur Ulang Filter'), findsNothing);
+      expect(find.widgetWithText(CupertinoButton, 'Jatuh Tempo Dekat'), findsNothing);
+      expect(find.widgetWithText(CupertinoButton, 'Sudah Lunas'), findsNothing);
+    });
+  });
 }

@@ -225,7 +225,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             'Deteksi otomatis format sewa DM Instagram',
                             style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
-                          trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
+                          trailing: const CupertinoListTileChevron(),
                           onTap: () {
                             Navigator.of(ctx).pop();
                             _openSmartPasteDialog();
@@ -242,7 +242,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             'Ketik data pesanan satu per satu lewat form',
                             style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
-                          trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
+                          trailing: const CupertinoListTileChevron(),
                           onTap: () {
                             Navigator.of(ctx).pop();
                             _openManualBookingDialog();

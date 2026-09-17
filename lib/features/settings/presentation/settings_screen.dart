@@ -545,7 +545,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.1.0',
+                    'Versi 1.1.1',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ),
@@ -749,7 +749,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.1.0 (BUILD 135) - TERBARU'),
+                  header: const Text('VERSI 1.1.1 (BUILD 136) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.calendar,
+                        color: Color(0xFF007AFF),
+                      ),
+                      title: Text('Presisi Durasi Standar Sewa 3 Hari', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Penyelarasan default durasi sewa manual menjadi standar 3 hari penuh tanpa memicu surcharge atau peringatan tambahan durasi saat membuka formulir.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.hand_draw_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Area Sentuh Filter Cicilan & Reset Cepat', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Peningkatan area sentuh filter chips daftar cicilan ke standar Apple HIG 44x44 pt dan penambahan tombol pintas Atur Ulang Filter saat multi-filter aktif.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.chevron_right_2,
+                        color: Color(0xFFFF9500),
+                      ),
+                      title: Text('Standarisasi Chevron Apple HIG & Bahasa Baku', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Seluruh chevron navigasi antarmuka kini menggunakan komponen native CupertinoListTileChevron serta standarisasi filter ukuran resmi Ukuran S/M/L.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.1.0 (BUILD 135)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1865,7 +1905,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
+                trailing: const CupertinoListTileChevron(),
                 onTap: _showPendingQueueSheet,
               ),
 
@@ -1968,7 +2008,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: Color(0xFF34C759),
                 ),
                 title: const Text('Statistik Database', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
+                trailing: const CupertinoListTileChevron(),
                 onTap: _showDatabaseStatsSheet,
               ),
 
@@ -2008,7 +2048,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.1.0', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                additionalInfo: const Text('v1.1.1', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),
@@ -2021,7 +2061,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 title: const Text('Design System', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                 additionalInfo: const Text('Apple HIG / iOS 18', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
+                trailing: const CupertinoListTileChevron(),
                 onTap: _showDesignSystemSheet,
               ),
 
@@ -2032,7 +2072,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: Color(0xFFFF9500),
                 ),
                 title: const Text('Catatan Rilis', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
+                trailing: const CupertinoListTileChevron(),
                 onTap: _showChangelogSheet,
               ),
             ],
