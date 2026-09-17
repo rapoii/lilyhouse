@@ -1720,7 +1720,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.93', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                additionalInfo: const Text('v1.0.94', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),
