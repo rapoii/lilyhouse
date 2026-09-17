@@ -446,7 +446,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         }
       }
 
-      final rawPhone = sanitizePhone(_phoneController.text);
+      final rawPhone = sanitizePhone(_phoneController.text.trim());
       Customer? existingCustomer;
       for (final c in _existingCustomers) {
         final cDigits = sanitizePhone(c.phone).replaceAll(RegExp(r'\D'), '');
@@ -457,10 +457,11 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
       }
 
       final custId = existingCustomer?.id ?? 'cust_${DateTime.now().millisecondsSinceEpoch}';
-      final cleanPhone = sanitizePhone(_phoneController.text);
+      final cleanPhone = sanitizePhone(_phoneController.text.trim());
       final cleanParentPhone = _parentPhoneController.text.trim().isEmpty
           ? existingCustomer?.parentPhone
-          : sanitizePhone(_parentPhoneController.text);
+          : sanitizePhone(_parentPhoneController.text.trim());
+      final rawSocial = _socialMediaController.text.replaceAll('@', '').trim();
       final customer = Customer(
         id: custId,
         fullName: _nameController.text.trim(),
@@ -469,9 +470,9 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
             ? (existingCustomer?.address.isNotEmpty == true ? existingCustomer!.address : '-')
             : _addressController.text.trim(),
         parentPhone: cleanParentPhone,
-        socialMedia: _socialMediaController.text.trim().isEmpty
+        socialMedia: rawSocial.isEmpty
             ? existingCustomer?.socialMedia
-            : _socialMediaController.text.trim(),
+            : rawSocial,
         ktpPhotoUrl: _ktpPhotoPath ?? existingCustomer?.ktpPhotoUrl,
         selfieKtpUrl: _selfieKtpPath ?? existingCustomer?.selfieKtpUrl,
       );

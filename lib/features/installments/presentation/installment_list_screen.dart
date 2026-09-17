@@ -615,7 +615,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: activeCount > 0 ? AppColors.deepPinkText : const Color(0xFF1E824C),
+                    color: activeCount > 0 ? AppColors.deepPinkText : AppColors.badgeSuccessText,
                   ),
                 ),
               ),
@@ -641,7 +641,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.3,
-                  color: totalRemainingDebt > 0 ? AppColors.deepPinkText : const Color(0xFF1E824C),
+                  color: totalRemainingDebt > 0 ? AppColors.deepPinkText : AppColors.badgeSuccessText,
                 ),
               ),
             ],
@@ -764,7 +764,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                 Icon(
                                   _selectedStatus == InstallmentStatus.paidOff ? CupertinoIcons.checkmark_seal_fill : CupertinoIcons.clock_fill,
                                   size: 12,
-                                  color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : const Color(0xFFD97706),
+                                  color: _selectedStatus == InstallmentStatus.paidOff ? AppColors.badgeSuccessText : AppColors.textAmber,
                                 ),
                                 const SizedBox(width: 5),
                                 Text(
@@ -772,7 +772,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                   style: TextStyle(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
-                                    color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : AppColors.textAmber,
+                                    color: _selectedStatus == InstallmentStatus.paidOff ? AppColors.badgeSuccessText : AppColors.textAmber,
                                   ),
                                 ),
                                 const SizedBox(width: 4),
@@ -790,7 +790,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                       child: Icon(
                                         CupertinoIcons.clear_circled_solid,
                                         size: 14,
-                                        color: _selectedStatus == InstallmentStatus.paidOff ? const Color(0xFF1E824C) : const Color(0xFFD97706),
+                                        color: _selectedStatus == InstallmentStatus.paidOff ? AppColors.badgeSuccessText : AppColors.textAmber,
                                       ),
                                     ),
                                   ),
@@ -1201,7 +1201,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                           style: TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.w700,
-                            color: inst.isPaidOff ? const Color(0xFF1E824C) : AppColors.deepPinkText,
+                            color: inst.isPaidOff ? AppColors.badgeSuccessText : AppColors.deepPinkText,
                           ),
                         ),
                       ),

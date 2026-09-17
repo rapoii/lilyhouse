@@ -429,7 +429,7 @@ void main() {
     // Verify both active filter chips and "Reset Filter" chip are visible
     expect(find.text('Vocaloid'), findsWidgets);
     expect(find.text('Size M'), findsOneWidget);
-    final resetAllChips = find.widgetWithText(CupertinoButton, 'Reset Filter');
+    final resetAllChips = find.widgetWithText(CupertinoButton, 'Atur Ulang Filter');
     expect(resetAllChips, findsOneWidget);
 
     // Verify filter chip touch target >= 44pt
@@ -467,18 +467,18 @@ void main() {
     await tester.pumpAndSettle();
 
     // Reset all filters using the interactive reset chip
-    await tester.tap(find.widgetWithText(CupertinoButton, 'Reset Filter'));
+    await tester.tap(find.widgetWithText(CupertinoButton, 'Atur Ulang Filter'));
     await tester.pumpAndSettle();
 
     // Active chips should be gone
-    expect(find.widgetWithText(CupertinoButton, 'Reset Filter'), findsNothing);
+    expect(find.widgetWithText(CupertinoButton, 'Atur Ulang Filter'), findsNothing);
     expect(find.text('Size M'), findsNothing);
     // Both costumes shown
     expect(find.text('Hatsune Miku'), findsOneWidget);
     expect(find.text('Makima Suit'), findsOneWidget);
   });
 
-  testWidgets('CostumeListScreen displays friendly empty state and instant Reset Filter & Pencarian button', (tester) async {
+  testWidgets('CostumeListScreen displays friendly empty state and instant Atur Ulang Filter & Pencarian button', (tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: AppTheme.lightTheme,
@@ -498,7 +498,7 @@ void main() {
     expect(find.text('Tidak ada hasil yang cocok'), findsOneWidget);
     expect(find.text('Coba sesuaikan kata kunci atau filter pencarian'), findsOneWidget);
 
-    final resetBtnFinder = find.widgetWithText(CupertinoButton, 'Reset Filter & Pencarian');
+    final resetBtnFinder = find.widgetWithText(CupertinoButton, 'Atur Ulang Filter & Pencarian');
     expect(resetBtnFinder, findsOneWidget);
 
     // Verify touch target min 44pt

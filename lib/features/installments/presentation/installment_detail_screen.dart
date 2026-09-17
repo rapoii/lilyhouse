@@ -304,7 +304,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
                       decoration: TextDecoration.none,
-                      color: inst.isPaidOff ? const Color(0xFF1E824C) : AppColors.deepPinkText,
+                      color: inst.isPaidOff ? AppColors.badgeSuccessText : AppColors.deepPinkText,
                     ),
                   ),
                 ),
@@ -465,18 +465,18 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(color: const Color(0xFF34C759).withValues(alpha: 0.3)),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(CupertinoIcons.checkmark_seal_fill, color: Color(0xFF1E824C), size: 18),
-                    SizedBox(width: 8),
-                    Text(
+                    const Icon(CupertinoIcons.checkmark_seal_fill, color: AppColors.badgeSuccessText, size: 18),
+                    const SizedBox(width: 8),
+                    const Text(
                       'Cicilan Sudah Lunas',
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
                         decoration: TextDecoration.none,
-                        color: Color(0xFF1E824C),
+                        color: AppColors.badgeSuccessText,
                       ),
                     ),
                   ],

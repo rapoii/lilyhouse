@@ -214,13 +214,13 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                       onTap: () => _select(() => _selectedStatus = null),
                     ),
                     CupertinoListTile(
-                      leading: const SquircleIcon(icon: CupertinoIcons.checkmark_circle_fill, color: Color(0xFF1E824C)),
+                      leading: const SquircleIcon(icon: CupertinoIcons.checkmark_circle_fill, color: AppColors.badgeSuccessText),
                       title: const Text('Tersedia', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == CostumeStatus.available),
                       onTap: () => _select(() => _selectedStatus = CostumeStatus.available),
                     ),
                     CupertinoListTile(
-                      leading: const SquircleIcon(icon: CupertinoIcons.bookmark_fill, color: Color(0xFFD97706)),
+                      leading: const SquircleIcon(icon: CupertinoIcons.bookmark_fill, color: AppColors.textAmber),
                       title: const Text('Dibooking', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == CostumeStatus.booked),
                       onTap: () => _select(() => _selectedStatus = CostumeStatus.booked),

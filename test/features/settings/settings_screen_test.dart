@@ -246,7 +246,7 @@ void main() {
 
       // A single release header per build — duplicates must be merged into one section.
       // v1.0.92 was superseded by this build, so its notes now live under 1.0.93.
-      expect(find.text('VERSI 1.0.94 (BUILD 129) - TERBARU'), findsOneWidget);
+      expect(find.text('VERSI 1.0.95 (BUILD 130) - TERBARU'), findsOneWidget);
 
       // Older release notes live further down the same list — scroll to confirm
       // they survived the merge (and that the sheet is not truncated).
@@ -261,6 +261,29 @@ void main() {
       // Non-standard KBBI spellings must not survive in the changelog copy.
       expect(find.textContaining('Pulasan'), findsNothing);
       expect(find.textContaining('Pulsan'), findsNothing);
+    });
+
+    testWidgets('tapping Antrean Offline when empty shows friendly toast instead of sheet', (tester) async {
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            syncServiceProvider.overrideWithValue(mockSync),
+          ],
+          child: const MaterialApp(
+            home: SettingsScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final queueTile = find.text('Antrean Offline');
+      await tester.scrollUntilVisible(queueTile, 300);
+      await tester.pumpAndSettle();
+      await tester.tap(queueTile);
+      await tester.pump();
+
+      expect(find.text('Antrean sinkronisasi sudah bersih'), findsOneWidget);
     });
   });
 }

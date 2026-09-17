@@ -317,6 +317,9 @@ void main() {
     // Fill Parent Phone with messy format (+62 898-7654-3210)
     await tester.enterText(find.byKey(const Key('manual_parent_phone_input')), '+62 898-7654-3210');
 
+    // Fill Instagram with leading @ and outer spaces
+    await tester.enterText(find.byKey(const Key('manual_social_input')), '  @budi_cosplayer  ');
+
     // Tap Simpan
     final saveButton = find.byKey(const Key('manual_save_booking_button'));
     await tester.tap(saveButton);
@@ -329,6 +332,7 @@ void main() {
     final savedCustomer = rentalRepo.customers.first;
     expect(savedCustomer.phone, '081234567890');
     expect(savedCustomer.parentPhone, '089876543210');
+    expect(savedCustomer.socialMedia, 'budi_cosplayer');
   });
 
   testWidgets('ManualBookingModal blocks phone numbers with less than 8 digits', (tester) async {

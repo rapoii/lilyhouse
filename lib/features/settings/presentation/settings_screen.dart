@@ -144,6 +144,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
 
   void _showPendingQueueSheet() {
+    final pendingCount = ref.read(syncStateProvider).pendingCount;
+    if (pendingCount == 0) {
+      HapticFeedback.lightImpact();
+      _showIosToast('Antrean sinkronisasi sudah bersih');
+      return;
+    }
     HapticFeedback.selectionClick();
     showCupertinoModalPopup<void>(
       context: context,
@@ -536,7 +542,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.94',
+                    'Versi 1.0.95',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ),
@@ -701,7 +707,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.94 (BUILD 129) - TERBARU'),
+                  header: const Text('VERSI 1.0.95 (BUILD 130) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.arrow_counterclockwise_circle_fill,
+                        color: Color(0xFF5856D6),
+                      ),
+                      title: Text('Standarisasi Bahasa & Kosakata Baku', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Tombol atur ulang filter di seluruh katalog kini menggunakan istilah resmi bahasa Indonesia baku, serta penyeragaman rincian riwayat perubahan.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.checkmark_seal_fill,
+                        color: AppColors.badgeSuccessText,
+                      ),
+                      title: Text('Harmonisasi Kontras WCAG AA Menyeluruh', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Seluruh sisa warna status hijau dan peringatan pada fitur kostum, kalender, dan cicilan kini konsisten memakai token aksesibilitas berasio kontras tinggi.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.person_crop_circle_badge_checkmark,
+                        color: AppColors.deepPinkText,
+                      ),
+                      title: Text('Pembersihan Input & Umpan Balik Antrean', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Normalisasi otomatis akun Instagram dan nomor telepon saat booking manual, serta notifikasi jelas saat antrean sinkronisasi sudah bersih.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.94 (BUILD 129)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -719,7 +765,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     CupertinoListTile(
                       leading: SquircleIcon(
                         icon: CupertinoIcons.checkmark_seal_fill,
-                        color: Color(0xFF1E824C),
+                        color: AppColors.badgeSuccessText,
                       ),
                       title: Text('Pembersihan Cache Lebih Pintar', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
@@ -741,7 +787,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     CupertinoListTile(
                       leading: SquircleIcon(
                         icon: CupertinoIcons.arrow_clockwise_circle_fill,
-                        color: Color(0xFF1E824C),
+                        color: AppColors.badgeSuccessText,
                       ),
                       title: Text('Pemulihan Gagal Muat', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
@@ -1222,7 +1268,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: CupertinoIcons.arrow_up_left_arrow_down_right,
                         color: Color(0xFF5856D6),
                       ),
-                      title: Text('Penyelarasan Scroll Margin Detail', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      title: Text('Penyelarasan Batas Gulir Rincian', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Layar Detail Kostum dan Detail Cicilan kini memiliki bottom padding lapang 96pt agar nyaman dibaca dan tidak mepet dengan bilah gestur sistem Android.',
                         style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
@@ -1367,7 +1413,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         icon: CupertinoIcons.creditcard_fill,
                         color: Color(0xFF5856D6),
                       ),
-                      title: Text('Detail Cicilan & Riwayat Apple HIG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      title: Text('Rincian Cicilan & Riwayat Apple HIG', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
                         'Standardisasi modal sheet Buku Cicilan ke Inset Grouped, nominal pembayaran presisi di tengah vertikal saat tanpa catatan, dan konfirmasi hapus aman.',
                         style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
@@ -1720,7 +1766,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.94', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                additionalInfo: const Text('v1.0.95', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),

@@ -285,7 +285,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
             Icon(CupertinoIcons.arrow_counterclockwise, size: 13, color: AppColors.primaryPink),
             SizedBox(width: 5),
             Text(
-              'Reset Filter',
+              'Atur Ulang Filter',
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
@@ -333,7 +333,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                 _buildFilterChip(
                   icon: CupertinoIcons.check_mark_circled_solid,
                   label: _getStatusLabel(_selectedStatus!),
-                  color: const Color(0xFF1E824C),
+                  color: AppColors.badgeSuccessText,
                   backgroundColor: const Color(0xFFE8F8F0),
                   borderColor: const Color(0xFFA3E6C4),
                   onRemove: () {
@@ -569,7 +569,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
                                     Icon(CupertinoIcons.arrow_counterclockwise, size: 14, color: AppColors.deepPinkText),
                                     SizedBox(width: 6),
                                     Text(
-                                      'Reset Filter & Pencarian',
+                                      'Atur Ulang Filter & Pencarian',
                                       style: TextStyle(
                                         color: AppColors.deepPinkText,
                                         fontSize: 14,

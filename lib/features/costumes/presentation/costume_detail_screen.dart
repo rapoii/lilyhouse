@@ -645,7 +645,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
         ? const Color(0xFFE3F9EC)
         : const Color(0xFFFFF4E5);
     final fg = isCurrentlyInUse
-        ? const Color(0xFF1E824C)
+        ? AppColors.badgeSuccessText
         : AppColors.textAmber;
     final label = isCurrentlyInUse ? 'Aktif' : 'Dijadwalkan';
 

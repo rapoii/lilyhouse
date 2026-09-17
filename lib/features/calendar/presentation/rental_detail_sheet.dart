@@ -2029,7 +2029,7 @@ class RentalDetailSheet extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
-                            color: Color(0xFF1E824C),
+                            color: AppColors.badgeSuccessText,
                           ),
                         ),
                         subtitle: const Text(

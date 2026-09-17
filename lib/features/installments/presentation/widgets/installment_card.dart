@@ -83,7 +83,7 @@ class InstallmentCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: isDone ? const Color(0xFF1E824C) : AppColors.deepPinkText,
+                      color: isDone ? AppColors.badgeSuccessText : AppColors.deepPinkText,
                     ),
                   ),
                 ),
@@ -140,7 +140,7 @@ class InstallmentCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: isDone ? const Color(0xFF1E824C) : AppColors.deepPinkText,
+                    color: isDone ? AppColors.badgeSuccessText : AppColors.deepPinkText,
                   ),
                 ),
                 Text(

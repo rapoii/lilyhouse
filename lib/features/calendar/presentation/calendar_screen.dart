@@ -653,7 +653,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   icon: CupertinoIcons.money_dollar_circle,
                   value: '$unsettledDp',
                   label: 'DP Belum Lunas',
-                  color: unsettledDp > 0 ? const Color(0xFFD97706) : const Color(0xFF1E824C),
+                  color: unsettledDp > 0 ? AppColors.textAmber : AppColors.badgeSuccessText,
                   key: const Key('ops_metric_unsettled_dp'),
                 ),
               ),
