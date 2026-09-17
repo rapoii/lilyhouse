@@ -527,7 +527,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                         icon: CupertinoIcons.timer,
                         color: _history.activeRental!.coversDate(DateTime.now())
                             ? const Color(0xFF34C759)
-                            : const Color(0xFFD97706),
+                            : AppColors.textAmber,
                       ),
                       title: const Text(
                         'Sedang Dipakai',

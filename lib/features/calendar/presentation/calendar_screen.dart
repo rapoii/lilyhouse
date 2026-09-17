@@ -625,7 +625,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
-                    color: dueToday > 0 ? AppColors.textAmber : const Color(0xFF1E824C),
+                    color: dueToday > 0 ? AppColors.textAmber : AppColors.badgeSuccessText,
                   ),
                 ),
               ),
@@ -667,7 +667,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   icon: CupertinoIcons.return_icon,
                   value: '$dueToday',
                   label: 'Jatuh Tempo',
-                  color: dueToday > 0 ? AppColors.dangerRose : const Color(0xFF1E824C),
+                  color: dueToday > 0 ? AppColors.dangerRose : AppColors.badgeSuccessText,
                   key: const Key('ops_metric_due_today'),
                 ),
               ),
@@ -816,7 +816,7 @@ class _RentalSlotCard extends StatelessWidget {
         child: const Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(CupertinoIcons.arrow_up_circle_fill, size: 12, color: Color(0xFFD97706)),
+            Icon(CupertinoIcons.arrow_up_circle_fill, size: 12, color: AppColors.textAmber),
             SizedBox(width: 4),
             Text(
               'Jatuh Tempo Pengembalian',
@@ -848,7 +848,7 @@ class _RentalSlotCard extends StatelessWidget {
               const SizedBox(width: 4),
               Text(
                 'Hari ke-$currentDayIndex dari $totalDays hari sewa',
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primaryPink),
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.deepPinkText),
               ),
             ],
           ),

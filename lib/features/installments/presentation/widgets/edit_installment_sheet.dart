@@ -231,6 +231,7 @@ class _EditInstallmentSheetState extends State<EditInstallmentSheet> {
                               style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: null,
+                              textInputAction: TextInputAction.done,
                               onChanged: (_) => _markEdited(),
                             ),
                           ),

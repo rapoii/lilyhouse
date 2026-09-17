@@ -542,7 +542,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.95',
+                    'Versi 1.0.96',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ),
@@ -587,6 +587,43 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         style: TextStyle(fontSize: 15, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                       ),
                     ],
+                  ),
+                ),
+                const SizedBox(height: 12),
+                CupertinoButton(
+                  padding: EdgeInsets.zero,
+                  minimumSize: const Size(44, 44),
+                  onPressed: () {
+                    HapticFeedback.lightImpact();
+                    Clipboard.setData(const ClipboardData(text: '@lilycosrent'));
+                    IosToast.show(context, 'Akun Instagram @lilycosrent disalin');
+                  },
+                  child: Container(
+                    constraints: const BoxConstraints(minHeight: 44),
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBg,
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                    child: Row(
+                      children: const [
+                        SquircleIcon(
+                          icon: CupertinoIcons.camera_fill,
+                          color: Color(0xFFE1306C),
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Instagram Toko',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.textDark),
+                          ),
+                        ),
+                        Text(
+                          '@lilycosrent',
+                          style: TextStyle(fontSize: 15, color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -707,7 +744,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.95 (BUILD 130) - TERBARU'),
+                  header: const Text('VERSI 1.0.96 (BUILD 131) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.keyboard,
+                        color: Color(0xFF5856D6),
+                      ),
+                      title: Text('Penyempurnaan Navigasi Keyboard & Filter Angka', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Aksi keyboard virtual kini otomatis beralih ke kolom berikutnya atau selesai, serta pembatasan input khusus angka untuk formulir tarif, DP, dan catatan pembayaran.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.checkmark_shield_fill,
+                        color: AppColors.badgeSuccessText,
+                      ),
+                      title: Text('Penyelarasan Kontras WCAG AA Menyeluruh', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Pembaruan warna teks tombol tambah aksesori, indikator hari sewa, dan lencana jatuh tempo ke token aksesibilitas tinggi untuk kenyamanan visual optimal.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.camera_fill,
+                        color: Color(0xFFE1306C),
+                      ),
+                      title: Text('Akses Cepat Akun Instagram Resmi Toko', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Penambahan informasi profil resmi Instagram @lilycosrent pada lembar Tentang Aplikasi dengan kemudahan salin ke papan klip dalam satu ketukan.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.95 (BUILD 130)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1766,7 +1843,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.95', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                additionalInfo: const Text('v1.0.96', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),

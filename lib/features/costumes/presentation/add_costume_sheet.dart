@@ -168,7 +168,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
   Color _getStatusColor(CostumeStatus status) {
     switch (status) {
       case CostumeStatus.available:
-        return const Color(0xFF1E824C);
+        return AppColors.badgeSuccessText;
       case CostumeStatus.booked:
         return AppColors.textAmber;
       case CostumeStatus.rented:
@@ -617,6 +617,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                           Expanded(
                             child: CupertinoTextField(
                               controller: _nameController,
+                              textInputAction: TextInputAction.next,
                               textAlign: TextAlign.right,
                               placeholder: 'Nama Kostum',
                               placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
@@ -639,6 +640,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                           Expanded(
                             child: CupertinoTextField(
                               controller: _seriesController,
+                              textInputAction: TextInputAction.next,
                               textAlign: TextAlign.right,
                               placeholder: 'cth: Genshin Impact',
                               placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
@@ -710,6 +712,8 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                           Expanded(
                             child: CupertinoTextField(
                               controller: _priceController,
+                              textInputAction: TextInputAction.next,
+                              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                               textAlign: TextAlign.right,
                               prefix: const Padding(
                                 padding: EdgeInsets.only(left: 8),
@@ -832,7 +836,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                                 leading: const SquircleIcon(icon: CupertinoIcons.add, color: AppColors.primaryPink),
                                 title: const Text(
                                   'Tambah Aksesori',
-                                  style: TextStyle(fontSize: 15, color: AppColors.primaryPink, fontWeight: FontWeight.w500),
+                                  style: TextStyle(fontSize: 15, color: AppColors.deepPinkText, fontWeight: FontWeight.w500),
                                 ),
                                 onTap: _showAddAccessoryDialog,
                               ),
@@ -852,6 +856,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       child: CupertinoTextField(
                         controller: _notesController,
+                        textInputAction: TextInputAction.done,
                         placeholder: 'Catatan perawatan, deposit, atau instruksi khusus...',
                         placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 14),
                         style: const TextStyle(fontSize: 14, color: AppColors.textDark),

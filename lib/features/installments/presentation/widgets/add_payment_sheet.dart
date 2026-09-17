@@ -552,6 +552,8 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                                     controller: _amountController,
                                     focusNode: _amountFocusNode,
                                     placeholder: 'Contoh: 100.000',
+                                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                    textInputAction: TextInputAction.next,
                                     prefix: const Padding(
                                       padding: EdgeInsets.only(left: 12),
                                       child: Text(
@@ -660,6 +662,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                                     controller: _notesController,
                                     focusNode: _notesFocusNode,
                                     placeholder: 'Contoh: Cicilan ke-2, transfer BCA',
+                                    textInputAction: TextInputAction.done,
                                     maxLines: 2,
                                     style: const TextStyle(
                                       fontSize: 15,

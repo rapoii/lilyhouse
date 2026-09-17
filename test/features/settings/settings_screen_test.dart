@@ -246,7 +246,7 @@ void main() {
 
       // A single release header per build — duplicates must be merged into one section.
       // v1.0.92 was superseded by this build, so its notes now live under 1.0.93.
-      expect(find.text('VERSI 1.0.95 (BUILD 130) - TERBARU'), findsOneWidget);
+      expect(find.text('VERSI 1.0.96 (BUILD 131) - TERBARU'), findsOneWidget);
 
       // Older release notes live further down the same list — scroll to confirm
       // they survived the merge (and that the sheet is not truncated).
@@ -284,6 +284,48 @@ void main() {
       await tester.pump();
 
       expect(find.text('Antrean sinkronisasi sudah bersih'), findsOneWidget);
+    });
+
+    testWidgets('tapping Instagram Toko in About sheet copies handle to clipboard', (tester) async {
+      tester.view.physicalSize = const Size(1080, 2400);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            syncServiceProvider.overrideWithValue(mockSync),
+          ],
+          child: const MaterialApp(
+            home: SettingsScreen(),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      final aboutTile = find.text('LilyHouse Rent');
+      await tester.scrollUntilVisible(aboutTile, 300);
+      await tester.pumpAndSettle();
+      await tester.tap(aboutTile);
+      await tester.pumpAndSettle();
+
+      // Scroll inside the About sheet if needed
+      final igTile = find.text('Instagram Toko');
+      await tester.scrollUntilVisible(igTile, 200, scrollable: find.byType(Scrollable).last);
+      await tester.pumpAndSettle();
+
+      // Verify About sheet contents
+      expect(find.text('Instagram Toko'), findsOneWidget);
+      expect(find.text('@lilycosrent'), findsOneWidget);
+
+      await tester.tap(find.text('Instagram Toko'));
+      await tester.pump();
+
+      expect(find.text('Akun Instagram @lilycosrent disalin'), findsOneWidget);
     });
   });
 }

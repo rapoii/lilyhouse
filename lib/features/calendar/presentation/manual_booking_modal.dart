@@ -372,8 +372,8 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
     }
 
     setState(() {
-      _costumeError = okCostume ? null : 'Pilih kostum dulu';
-      _dateError = okDate ? null : 'Tanggal selesai harus setelah mulai';
+      _costumeError = okCostume ? null : 'Pilih kostum terlebih dahulu';
+      _dateError = okDate ? null : 'Tanggal selesai harus setelah tanggal mulai';
       _dpError = dpErr;
     });
     if (!okName) {
