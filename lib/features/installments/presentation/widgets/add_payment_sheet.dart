@@ -289,7 +289,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                           : const Text(
                               'Simpan',
                               style: TextStyle(
-                                color: AppColors.primaryPink,
+                                color: AppColors.deepPinkText,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 16,
                               ),
@@ -349,7 +349,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                                   style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.w700,
-                                    color: isOverdue ? const Color(0xFFFF3B30) : AppColors.primaryPink,
+                                    color: isOverdue ? const Color(0xFFFF3B30) : AppColors.deepPinkText,
                                   ),
                                 ),
                               ],
@@ -538,7 +538,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                                                 style: TextStyle(
                                                   fontSize: 12,
                                                   fontWeight: FontWeight.w600,
-                                                  color: AppColors.primaryPink,
+                                                  color: AppColors.deepPinkText,
                                                 ),
                                               ),
                                             ],
@@ -620,7 +620,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
                                           style: const TextStyle(
                                             fontSize: 14,
                                             fontWeight: FontWeight.w500,
-                                            color: AppColors.primaryPink,
+                                            color: AppColors.deepPinkText,
                                           ),
                                         ),
                                         const SizedBox(width: 4),

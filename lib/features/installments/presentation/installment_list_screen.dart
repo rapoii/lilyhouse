@@ -243,7 +243,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.pop(alertCtx),
-            child: const Text('Oke', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+            child: const Text('Oke', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.deepPinkText)),
           ),
         ],
       ),
@@ -379,7 +379,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                       controller: nameController,
                                       textAlign: TextAlign.right,
                                       placeholder: 'Nama barang / kostum',
-                                      placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                      placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                                       style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                                       padding: const EdgeInsets.symmetric(vertical: 12),
                                       decoration: null,
@@ -403,7 +403,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                       controller: storeController,
                                       textAlign: TextAlign.right,
                                       placeholder: 'Nama toko / seller',
-                                      placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                      placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                                       style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                                       padding: const EdgeInsets.symmetric(vertical: 12),
                                       decoration: null,
@@ -434,7 +434,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                       controller: costController,
                                       textAlign: TextAlign.right,
                                       placeholder: 'Total harga (Rp)',
-                                      placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                      placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                                       style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                                       keyboardType: TextInputType.number,
                                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -459,7 +459,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                                       controller: dpController,
                                       textAlign: TextAlign.right,
                                       placeholder: 'DP awal (Rp)',
-                                      placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                                      placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                                       style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                                       keyboardType: TextInputType.number,
                                       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -493,7 +493,7 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                               trailing: const Icon(
                                 CupertinoIcons.chevron_right,
                                 size: 14,
-                                color: Color(0xFFC7C7CC),
+                                color: AppColors.placeholderText,
                               ),
                               onTap: () async {
                                 final d = await showSheetDatePicker(
@@ -1299,7 +1299,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w700,
-                          color: AppColors.primaryPink,
+                          color: AppColors.deepPinkText,
                         ),
                       ),
                     ),

@@ -93,6 +93,8 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       _selectedStatus = CostumeStatus.available;
       _selectedImagePath = null;
     }
+    // A pre-filled edit form is immediately saveable.
+    _canSave = _nameController.text.trim().isNotEmpty;
     // Attach edit listeners AFTER initial values are set, so programmatic
     // pre-fill does not count as a user edit.
     for (final controller in [
@@ -102,8 +104,20 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       _notesController,
     ]) {
       controller.addListener(_markEdited);
+      controller.addListener(_refreshCanSave);
     }
   }
+
+  void _refreshCanSave() {
+    if (!mounted) return;
+    final canSave = _nameController.text.trim().isNotEmpty;
+    if (canSave != _canSave) setState(() => _canSave = canSave);
+  }
+
+  /// A costume needs at least a name before it can be saved. Drives the
+  /// disabled state of the header "Simpan" button so the owner gets immediate
+  /// feedback about what is still missing.
+  bool _canSave = false;
 
   Future<void> _loadExistingAccessories(String costumeId) async {
     setState(() => _isLoadingAccessories = true);
@@ -331,7 +345,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primaryPink,
+                    color: AppColors.deepPinkText,
                   ),
                 ),
               ),
@@ -350,7 +364,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+            child: const Text('Batal', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.deepPinkText)),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
@@ -396,7 +410,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
           CupertinoDialogAction(
             isDefaultAction: true,
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Oke', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+            child: const Text('Oke', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.deepPinkText)),
           ),
         ],
       ),
@@ -420,7 +434,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
           const SizedBox(height: 8),
           const Text(
             'Unggah Foto Kostum',
-            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.primaryPink),
+            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.deepPinkText),
           ),
           const SizedBox(height: 2),
           const Text(
@@ -539,10 +553,15 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
             ),
             trailing: CupertinoButton(
               padding: EdgeInsets.zero,
-              onPressed: _isSaving ? null : _save,
+              onPressed: (_isSaving || !_canSave) ? null : _save,
               child: _isSaving
                   ? const CupertinoActivityIndicator(radius: 10)
-                  : const Text('Simpan', style: AppTypography.actionButton),
+                  : Text(
+                      _canSave ? 'Simpan' : 'Isi Nama Dulu',
+                      style: AppTypography.actionButton.copyWith(
+                        color: _canSave ? null : AppColors.textMuted,
+                      ),
+                    ),
             ),
           ),
           child: SafeArea(
@@ -600,7 +619,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                               controller: _nameController,
                               textAlign: TextAlign.right,
                               placeholder: 'Nama Kostum',
-                              placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                              placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                               style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: null,
@@ -622,7 +641,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                               controller: _seriesController,
                               textAlign: TextAlign.right,
                               placeholder: 'cth: Genshin Impact',
-                              placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                              placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                               style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                               padding: const EdgeInsets.symmetric(vertical: 12),
                               decoration: null,
@@ -651,7 +670,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                       trailing: const Icon(
                         CupertinoIcons.chevron_right,
                         size: 14,
-                        color: Color(0xFFC7C7CC),
+                        color: AppColors.placeholderText,
                       ),
                       onTap: () async {
                         final hadFocus = FocusScope.of(context).hasFocus;
@@ -694,10 +713,10 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                               textAlign: TextAlign.right,
                               prefix: const Padding(
                                 padding: EdgeInsets.only(left: 8),
-                                child: Text('Rp ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.primaryPink)),
+                                child: Text('Rp ', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.deepPinkText)),
                               ),
                               placeholder: '150.000',
-                              placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                              placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                               style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                               keyboardType: TextInputType.number,
                               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -728,7 +747,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                       trailing: const Icon(
                         CupertinoIcons.chevron_right,
                         size: 14,
-                        color: Color(0xFFC7C7CC),
+                        color: AppColors.placeholderText,
                       ),
                       onTap: () async {
                         final hadFocus = FocusScope.of(context).hasFocus;
@@ -834,7 +853,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                       child: CupertinoTextField(
                         controller: _notesController,
                         placeholder: 'Catatan perawatan, deposit, atau instruksi khusus...',
-                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 14),
+                        placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 14),
                         style: const TextStyle(fontSize: 14, color: AppColors.textDark),
                         maxLines: 3,
                         decoration: null,

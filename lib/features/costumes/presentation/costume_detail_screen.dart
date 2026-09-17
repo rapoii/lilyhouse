@@ -170,7 +170,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
               child: const Text(
                 'Tutup',
                 style: TextStyle(
-                  color: AppColors.primaryPink,
+                  color: AppColors.deepPinkText,
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
                 ),
@@ -218,7 +218,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
   (Color bg, Color text, String label) _getStatusBadgeData(CostumeStatus status) {
     switch (status) {
       case CostumeStatus.available:
-        return (const Color(0xFFE3F9EC), const Color(0xFF1E824C), 'Tersedia');
+        return (const Color(0xFFE3F9EC), AppColors.badgeSuccessText, 'Tersedia');
       case CostumeStatus.booked:
         return (const Color(0xFFFFF4E5), AppColors.textAmber, 'Dibooking');
       case CostumeStatus.rented:
@@ -432,7 +432,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.primaryPink,
+                      color: AppColors.deepPinkText,
                     ),
                   ),
                 ),
@@ -602,7 +602,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.primaryPink,
+                        color: AppColors.deepPinkText,
                       ),
                     ),
                     onTap: _showAddAccessoryDialog,
@@ -620,7 +620,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
   ({Color bg, Color text}) _getConditionColors(AccessoryCondition condition) {
     switch (condition) {
       case AccessoryCondition.good:
-        return (bg: const Color(0xFFE3F9EC), text: const Color(0xFF1E824C));
+        return (bg: const Color(0xFFE3F9EC), text: AppColors.badgeSuccessText);
       case AccessoryCondition.minorDamage:
         return (bg: const Color(0xFFFFF4E5), text: AppColors.textAmber);
       case AccessoryCondition.needsRepair:
@@ -716,7 +716,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       case RentalItemStatus.shipped:
         return (bg: AppColors.pastelPink.withValues(alpha: 0.25), text: AppColors.primaryPink, label: 'Dikirim');
       case RentalItemStatus.rented:
-        return (bg: const Color(0xFFE3F9EC), text: const Color(0xFF1E824C), label: 'Sedang Disewa');
+        return (bg: const Color(0xFFE3F9EC), text: AppColors.badgeSuccessText, label: 'Sedang Disewa');
       case RentalItemStatus.returned:
         return (bg: const Color(0xFFF2F2F7), text: const Color(0xFF3A3A3C), label: 'Dikembalikan');
       case RentalItemStatus.laundry:

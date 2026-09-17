@@ -103,7 +103,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: _resetFilters,
-              child: const Text('Atur Ulang', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.primaryPink)),
+              child: const Text('Atur Ulang', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.deepPinkText)),
             ),
             middle: const SizedBox(
               width: double.infinity,
@@ -177,7 +177,7 @@ class _InstallmentFilterSheetState extends State<InstallmentFilterSheet> {
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w500,
-                          color: _dueSoon ? AppColors.primaryPink : AppColors.textSecondary,
+                          color: _dueSoon ? AppColors.deepPinkText : AppColors.textSecondary,
                         ),
                       ),
                       trailing: CupertinoSwitch(

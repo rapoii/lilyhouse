@@ -8,7 +8,7 @@ class AppColors {
   static const Color background = Color(0xFFF8F9FA); // Warm off-white background
   static const Color cardBg = Color(0xFFFFFFFF);
   static const Color textDark = Color(0xFF2D2D3A);
-  static const Color textMuted = Color(0xFF8C8CA1);
+  static const Color textMuted = Color(0xFF6E6E73); // WCAG AA on background (4.81:1)
   static const Color successMint = Color(0xFF67D4A8);
   static const Color warningOrange = Color(0xFFFFAA5A);
   static const Color dangerRose = Color(0xFFFF5964);
@@ -32,4 +32,12 @@ class AppColors {
   /// Link/info blue text. Replaces 0xFF007AFF (4.02:1 on white).
   /// 0xFF0062CC keeps >= 4.8:1 on every surface.
   static const Color textBlue = Color(0xFF0062CC);
+
+  /// Input placeholder text. Replaces 0xFFC7C7CC, which only reaches 1.68:1 on
+  /// white — nearly unreadable. 0xFF636366 keeps >= 5.68:1 everywhere.
+  static const Color placeholderText = Color(0xFF636366);
+
+  /// Success badge text. Replaces 0xFF1E824C on 0xFFE3F9EC (4.37:1, just under
+  /// AA). 0xFF176B3E keeps >= 5.9:1 on the same tinted background.
+  static const Color badgeSuccessText = Color(0xFF176B3E);
 }

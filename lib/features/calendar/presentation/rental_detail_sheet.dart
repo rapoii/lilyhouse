@@ -231,7 +231,7 @@ class RentalDetailSheet extends StatelessWidget {
               child: const Text(
                 'Tutup',
                 style: TextStyle(
-                  color: AppColors.primaryPink,
+                  color: AppColors.deepPinkText,
                   fontWeight: FontWeight.w600,
                   fontSize: 15,
                 ),
@@ -332,7 +332,7 @@ class RentalDetailSheet extends StatelessWidget {
                 const Icon(
                   CupertinoIcons.chevron_right,
                   size: 14,
-                  color: Color(0xFFC7C7CC),
+                  color: AppColors.placeholderText,
                 ),
               ],
             )
@@ -910,7 +910,7 @@ class RentalDetailSheet extends StatelessWidget {
                     ? 'Denda keterlambatan / rusak (Rp)'
                     : 'Denda jika ada kerusakan (opsional)',
                 placeholderStyle: const TextStyle(
-                  color: Color(0xFFC7C7CC),
+                  color: AppColors.placeholderText,
                   fontSize: 13,
                 ),
                 style: const TextStyle(fontSize: 13, color: AppColors.textDark),
@@ -924,7 +924,7 @@ class RentalDetailSheet extends StatelessWidget {
                 controller: noteController,
                 placeholder: 'Catatan kondisi / kelengkapan (opsional)',
                 placeholderStyle: const TextStyle(
-                  color: Color(0xFFC7C7CC),
+                  color: AppColors.placeholderText,
                   fontSize: 13,
                 ),
                 style: const TextStyle(fontSize: 13, color: AppColors.textDark),
@@ -1175,7 +1175,7 @@ class RentalDetailSheet extends StatelessWidget {
               child: const Text(
                 'Tutup',
                 style: TextStyle(
-                  color: AppColors.primaryPink,
+                  color: AppColors.deepPinkText,
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1427,7 +1427,7 @@ class RentalDetailSheet extends StatelessWidget {
                                     fontWeight: FontWeight.w700,
                                     color: isLateReturn
                                         ? AppColors.dangerRose
-                                        : AppColors.primaryPink,
+                                        : AppColors.deepPinkText,
                                   ),
                                 ),
                               ),
@@ -1463,14 +1463,14 @@ class RentalDetailSheet extends StatelessWidget {
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,
-                                    color: AppColors.primaryPink,
+                                    color: AppColors.deepPinkText,
                                   ),
                                 ),
                                 Spacer(),
                                 Icon(
                                   CupertinoIcons.chevron_right,
                                   size: 13,
-                                  color: Color(0xFFC7C7CC),
+                                  color: AppColors.placeholderText,
                                 ),
                               ],
                             ),
@@ -1912,7 +1912,7 @@ class RentalDetailSheet extends StatelessWidget {
                         style: const TextStyle(
                           fontWeight: FontWeight.w700,
                           fontSize: 16,
-                          color: AppColors.primaryPink,
+                          color: AppColors.deepPinkText,
                         ),
                       ),
                     ),
@@ -2071,7 +2071,7 @@ class RentalDetailSheet extends StatelessWidget {
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
-                            color: AppColors.primaryPink,
+                            color: AppColors.deepPinkText,
                           ),
                         ),
                         subtitle: const Text(

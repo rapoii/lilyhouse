@@ -418,6 +418,17 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _showClearCacheDialog() {
+    // Nothing to clear: surface a non-destructive toast instead of the full
+    // destructive confirmation dialog for an empty cache.
+    if (_cacheSizeText.isEmpty || _cacheSizeText == '0 B') {
+      IosToast.show(
+        context,
+        'Cache gambar sudah kosong',
+        icon: CupertinoIcons.checkmark_circle_fill,
+        iconColor: AppColors.successMint,
+      );
+      return;
+    }
     HapticFeedback.selectionClick();
     showCupertinoDialog<void>(
       context: context,
@@ -525,7 +536,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.93',
+                    'Versi 1.0.94',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ),
@@ -690,14 +701,36 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.93 (BUILD 128) - TERBARU'),
+                  header: const Text('VERSI 1.0.94 (BUILD 129) - TERBARU'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
                     CupertinoListTile(
                       leading: SquircleIcon(
-                        icon: CupertinoIcons.eye_fill,
+                        icon: CupertinoIcons.textformat_size,
                         color: Color(0xFF5856D6),
+                      ),
+                      title: Text('Keterbacaan Layar Form', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Teks panduan pada kolom isian kini jauh lebih gelap agar terbaca jelas, dan tombol Simpan pada form kostum tidak bisa ditekan sampai nama kostum terisi, sehingga kesalahan input berkurang.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.checkmark_seal_fill,
+                        color: Color(0xFF1E824C),
+                      ),
+                      title: Text('Pembersihan Cache Lebih Pintar', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Saat cache gambar sudah kosong, aplikasi cukup menampilkan pemberitahuan singkat alih-alih memunculkan dialog konfirmasi kosong yang membuang waktu.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.eye_fill,
+                        color: Color(0xFF8A5300),
                       ),
                       title: Text('Kontras Teks Sesuai WCAG AA', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                       subtitle: Text(
@@ -1544,7 +1577,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     fontWeight: FontWeight.w400,
                   ),
                 ),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
                 onTap: _showPendingQueueSheet,
               ),
 
@@ -1647,7 +1680,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: Color(0xFF34C759),
                 ),
                 title: const Text('Statistik Database', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
                 onTap: _showDatabaseStatsSheet,
               ),
 
@@ -1700,7 +1733,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
                 title: const Text('Design System', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
                 additionalInfo: const Text('Apple HIG / iOS 18', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
                 onTap: _showDesignSystemSheet,
               ),
 
@@ -1711,7 +1744,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: Color(0xFFFF9500),
                 ),
                 title: const Text('Catatan Rilis', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
-                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
                 onTap: _showChangelogSheet,
               ),
             ],

@@ -148,7 +148,7 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
               padding: EdgeInsets.zero,
               minimumSize: const Size(44, 44),
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Batal', style: TextStyle(fontSize: 15, color: AppColors.primaryPink)),
+              child: const Text('Batal', style: TextStyle(fontSize: 15, color: AppColors.deepPinkText)),
             ),
             middle: const Text('Tambah Aksesori', style: AppTypography.navTitle),
             trailing: CupertinoButton(
@@ -191,7 +191,7 @@ class _AddAccessorySheetState extends State<AddAccessorySheet> {
                         autofocus: true,
                         decoration: null,
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
-                        placeholderStyle: const TextStyle(fontSize: 15, color: Color(0xFFC7C7CC)),
+                        placeholderStyle: const TextStyle(fontSize: 15, color: AppColors.placeholderText),
                         textInputAction: TextInputAction.done,
                         onSubmitted: (_) => _submit(),
                       ),

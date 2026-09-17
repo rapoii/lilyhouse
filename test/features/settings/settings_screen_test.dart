@@ -164,7 +164,7 @@ void main() {
       expect(find.text('Belum pernah'), findsOneWidget);
     });
 
-    testWidgets('protects "Bersihkan Cache Gambar" dialog with default "Batal" action', (tester) async {
+    testWidgets('Bersihkan Cache Gambar skips the destructive dialog when cache is empty', (tester) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
@@ -181,24 +181,14 @@ void main() {
       // Scroll to "Bersihkan Cache Gambar"
       final cacheTile = find.text('Bersihkan Cache Gambar');
       await tester.scrollUntilVisible(cacheTile, 300);
+      await tester.pumpAndSettle();
       await tester.tap(cacheTile);
       await tester.pumpAndSettle();
 
-      // Verify CupertinoAlertDialog opens
-      expect(find.byType(CupertinoAlertDialog), findsOneWidget);
-      expect(find.text('Bersihkan Cache Gambar?'), findsOneWidget);
-
-      // Verify informative content text assuring data is safe
-      expect(find.textContaining('File thumbnail sementara'), findsOneWidget);
-
-      // Verify Batal is available and safe
-      final batalBtn = find.text('Batal');
-      expect(batalBtn, findsOneWidget);
-
-      // Tap Batal closes dialog without destructive action
-      await tester.tap(batalBtn);
-      await tester.pumpAndSettle();
+      // An empty cache must NOT raise the destructive confirmation dialog —
+      // there is nothing to clear, so a friendly toast is shown instead.
       expect(find.byType(CupertinoAlertDialog), findsNothing);
+      expect(find.text('Cache gambar sudah kosong'), findsOneWidget);
     });
 
     testWidgets('protects "Pulihkan dari Cloud" with explicit confirmation dialog', (tester) async {
@@ -256,7 +246,7 @@ void main() {
 
       // A single release header per build — duplicates must be merged into one section.
       // v1.0.92 was superseded by this build, so its notes now live under 1.0.93.
-      expect(find.text('VERSI 1.0.93 (BUILD 128) - TERBARU'), findsOneWidget);
+      expect(find.text('VERSI 1.0.94 (BUILD 129) - TERBARU'), findsOneWidget);
 
       // Older release notes live further down the same list — scroll to confirm
       // they survived the merge (and that the sheet is not truncated).

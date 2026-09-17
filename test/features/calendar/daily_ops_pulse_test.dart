@@ -222,7 +222,7 @@ void main() {
       await tester.pump();
 
       expect(find.byKey(const Key('daily_ops_card')), findsOneWidget);
-      expect(find.text('PULASAN OPERASIONAL HARI INI'), findsOneWidget);
+      expect(find.text('RINGKASAN OPERASIONAL HARI INI'), findsOneWidget);
       expect(find.byKey(const Key('ops_metric_active_bookings')), findsOneWidget);
       expect(find.byKey(const Key('ops_metric_unsettled_dp')), findsOneWidget);
       expect(find.byKey(const Key('ops_metric_due_today')), findsOneWidget);

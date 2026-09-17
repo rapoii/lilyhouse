@@ -73,6 +73,6 @@ class AppTypography {
     fontSize: 15,
     fontWeight: FontWeight.w600,
     letterSpacing: -0.2,
-    color: AppColors.primaryPink,
+    color: AppColors.deepPinkText,
   );
 }

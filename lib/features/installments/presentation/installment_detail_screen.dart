@@ -416,7 +416,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w700,
-                    color: AppColors.primaryPink,
+                    color: AppColors.deepPinkText,
                   ),
                 ),
               ),
@@ -446,7 +446,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
-                    color: inst.isPaidOff ? const Color(0xFF34C759) : AppColors.primaryPink,
+                    color: inst.isPaidOff ? const Color(0xFF34C759) : AppColors.deepPinkText,
                   ),
                 ),
               ),

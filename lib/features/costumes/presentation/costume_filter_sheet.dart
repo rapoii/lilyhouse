@@ -133,7 +133,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
             leading: CupertinoButton(
               padding: EdgeInsets.zero,
               onPressed: _resetFilters,
-              child: const Text('Atur Ulang', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.primaryPink)),
+              child: const Text('Atur Ulang', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: AppColors.deepPinkText)),
             ),
             middle: const SizedBox(
               width: double.infinity,
@@ -187,7 +187,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                             series,
                             style: TextStyle(
                               fontSize: 15,
-                              color: isSelected ? AppColors.primaryPink : AppColors.textDark,
+                              color: isSelected ? AppColors.deepPinkText : AppColors.textDark,
                               fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                             ),
                           ),
@@ -273,7 +273,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                           sz,
                           style: TextStyle(
                             fontSize: 15,
-                            color: isSelected ? AppColors.primaryPink : AppColors.textDark,
+                            color: isSelected ? AppColors.deepPinkText : AppColors.textDark,
                             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
                           ),
                         ),

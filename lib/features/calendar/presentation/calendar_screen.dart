@@ -191,7 +191,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 trailing: CupertinoButton(
                   padding: EdgeInsets.zero,
                   onPressed: () => Navigator.of(sheetCtx).pop(),
-                  child: const Text('Tutup', style: TextStyle(color: AppColors.primaryPink, fontSize: 15, fontWeight: FontWeight.w600)),
+                  child: const Text('Tutup', style: TextStyle(color: AppColors.deepPinkText, fontSize: 15, fontWeight: FontWeight.w600)),
                 ),
               ),
               child: SafeArea(
@@ -223,7 +223,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             'Deteksi otomatis format sewa DM Instagram',
                             style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
-                          trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                          trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
                           onTap: () {
                             Navigator.of(ctx).pop();
                             _openSmartPasteDialog();
@@ -240,7 +240,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             'Ketik data pesanan satu per satu lewat form',
                             style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                           ),
-                          trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: Color(0xFFC7C7CC)),
+                          trailing: const Icon(CupertinoIcons.chevron_right, size: 14, color: AppColors.placeholderText),
                           onTap: () {
                             Navigator.of(ctx).pop();
                             _openManualBookingDialog();
@@ -387,10 +387,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                       ),
                       calendarStyle: CalendarStyle(
                         outsideDaysVisible: false,
-                        weekendTextStyle: const TextStyle(color: AppColors.primaryPink),
+                        weekendTextStyle: const TextStyle(color: AppColors.deepPinkText),
                         defaultTextStyle: const TextStyle(color: AppColors.textDark),
                         selectedDecoration: const BoxDecoration(
-                          color: AppColors.primaryPink,
+                          color: AppColors.deepPinkText,
                           shape: BoxShape.circle,
                         ),
                         todayDecoration: BoxDecoration(
@@ -399,11 +399,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                           border: Border.all(color: AppColors.primaryPink, width: 1.5),
                         ),
                         todayTextStyle: const TextStyle(
-                          color: AppColors.primaryPink,
+                          color: AppColors.deepPinkText,
                           fontWeight: FontWeight.bold,
                         ),
                         markerDecoration: const BoxDecoration(
-                          color: AppColors.primaryPink,
+                          color: AppColors.deepPinkText,
                           shape: BoxShape.circle,
                         ),
                         markersMaxCount: 3,
@@ -455,7 +455,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                             style: const TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.primaryPink,
+                              color: AppColors.deepPinkText,
                             ),
                           ),
                         ),
@@ -605,7 +605,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               const SizedBox(width: 10),
               const Expanded(
                 child: Text(
-                  'PULASAN OPERASIONAL HARI INI',
+                  'RINGKASAN OPERASIONAL HARI INI',
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
@@ -965,7 +965,7 @@ class _RentalSlotCard extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.primaryPink,
+                    color: AppColors.deepPinkText,
                   ),
                 ),
               ],
@@ -1217,7 +1217,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
-                              color: AppColors.primaryPink,
+                              color: AppColors.deepPinkText,
                             ),
                           ),
                         ],

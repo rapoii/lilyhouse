@@ -198,6 +198,40 @@ void main() {
     expect(find.text('Hatsune Miku'), findsNothing);
   });
 
+  testWidgets('AddCostumeSheet keeps Simpan disabled until a name is entered', (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: AppTheme.lightTheme,
+        home: Scaffold(
+          body: AddCostumeSheet(
+            repository: repository,
+            onSaved: () {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    // Empty form: the header action must explain what is missing and stay
+    // non-interactive (onPressed == null).
+    final placeholder = find.text('Isi Nama Dulu');
+    expect(placeholder, findsOneWidget);
+    final disabled = tester.widget<CupertinoButton>(
+      find.ancestor(of: placeholder, matching: find.byType(CupertinoButton)),
+    );
+    expect(disabled.onPressed, isNull);
+
+    // Type a name: the button activates and becomes "Simpan".
+    await tester.enterText(find.byType(CupertinoTextField).first, 'Kostum Uji');
+    await tester.pumpAndSettle();
+
+    final enabled = tester.widget<CupertinoButton>(
+      find.widgetWithText(CupertinoButton, 'Simpan'),
+    );
+    expect(enabled.onPressed, isNotNull);
+  });
+
   testWidgets('CostumeDetailScreen displays costume details and accessories', (tester) async {
     final costume = await repository.getCostumeById('cos-2');
     expect(costume, isNotNull);

@@ -289,7 +289,7 @@ class _CostumeListScreenState extends State<CostumeListScreen> {
               style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: AppColors.primaryPink,
+                color: AppColors.deepPinkText,
               ),
             ),
           ],

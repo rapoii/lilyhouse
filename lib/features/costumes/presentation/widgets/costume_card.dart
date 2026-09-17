@@ -76,7 +76,7 @@ class CostumeCard extends StatelessWidget {
   (Color bg, Color text, String label) _getStatusBadgeData(CostumeStatus status) {
     switch (status) {
       case CostumeStatus.available:
-        return (const Color(0xFFE3F9EC), const Color(0xFF1E824C), 'Tersedia');
+        return (const Color(0xFFE3F9EC), AppColors.badgeSuccessText, 'Tersedia');
       case CostumeStatus.booked:
         return (const Color(0xFFFFF4E5), AppColors.textAmber, 'Dibooking');
       case CostumeStatus.rented:
@@ -187,7 +187,7 @@ class CostumeCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primaryPink,
+                        color: AppColors.deepPinkText,
                       ),
                     ),
                   ],

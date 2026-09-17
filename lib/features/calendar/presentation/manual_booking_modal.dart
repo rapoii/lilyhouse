@@ -661,7 +661,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         key: const Key('manual_name_input'),
                         controller: _nameController,
                         placeholder: 'Nama asli / nama di paket',
-                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
@@ -678,7 +678,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         key: const Key('manual_phone_input'),
                         controller: _phoneController,
                         placeholder: 'Nomor Telepon / HP (cth: 081234567890)',
-                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
@@ -699,7 +699,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         key: const Key('manual_address_input'),
                         controller: _addressController,
                         placeholder: 'Alamat lengkap',
-                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
@@ -718,7 +718,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         key: const Key('manual_parent_phone_input'),
                         controller: _parentPhoneController,
                         placeholder: 'No HP ortu / keluarga terdekat',
-                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
@@ -739,7 +739,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         key: const Key('manual_social_input'),
                         controller: _socialMediaController,
                         placeholder: 'Akun Instagram (cth: @username)',
-                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
@@ -775,7 +775,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         style: TextStyle(
                           fontSize: 15,
                           color: _ktpPhotoPath != null && File(_ktpPhotoPath!).existsSync()
-                              ? AppColors.primaryPink
+                              ? AppColors.deepPinkText
                               : AppColors.textSecondary,
                         ),
                       ),
@@ -794,7 +794,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           : const Icon(
                               CupertinoIcons.chevron_right,
                               size: 14,
-                              color: Color(0xFFC7C7CC),
+                              color: AppColors.placeholderText,
                             ),
                       onTap: () => _showImagePickerActionSheet(true),
                     ),
@@ -815,7 +815,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         style: TextStyle(
                           fontSize: 15,
                           color: _selfieKtpPath != null && File(_selfieKtpPath!).existsSync()
-                              ? AppColors.primaryPink
+                              ? AppColors.deepPinkText
                               : AppColors.textSecondary,
                         ),
                       ),
@@ -834,7 +834,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           : const Icon(
                               CupertinoIcons.chevron_right,
                               size: 14,
-                              color: Color(0xFFC7C7CC),
+                              color: AppColors.placeholderText,
                             ),
                       onTap: () => _showImagePickerActionSheet(false),
                     ),
@@ -862,7 +862,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           style: TextStyle(
                             fontSize: 11,
                             fontWeight: FontWeight.w700,
-                            color: _durationDays > 3 ? AppColors.warningOrange : AppColors.primaryPink,
+                            color: _durationDays > 3 ? AppColors.warningOrange : AppColors.deepPinkText,
                           ),
                         ),
                       ),
@@ -902,7 +902,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       trailing: const Icon(
                         CupertinoIcons.chevron_right,
                         size: 14,
-                        color: Color(0xFFC7C7CC),
+                        color: AppColors.placeholderText,
                       ),
                       onTap: _isLoadingCostumes || _costumes.isEmpty
                           ? null
@@ -955,7 +955,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       trailing: const Icon(
                         CupertinoIcons.chevron_right,
                         size: 14,
-                        color: Color(0xFFC7C7CC),
+                        color: AppColors.placeholderText,
                       ),
                       onTap: () async {
                         final hadFocus = FocusScope.of(context).hasFocus;
@@ -1010,7 +1010,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       trailing: const Icon(
                         CupertinoIcons.chevron_right,
                         size: 14,
-                        color: Color(0xFFC7C7CC),
+                        color: AppColors.placeholderText,
                       ),
                       onTap: () async {
                         final hadFocus = FocusScope.of(context).hasFocus;
@@ -1052,7 +1052,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                       trailing: const Icon(
                         CupertinoIcons.chevron_right,
                         size: 14,
-                        color: Color(0xFFC7C7CC),
+                        color: AppColors.placeholderText,
                       ),
                       onTap: () async {
                         final hadFocus = FocusScope.of(context).hasFocus;
@@ -1100,7 +1100,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                         key: const Key('manual_total_price_field'),
                         controller: _totalPriceController,
                         placeholder: 'Total harga sewa',
-                        placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                        placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                         style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         decoration: null,
@@ -1164,7 +1164,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
                           key: const Key('manual_dp_amount_field'),
                           controller: _dpAmountController,
                           placeholder: 'Nominal DP (Rp)',
-                          placeholderStyle: const TextStyle(color: Color(0xFFC7C7CC), fontSize: 15),
+                          placeholderStyle: const TextStyle(color: AppColors.placeholderText, fontSize: 15),
                           style: const TextStyle(fontSize: 15, color: AppColors.textDark),
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: null,

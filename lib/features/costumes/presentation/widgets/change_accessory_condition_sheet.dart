@@ -55,7 +55,7 @@ class ChangeAccessoryConditionSheet extends StatelessWidget {
               padding: EdgeInsets.zero,
               minimumSize: const Size(44, 44),
               onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Tutup', style: TextStyle(color: AppColors.primaryPink, fontSize: 15, fontWeight: FontWeight.w600)),
+              child: const Text('Tutup', style: TextStyle(color: AppColors.deepPinkText, fontSize: 15, fontWeight: FontWeight.w600)),
             ),
           ),
           child: SafeArea(
