@@ -80,7 +80,13 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   ///
   /// Auto-filled values (Smart Paste pre-fill, customer auto-match, auto-price)
   /// are deliberately excluded: only genuine user input flips this flag.
-  bool get _hasUnsavedChanges => _userEdited && !_isSaving;
+  bool get _hasUnsavedChanges =>
+      !_isSaving &&
+      (_userEdited ||
+          _nameController.text.trim().isNotEmpty ||
+          _phoneController.text.trim().isNotEmpty ||
+          _socialMediaController.text.trim().isNotEmpty ||
+          _selectedCostume != null);
 
   /// Confirms discarding edits before the sheet closes. Returns `true` when
   /// the sheet should be allowed to close.
@@ -566,7 +572,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
   void _showSuccessSnack() {
     IosToast.show(
       context,
-      'Booking ${_selectedCostume!.name} tersimpan',
+      'Pesanan sewa ${_selectedCostume!.name} tersimpan',
       icon: CupertinoIcons.checkmark_circle_fill,
       iconColor: AppColors.successMint,
     );
@@ -625,7 +631,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
             middle: const SizedBox(
               width: double.infinity,
               child: Center(
-                child: Text('Booking Manual', style: AppTypography.navTitle),
+                child: Text('Input Pesanan Sewa', style: AppTypography.navTitle),
               ),
             ),
             trailing: CupertinoButton(

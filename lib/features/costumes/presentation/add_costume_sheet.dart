@@ -155,7 +155,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
       case CostumeStatus.available:
         return 'Tersedia';
       case CostumeStatus.booked:
-        return 'Dibooking';
+        return 'Dipesan';
       case CostumeStatus.rented:
         return 'Disewa';
       case CostumeStatus.laundry:
@@ -762,7 +762,7 @@ class _AddCostumeSheetState extends State<AddCostumeSheet> {
                         }
                         const items = [
                           SheetPickerItem('available', 'Tersedia'),
-                          SheetPickerItem('booked', 'Dibooking'),
+                          SheetPickerItem('booked', 'Dipesan'),
                           SheetPickerItem('rented', 'Disewa'),
                           SheetPickerItem('laundry', 'Dicuci'),
                           SheetPickerItem('maintenance', 'Perawatan'),

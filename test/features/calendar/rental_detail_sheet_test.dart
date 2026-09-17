@@ -231,7 +231,7 @@ void main() {
     // Verify Hero card info
     expect(find.text('Furina Archon'), findsOneWidget);
     expect(find.text('Genshin Impact'), findsOneWidget);
-    expect(find.text('Dibooking'), findsOneWidget);
+    expect(find.text('Dipesan'), findsOneWidget);
     expect(find.text('DP Terbayar'), findsOneWidget);
     expect(find.text('Photoshoot Event'), findsOneWidget);
     expect(find.text('3 Hari'), findsOneWidget);
@@ -272,7 +272,7 @@ void main() {
     expect(find.text('Tandai Sedang Disewa'), findsOneWidget);
     expect(find.text('Tandai Sudah Dikembalikan'), findsOneWidget);
     expect(find.text('Tandai Pembayaran Lunas'), findsOneWidget);
-    expect(find.text('Batalkan Booking'), findsOneWidget);
+    expect(find.text('Batalkan Pesanan Sewa'), findsOneWidget);
   });
 
   testWidgets('Tapping Tandai Sedang Disewa updates rental itemStatus', (
@@ -434,7 +434,7 @@ void main() {
   });
 
   testWidgets(
-    'Batalkan Booking shows CupertinoAlertDialog and cancels when confirmed',
+    'Batalkan Pesanan Sewa shows CupertinoAlertDialog and cancels when confirmed',
     (tester) async {
       tester.view.physicalSize = const Size(1080, 2400);
       tester.view.devicePixelRatio = 1.0;
@@ -468,8 +468,8 @@ void main() {
       await tester.tap(find.text('Open Sheet'));
       await tester.pumpAndSettle();
 
-      // Scroll to and tap "Batalkan Booking"
-      final batalTile = find.text('Batalkan Booking');
+      // Scroll to and tap "Batalkan Pesanan Sewa"
+      final batalTile = find.text('Batalkan Pesanan Sewa');
       await tester.scrollUntilVisible(
         batalTile,
         200,
@@ -479,13 +479,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Confirm dialog is shown
-      expect(find.text('Batalkan Booking?'), findsOneWidget);
+      expect(find.text('Batalkan Pesanan Sewa?'), findsOneWidget);
       expect(find.text('Batal'), findsOneWidget);
 
       // Tap destructive confirm in dialog
       final confirmBtn = find.widgetWithText(
         CupertinoDialogAction,
-        'Batalkan Booking',
+        'Batalkan Pesanan Sewa',
       );
       await tester.tap(confirmBtn);
       await tester.pump();

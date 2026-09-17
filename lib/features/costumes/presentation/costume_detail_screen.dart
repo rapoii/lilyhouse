@@ -220,7 +220,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       case CostumeStatus.available:
         return (const Color(0xFFE3F9EC), AppColors.badgeSuccessText, 'Tersedia');
       case CostumeStatus.booked:
-        return (const Color(0xFFFFF4E5), AppColors.textAmber, 'Dibooking');
+        return (const Color(0xFFFFF4E5), AppColors.textAmber, 'Dipesan');
       case CostumeStatus.rented:
         return (const Color(0xFFFFEBF0), AppColors.deepPinkText, 'Disewa');
       case CostumeStatus.laundry:
@@ -712,7 +712,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
   ({Color bg, Color text, String label}) _getRentalStatusBadgeData(RentalItemStatus status) {
     switch (status) {
       case RentalItemStatus.booked:
-        return (bg: AppColors.softPinkBg, text: AppColors.primaryPink, label: 'Dibooking');
+        return (bg: AppColors.softPinkBg, text: AppColors.primaryPink, label: 'Dipesan');
       case RentalItemStatus.shipped:
         return (bg: AppColors.pastelPink.withValues(alpha: 0.25), text: AppColors.primaryPink, label: 'Dikirim');
       case RentalItemStatus.rented:

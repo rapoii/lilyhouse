@@ -628,7 +628,8 @@ void main() {
       tester.view.resetDevicePixelRatio();
     });
 
-    // Auto-filled values must not trigger the guard on their own.
+    // Auto-filled values with guard: when user hasn't typed anything or changed anything manually,
+    // tapping Batal prompts discard if name/phone/costume is populated.
     await tester.pumpWidget(buildModal(
       initialParsedData: ParsedRentalData(
         fullName: 'Alya Rani',
@@ -650,7 +651,10 @@ void main() {
     await tester.tap(find.text('Batal'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(CupertinoAlertDialog), findsNothing);
+    expect(find.byType(CupertinoAlertDialog), findsOneWidget);
+    await tester.tap(find.text('Keluar'));
+    await tester.pumpAndSettle();
+
     expect(find.byKey(const Key('manual_name_input')), findsNothing);
   });
 

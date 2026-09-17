@@ -390,7 +390,7 @@ class RentalDetailSheet extends StatelessWidget {
       case RentalItemStatus.booked:
         bg = AppColors.softPinkBg;
         fg = AppColors.primaryPink;
-        label = 'Dibooking';
+        label = 'Dipesan';
         break;
       case RentalItemStatus.rented:
         bg = AppColors.successMint.withValues(alpha: 0.18);
@@ -843,7 +843,7 @@ class RentalDetailSheet extends StatelessWidget {
     showCupertinoDialog<void>(
       context: context,
       builder: (dialogCtx) => CupertinoAlertDialog(
-        title: const Text('Batalkan Booking?'),
+        title: const Text('Batalkan Pesanan Sewa?'),
         content: Text(
           'Yakin ingin membatalkan jadwal sewa $costumeName untuk $customerName?',
         ),
@@ -866,10 +866,10 @@ class RentalDetailSheet extends StatelessWidget {
                 onRentalUpdated?.call();
               }
               if (!context.mounted) return;
-              IosToast.show(context, 'Booking berhasil dibatalkan');
+              IosToast.show(context, 'Pesanan sewa berhasil dibatalkan');
               Navigator.pop(context);
             },
-            child: const Text('Batalkan Booking'),
+            child: const Text('Batalkan Pesanan Sewa'),
           ),
         ],
       ),
@@ -2222,7 +2222,7 @@ class RentalDetailSheet extends StatelessWidget {
                           color: Color(0xFF8E8E93),
                         ),
                         title: Text(
-                          'Booking Telah Dibatalkan',
+                          'Pesanan Sewa Dibatalkan',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,
@@ -2286,7 +2286,7 @@ class RentalDetailSheet extends StatelessWidget {
                           color: AppColors.dangerRose,
                         ),
                         title: const Text(
-                          'Batalkan Booking',
+                          'Batalkan Pesanan Sewa',
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             fontSize: 15,

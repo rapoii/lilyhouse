@@ -542,7 +542,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.97',
+                    'Versi 1.0.98',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ),
@@ -744,7 +744,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.97 (BUILD 132) - TERBARU'),
+                  header: const Text('VERSI 1.0.98 (BUILD 133) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.checkmark_seal_fill,
+                        color: Color(0xFF007AFF),
+                      ),
+                      title: Text('Standardisasi Status Dipesan Seluruh Sistem', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Penyelarasan label status ketersediaan dan sewa dari istilah tidak baku ke kata resmi KBBI Dipesan di seluruh katalog, filter, kartu kostum, rincian, dan kalender.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.shield_lefthalf_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Proteksi Deteksi Format Sewa (Smart Paste)', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Lembar Smart Paste kini terproteksi dialog konfirmasi Apple HIG saat ada teks format sewa yang belum diproses ketika dibatalkan atau digeser ke bawah.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.doc_text_fill,
+                        color: Color(0xFFFF9500),
+                      ),
+                      title: Text('Penyelarasan Zona Bahaya & Form Pesanan Sewa', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Penyelarasan aksi pembatalan ke istilah resmi Batalkan Pesanan Sewa, penguatan deteksi draf pada formulir sewa, dan penyempurnaan kesantunan template pesan.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.97 (BUILD 132)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1883,7 +1923,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.97', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                additionalInfo: const Text('v1.0.98', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),

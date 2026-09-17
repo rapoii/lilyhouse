@@ -221,7 +221,7 @@ class _CostumeFilterSheetState extends State<CostumeFilterSheet> {
                     ),
                     CupertinoListTile(
                       leading: const SquircleIcon(icon: CupertinoIcons.bookmark_fill, color: AppColors.textAmber),
-                      title: const Text('Dibooking', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
+                      title: const Text('Dipesan', style: TextStyle(fontSize: 15, color: AppColors.textDark)),
                       trailing: _buildCheckmark(_selectedStatus == CostumeStatus.booked),
                       onTap: () => _select(() => _selectedStatus = CostumeStatus.booked),
                     ),

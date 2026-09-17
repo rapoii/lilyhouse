@@ -285,7 +285,7 @@ void main() {
       // On Sept 6, 2026, rental_001 is active
       expect(find.text('Citlali'), findsWidgets);
       expect(find.text('Jihan Fatin'), findsOneWidget);
-      expect(find.text('Dibooking'), findsWidgets);
+      expect(find.text('Dipesan'), findsWidgets);
       expect(find.text('Rp 150.000'), findsWidgets);
       expect(find.text('Hari ke-2 dari 3 hari sewa'), findsOneWidget);
       expect(find.text('5 Sep – 7 Sep 2026 • 3 hari'), findsOneWidget);
@@ -410,7 +410,7 @@ void main() {
 
       // Manual modal should be open with parsed data prefilled.
       // Verify Manual modal title is visible.
-      expect(find.text('Booking Manual'), findsOneWidget);
+      expect(find.text('Input Pesanan Sewa'), findsOneWidget);
 
       // Verify the Manual modal's text fields (Alamat, Sosmed) were
       // prefilled into the CupertinoTextFormFieldRow widgets.
@@ -418,6 +418,44 @@ void main() {
       expect(find.text('ig @rosetyler'), findsOneWidget);
       // The 'Clara Oswald' from the previous conflict-test should NOT be here.
       expect(find.text('Clara Oswald'), findsNothing);
+    });
+
+    testWidgets('tapping Batal with unsaved text in Smart Paste triggers discard confirmation', (tester) async {
+      await tester.pumpWidget(createWidgetUnderTest());
+      await tester.pump();
+      await tester.pump();
+
+      // Tap "Tambah" then "Smart Paste"
+      await tester.tap(find.byKey(const Key('add_booking_button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.tap(find.byKey(const Key('entry_smart_paste')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      // Enter some text into smart paste input
+      await tester.enterText(find.byKey(const Key('smart_paste_input')), 'Draft sewa kostum');
+      await tester.pump();
+
+      // Tap Batal
+      await tester.tap(find.text('Batal'));
+      await tester.pumpAndSettle();
+
+      // Discard confirmation dialog should appear
+      expect(find.text('Batalkan Perubahan?'), findsOneWidget);
+      expect(find.text('Perubahan yang belum disimpan akan hilang.'), findsOneWidget);
+
+      // Tap "Lanjut Mengisi" -> modal remains open
+      await tester.tap(find.text('Lanjut Mengisi'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('smart_paste_input')), findsOneWidget);
+
+      // Tap Batal again and tap "Keluar" -> modal is dismissed
+      await tester.tap(find.text('Batal'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Keluar'));
+      await tester.pumpAndSettle();
+      expect(find.byKey(const Key('smart_paste_input')), findsNothing);
     });
   });
 }

@@ -14,6 +14,7 @@ import '../../../core/widgets/header_action_button.dart';
 import '../../../core/widgets/ios_toast.dart';
 import '../../../core/widgets/pressable_card.dart';
 import '../../../core/widgets/squircle_icon.dart';
+import '../../../core/widgets/unsaved_changes_guard.dart';
 import '../../costumes/data/costume_repository.dart';
 import '../../costumes/domain/costume.dart';
 import '../../rentals/data/form_parser.dart';
@@ -521,7 +522,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                                   Icon(CupertinoIcons.plus, size: 14, color: AppColors.deepPinkText),
                                   SizedBox(width: 6),
                                   Text(
-                                    'Tambah Booking',
+                                    'Tambah Pesanan',
                                     style: TextStyle(color: AppColors.deepPinkText, fontSize: 13, fontWeight: FontWeight.w600),
                                   ),
                                 ],
@@ -638,7 +639,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 child: _buildOpsMetric(
                   icon: CupertinoIcons.calendar,
                   value: '$activeBookings',
-                  label: 'Booking Aktif',
+                  label: 'Sewa Aktif',
                   color: AppColors.primaryPink,
                   key: const Key('ops_metric_active_bookings'),
                 ),
@@ -985,7 +986,7 @@ class _RentalSlotCard extends StatelessWidget {
       case RentalItemStatus.booked:
         bg = AppColors.softPinkBg;
         fg = AppColors.primaryPink;
-        label = 'Dibooking';
+        label = 'Dipesan';
         break;
       case RentalItemStatus.rented:
         bg = AppColors.successMint.withValues(alpha: 0.15);
@@ -1153,38 +1154,61 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
 
-    return DraggableSheetContainer(
-      initialHeightFraction: 0.68,
-      maxHeightFraction: 0.94,
-      backgroundColor: AppColors.background,
-      onDismissed: () => Navigator.of(context).pop(),
-      builder: (sheetCtx) => DefaultTextStyle(
-        style: const TextStyle(
-          decoration: TextDecoration.none,
-          fontFamily: '.SF Pro Text',
-          color: AppColors.textDark,
-        ),
-        child: CupertinoPageScaffold(
-          backgroundColor: AppColors.background,
-          navigationBar: CupertinoNavigationBar(
-            backgroundColor: AppColors.background,
-            border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
-            leading: CupertinoButton(
-              padding: EdgeInsets.zero,
-              onPressed: () => Navigator.of(sheetCtx).pop(),
-              child: const Text('Batal', style: AppTypography.actionButton),
-            ),
-            middle: const Text('Deteksi Format Sewa', style: AppTypography.navTitle),
+    return PopScope(
+      canPop: _textController.text.trim().isEmpty,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+        final navigator = Navigator.of(context);
+        if (_textController.text.trim().isNotEmpty) {
+          final discard = await confirmDiscardChanges(context);
+          if (!discard) return;
+        }
+        if (mounted) navigator.pop();
+      },
+      child: DraggableSheetContainer(
+        initialHeightFraction: 0.68,
+        maxHeightFraction: 0.94,
+        backgroundColor: AppColors.background,
+        onDismissed: () => Navigator.of(context).pop(),
+        confirmDismiss: () async {
+          if (_textController.text.trim().isEmpty) return true;
+          return confirmDiscardChanges(context);
+        },
+        builder: (sheetCtx) => DefaultTextStyle(
+          style: const TextStyle(
+            decoration: TextDecoration.none,
+            fontFamily: '.SF Pro Text',
+            color: AppColors.textDark,
           ),
-          child: SafeArea(
-            top: false,
-            child: SingleChildScrollView(
-              keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-              physics: const BouncingScrollPhysics(),
-              padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset + 32),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+          child: CupertinoPageScaffold(
+            backgroundColor: AppColors.background,
+            navigationBar: CupertinoNavigationBar(
+              backgroundColor: AppColors.background,
+              border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
+              leading: CupertinoButton(
+                padding: EdgeInsets.zero,
+                onPressed: () async {
+                  if (_textController.text.trim().isNotEmpty) {
+                    final discard = await confirmDiscardChanges(sheetCtx);
+                    if (!discard) return;
+                  }
+                  if (sheetCtx.mounted) {
+                    Navigator.of(sheetCtx).pop();
+                  }
+                },
+                child: const Text('Batal', style: AppTypography.actionButton),
+              ),
+              middle: const Text('Deteksi Format Sewa', style: AppTypography.navTitle),
+            ),
+            child: SafeArea(
+              top: false,
+              child: SingleChildScrollView(
+                keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+                physics: const BouncingScrollPhysics(),
+                padding: EdgeInsets.fromLTRB(16, 16, 16, bottomInset + 32),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                 const Text(
                   'Tempel format sewa DM Instagram di bawah ini untuk deteksi jadwal dan isi formulir otomatis.',
                   style: TextStyle(fontSize: 13, color: AppColors.textSecondary, height: 1.3),
@@ -1402,6 +1426,7 @@ class _SmartPasteModalState extends State<_SmartPasteModal> {
             ),
           ),
         ),
+      ),
       ),
     );
   }

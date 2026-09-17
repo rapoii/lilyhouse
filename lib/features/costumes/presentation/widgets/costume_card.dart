@@ -78,7 +78,7 @@ class CostumeCard extends StatelessWidget {
       case CostumeStatus.available:
         return (const Color(0xFFE3F9EC), AppColors.badgeSuccessText, 'Tersedia');
       case CostumeStatus.booked:
-        return (const Color(0xFFFFF4E5), AppColors.textAmber, 'Dibooking');
+        return (const Color(0xFFFFF4E5), AppColors.textAmber, 'Dipesan');
       case CostumeStatus.rented:
         return (const Color(0xFFFFEBF0), AppColors.deepPinkText, 'Disewa');
       case CostumeStatus.laundry:
