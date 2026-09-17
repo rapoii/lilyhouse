@@ -845,7 +845,7 @@ class RentalDetailSheet extends StatelessWidget {
       builder: (dialogCtx) => CupertinoAlertDialog(
         title: const Text('Batalkan Booking?'),
         content: Text(
-          'Apakah kamu yakin ingin membatalkan jadwal sewa $costumeName untuk $customerName?',
+          'Yakin ingin membatalkan jadwal sewa $costumeName untuk $customerName?',
         ),
         actions: [
           CupertinoDialogAction(
@@ -1459,7 +1459,7 @@ class RentalDetailSheet extends StatelessWidget {
                                 ),
                                 SizedBox(width: 8),
                                 Text(
-                                  'Lihat Detail & Kelengkapan Kostum',
+                                  'Lihat Rincian & Kelengkapan Kostum',
                                   style: TextStyle(
                                     fontSize: 13,
                                     fontWeight: FontWeight.w600,

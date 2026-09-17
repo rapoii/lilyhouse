@@ -93,7 +93,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               rawError.contains('Failed host lookup') ||
               rawError.contains('TimeoutException') ||
               rawError.contains('ClientException')
-          ? 'Gagal terhubung ke cloud. Periksa koneksi internet kamu'
+          ? 'Gagal terhubung ke cloud. Periksa koneksi internet.'
           : (rawError.isNotEmpty ? rawError : 'Gagal melakukan sinkronisasi');
       _showIosToast(
         humanMsg,
@@ -111,7 +111,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         content: const Text(
           'Seluruh data lokal akan diganti dengan data dari cloud. '
           'Data offline yang belum disinkronkan akan hilang secara permanen. '
-          'Lanjutkan hanya jika kamu yakin atau baru selesai menginstall ulang aplikasi.',
+          'Lanjutkan hanya jika yakin atau baru selesai menginstal ulang aplikasi.',
         ),
         actions: [
           CupertinoDialogAction(
@@ -542,7 +542,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 const SizedBox(height: 4),
                 const Center(
                   child: Text(
-                    'Versi 1.0.96',
+                    'Versi 1.0.97',
                     style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
                   ),
                 ),
@@ -744,7 +744,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               padding: const EdgeInsets.symmetric(vertical: 16),
               children: [
                 CupertinoListSection.insetGrouped(
-                  header: const Text('VERSI 1.0.96 (BUILD 131) - TERBARU'),
+                  header: const Text('VERSI 1.0.97 (BUILD 132) - TERBARU'),
+                  backgroundColor: Colors.transparent,
+                  margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  children: const [
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.shield_lefthalf_fill,
+                        color: Color(0xFF007AFF),
+                      ),
+                      title: Text('Proteksi Input Form Cicilan Menyeluruh', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Formulir Cicilan Baru dan Catat Pembayaran kini terproteksi dialog konfirmasi Apple HIG jika ada isian yang belum tersimpan saat batal atau geser ke bawah.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.chat_bubble_text_fill,
+                        color: Color(0xFF34C759),
+                      ),
+                      title: Text('Harmonisasi Dialog & Netralitas Kata Ganti', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Penyelarasan seluruh dialog peringatan, pembatalan jadwal sewa, dan hapus riwayat ke gaya bahasa langsung yang santun, ringkas, dan profesional.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    CupertinoListTile(
+                      leading: SquircleIcon(
+                        icon: CupertinoIcons.text_badge_checkmark,
+                        color: Color(0xFFFF9500),
+                      ),
+                      title: Text('Standardisasi Kosakata KBBI & Pesanan Sewa', style: TextStyle(fontWeight: FontWeight.w500, fontSize: 16)),
+                      subtitle: Text(
+                        'Standardisasi penulisan kata baku menginstal, perbaikan label Lihat Rincian Kostum, dan penyelarasan istilah pesanan sewa di alur kalender.',
+                        style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                      ),
+                    ),
+                  ],
+                ),
+                CupertinoListSection.insetGrouped(
+                  header: const Text('VERSI 1.0.96 (BUILD 131)'),
                   backgroundColor: Colors.transparent,
                   margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                   children: const [
@@ -1843,7 +1883,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   color: AppColors.primaryPink,
                 ),
                 title: const Text('LilyHouse Rent', style: AppTypography.body),
-                additionalInfo: const Text('v1.0.96', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
+                additionalInfo: const Text('v1.0.97', style: TextStyle(color: AppColors.textSecondary, fontSize: 15)),
                 trailing: const CupertinoListTileChevron(),
                 onTap: _showAboutSheet,
               ),

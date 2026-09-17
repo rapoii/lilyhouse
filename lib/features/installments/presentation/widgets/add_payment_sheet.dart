@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/ios_toast.dart';
 import '../../../../core/widgets/sheet_picker.dart';
+import '../../../../core/widgets/unsaved_changes_guard.dart';
 import '../../data/installment_repository.dart';
 import '../../domain/installment.dart';
 import '../../domain/installment_log.dart';
@@ -34,6 +35,10 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
   DateTime _selectedDate = DateTime.now();
   bool _isSaving = false;
   String? _errorMessage;
+
+  bool get _hasUnsavedChanges =>
+      !_isSaving &&
+      (_amountController.text.trim().isNotEmpty || _notesController.text.trim().isNotEmpty);
 
   List<InstallmentLog> _logs = const [];
   bool _isLoadingLogs = true;
@@ -232,45 +237,62 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
     final remaining = widget.installment.remainingBalance;
     final isOverdue = widget.installment.isOverdue;
 
-    return Container(
-      decoration: const BoxDecoration(
-        color: AppColors.background,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: EdgeInsets.only(bottom: bottomInset),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header bar
-              Container(
-                height: 56,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: const BoxDecoration(
-                  border: Border(
-                    bottom: BorderSide(
-                      color: AppColors.borderSubtle,
-                      width: 0.5,
-                    ),
-                  ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      minimumSize: const Size(44, 44),
-                      onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
-                      child: const Text(
-                        'Batal',
-                        style: TextStyle(
-                          color: AppColors.textMuted,
-                          fontSize: 16,
-                        ),
+    return PopScope(
+      canPop: !_hasUnsavedChanges,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final shouldDiscard = await confirmDiscardChanges(context);
+        if (shouldDiscard && context.mounted) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Container(
+        decoration: const BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(14)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Padding(
+            padding: EdgeInsets.only(bottom: bottomInset),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header bar
+                Container(
+                  height: 56,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: const BoxDecoration(
+                    border: Border(
+                      bottom: BorderSide(
+                        color: AppColors.borderSubtle,
+                        width: 0.5,
                       ),
                     ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        minimumSize: const Size(44, 44),
+                        onPressed: _isSaving
+                            ? null
+                            : () async {
+                                if (_hasUnsavedChanges) {
+                                  final shouldDiscard = await confirmDiscardChanges(context);
+                                  if (!shouldDiscard) return;
+                                }
+                                if (context.mounted) Navigator.of(context).pop();
+                              },
+                        child: const Text(
+                          'Batal',
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
                     const Text(
                       'Catat Pembayaran Cicilan',
                       style: TextStyle(
@@ -718,6 +740,7 @@ class _AddPaymentSheetState extends State<AddPaymentSheet> {
           ),
         ),
       ),
-    );
+    ),
+  );
   }
 }

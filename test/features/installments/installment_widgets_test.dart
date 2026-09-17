@@ -962,5 +962,107 @@ void main() {
       expect(find.byKey(const Key('add_payment_last_payment')), findsOneWidget);
       expect(find.text('1x pembayaran'), findsOneWidget);
     });
+
+    testWidgets('tapping Batal with unsaved input in Add Installment sheet triggers confirmation dialog', (tester) async {
+      final repo = MockInstallmentRepository(
+        installments: [],
+        logs: [],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: InstallmentListScreen(
+              repository: repo,
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Tap add button
+      await tester.tap(find.byKey(const Key('add_installment_button')));
+      await tester.pumpAndSettle();
+
+      // Form is open
+      expect(find.text('Cicilan Baru'), findsOneWidget);
+
+      // Enter name
+      await tester.enterText(find.byKey(const Key('installment_name_input')), 'Kostum Nahida');
+      await tester.pump();
+
+      // Tap Batal
+      await tester.tap(find.text('Batal'));
+      await tester.pumpAndSettle();
+
+      // Confirmation dialog should appear
+      expect(find.text('Batalkan Perubahan?'), findsOneWidget);
+      expect(find.text('Perubahan yang belum disimpan akan hilang.'), findsOneWidget);
+
+      // Tap Lanjut Mengisi to stay
+      await tester.tap(find.text('Lanjut Mengisi'));
+      await tester.pumpAndSettle();
+      expect(find.text('Cicilan Baru'), findsOneWidget);
+
+      // Tap Batal again and discard
+      await tester.tap(find.text('Batal'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Keluar'));
+      await tester.pumpAndSettle();
+      expect(find.text('Cicilan Baru'), findsNothing);
+    });
+
+    testWidgets('tapping Batal with unsaved amount in AddPaymentSheet triggers confirmation dialog', (tester) async {
+      final installment = Installment(
+        id: 'inst-unsaved-test',
+        itemName: 'Raiden Shogun',
+        totalCost: 1500000.0,
+        totalPaid: 500000.0,
+        dueDate: DateTime(2027, 1, 1),
+        status: InstallmentStatus.ongoing,
+      );
+      final repo = MockInstallmentRepository(
+        installments: [installment],
+        logs: [],
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: AppTheme.lightTheme,
+          home: Scaffold(
+            body: AddPaymentSheet(
+              installment: installment,
+              repository: repo,
+              onSaved: () {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Enter payment amount
+      await tester.enterText(find.byKey(const Key('payment_amount_input')), '200000');
+      await tester.pump();
+
+      // Tap Batal
+      await tester.tap(find.text('Batal'));
+      await tester.pumpAndSettle();
+
+      // Confirmation dialog should appear
+      expect(find.text('Batalkan Perubahan?'), findsOneWidget);
+      expect(find.text('Perubahan yang belum disimpan akan hilang.'), findsOneWidget);
+
+      // Tap Lanjut Mengisi
+      await tester.tap(find.text('Lanjut Mengisi'));
+      await tester.pumpAndSettle();
+      expect(find.text('Catat Pembayaran Cicilan'), findsOneWidget);
+
+      // Tap Batal and discard
+      await tester.tap(find.text('Batal'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Keluar'));
+      await tester.pumpAndSettle();
+    });
   });
 }

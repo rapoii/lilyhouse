@@ -544,7 +544,7 @@ class _ManualBookingModalState extends State<ManualBookingModal> {
         content: Padding(
           padding: const EdgeInsets.only(top: 8),
           child: Text(
-            'Kostum ini sudah memiliki jadwal sewa pada rentang tanggal yang sama:\n\n$conflictDetails\n\nTetap simpan booking ini?',
+            'Kostum ini sudah memiliki jadwal sewa pada rentang tanggal yang sama:\n\n$conflictDetails\n\nTetap simpan pesanan sewa ini?',
           ),
         ),
         actions: [

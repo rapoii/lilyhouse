@@ -246,7 +246,7 @@ void main() {
 
       // A single release header per build — duplicates must be merged into one section.
       // v1.0.92 was superseded by this build, so its notes now live under 1.0.93.
-      expect(find.text('VERSI 1.0.96 (BUILD 131) - TERBARU'), findsOneWidget);
+      expect(find.text('VERSI 1.0.97 (BUILD 132) - TERBARU'), findsOneWidget);
 
       // Older release notes live further down the same list — scroll to confirm
       // they survived the merge (and that the sheet is not truncated).

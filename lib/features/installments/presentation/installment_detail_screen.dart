@@ -132,7 +132,7 @@ class _InstallmentDetailScreenState extends State<InstallmentDetailScreen> {
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Hapus Catatan Pembayaran?'),
-        content: Text('Apakah kamu yakin ingin menghapus catatan pembayaran sebesar ${_formatCurrency(log.amountPaid)}?'),
+        content: Text('Yakin ingin menghapus catatan pembayaran sebesar ${_formatCurrency(log.amountPaid)}?'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),

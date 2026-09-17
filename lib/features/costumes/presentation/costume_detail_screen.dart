@@ -780,7 +780,7 @@ class _CostumeDetailScreenState extends State<CostumeDetailScreen> {
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Hapus Aksesori?'),
-        content: Text('Apakah kamu yakin ingin menghapus "$name" dari kostum ini?'),
+        content: Text('Yakin ingin menghapus "$name" dari kostum ini?'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),

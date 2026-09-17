@@ -14,6 +14,7 @@ import '../../../core/widgets/squircle_icon.dart';
 import '../../../core/widgets/animated_list_item.dart';
 import '../../../core/widgets/state_crossfade.dart';
 import '../../../core/widgets/error_state_view.dart';
+import '../../../core/widgets/unsaved_changes_guard.dart';
 import '../data/installment_repository.dart';
 import '../domain/installment.dart';
 import '../domain/installment_log.dart';
@@ -264,27 +265,53 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
         bool isSaving = false;
         return StatefulBuilder(
           builder: (context, setSheetState) {
-            return DraggableSheetContainer(
-              backgroundColor: AppColors.background,
-              initialHeightFraction: 0.52,
-              maxHeightFraction: 0.88,
-              onDismissed: () => Navigator.of(ctx).pop(),
-              builder: (context) => DefaultTextStyle(
-                style: const TextStyle(
-                  decoration: TextDecoration.none,
-                  fontFamily: '.SF Pro Text',
-                  color: AppColors.textDark,
-                ),
-                child: CupertinoPageScaffold(
-                  backgroundColor: AppColors.background,
-                  navigationBar: CupertinoNavigationBar(
+            bool hasUnsaved() =>
+                !isSaving &&
+                (nameController.text.trim().isNotEmpty ||
+                    costController.text.trim().isNotEmpty ||
+                    dpController.text.trim().isNotEmpty ||
+                    storeController.text.trim().isNotEmpty);
+
+            return PopScope(
+              canPop: !hasUnsaved(),
+              onPopInvokedWithResult: (didPop, result) async {
+                if (didPop) return;
+                final shouldDiscard = await confirmDiscardChanges(ctx);
+                if (shouldDiscard && ctx.mounted) {
+                  Navigator.of(ctx).pop();
+                }
+              },
+              child: DraggableSheetContainer(
+                backgroundColor: AppColors.background,
+                initialHeightFraction: 0.52,
+                maxHeightFraction: 0.88,
+                confirmDismiss: () async {
+                  if (!hasUnsaved()) return true;
+                  return confirmDiscardChanges(ctx);
+                },
+                onDismissed: () => Navigator.of(ctx).pop(),
+                builder: (context) => DefaultTextStyle(
+                  style: const TextStyle(
+                    decoration: TextDecoration.none,
+                    fontFamily: '.SF Pro Text',
+                    color: AppColors.textDark,
+                  ),
+                  child: CupertinoPageScaffold(
                     backgroundColor: AppColors.background,
-                    border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
-                    leading: CupertinoButton(
-                      padding: EdgeInsets.zero,
-                      onPressed: () => Navigator.of(ctx).pop(),
-                      child: const Text('Batal', style: AppTypography.actionButton),
-                    ),
+                    navigationBar: CupertinoNavigationBar(
+                      backgroundColor: AppColors.background,
+                      border: const Border(bottom: BorderSide(color: Color(0xFFE5E5EA), width: 0.5)),
+                      leading: CupertinoButton(
+                        padding: EdgeInsets.zero,
+                        onPressed: () async {
+                          if (hasUnsaved()) {
+                            final shouldDiscard = await confirmDiscardChanges(ctx);
+                            if (!shouldDiscard) return;
+                          }
+                          if (ctx.mounted) Navigator.of(ctx).pop();
+                        },
+                        child: const Text('Batal', style: AppTypography.actionButton),
+                      ),
                     middle: const SizedBox(
                       width: double.infinity,
                       child: Center(
@@ -517,11 +544,12 @@ class _InstallmentListScreenState extends State<InstallmentListScreen> {
                   ),
                 ),
               ),
-            );
-          },
-        );
-      },
-    );
+            ),
+          );
+        },
+      );
+    },
+  );
   }
 
   void _showLedgerDetailSheet(Installment installment) {
@@ -1071,7 +1099,7 @@ class _PaymentHistorySheetState extends State<_PaymentHistorySheet> {
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('Hapus Catatan Pembayaran?'),
-        content: Text('Apakah kamu yakin ingin menghapus catatan pembayaran sebesar ${_formatCurrency(log.amountPaid)}?'),
+        content: Text('Yakin ingin menghapus catatan pembayaran sebesar ${_formatCurrency(log.amountPaid)}?'),
         actions: [
           CupertinoDialogAction(
             onPressed: () => Navigator.pop(ctx),
